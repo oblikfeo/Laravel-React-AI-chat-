@@ -28,16 +28,12 @@ export default function MessageBubble({ message }) {
                 <LogoMark className="h-5 w-5" />
             </span>
 
+            {/* Название модели намеренно не показываем: это внутренняя
+                деталь, она хранится в базе и видна только в админке. */}
             <div className="min-w-0 flex-1 pt-1">
                 <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-white/90">
                     {message.content}
                 </p>
-
-                {message.model && (
-                    <p className="mt-2 text-xs text-white/35">
-                        {message.model}
-                    </p>
-                )}
             </div>
         </div>
     );

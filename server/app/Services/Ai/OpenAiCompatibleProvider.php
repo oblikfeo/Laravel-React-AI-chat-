@@ -18,6 +18,7 @@ class OpenAiCompatibleProvider implements AiChatProvider
         private readonly ?string $apiKey,
         private readonly string $model,
         private readonly int $timeout,
+        private readonly int $maxTokens = 1024,
     ) {
     }
 
@@ -34,6 +35,7 @@ class OpenAiCompatibleProvider implements AiChatProvider
             ->post($this->baseUrl.'/chat/completions', [
                 'model' => $this->model,
                 'messages' => $messages,
+                'max_tokens' => $this->maxTokens,
             ]);
 
         if ($response->failed()) {
@@ -42,14 +44,26 @@ class OpenAiCompatibleProvider implements AiChatProvider
             );
         }
 
-        $content = $response->json('choices.0.message.content');
+        // Некоторые провайдеры отвечают кодом 200 и телом с ошибкой внутри.
+        if ($error = $response->json('error.message')) {
+            throw new RuntimeException('Провайдер сообщил об ошибке: '.$error);
+        }
 
-        if (! is_string($content) || $content === '') {
+        $content = trim((string) $response->json('choices.0.message.content'));
+
+        // Рассуждающие модели тратят лимит на размышления и могут вернуть
+        // пустой content. Тогда берём сами рассуждения, иначе пользователь
+        // получил бы пустое сообщение.
+        if ($content === '') {
+            $content = trim((string) $response->json('choices.0.message.reasoning'));
+        }
+
+        if ($content === '') {
             throw new RuntimeException('Провайдер вернул пустой ответ.');
         }
 
         return new AiResponse(
-            content: trim($content),
+            content: $content,
             model: $response->json('model') ?? $this->model,
         );
     }

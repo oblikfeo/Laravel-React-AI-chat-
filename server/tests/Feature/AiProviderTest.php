@@ -79,8 +79,31 @@ class AiProviderTest extends TestCase
         // Вопрос сохранён, а вместо ответа — понятное пояснение.
         $this->assertSame(2, $chat->messages()->count());
         $this->assertStringContainsString(
-            'Could not get a response',
+            "I'm having trouble responding",
             $chat->messages()->latest('id')->first()->content
         );
+    }
+
+    public function test_user_never_sees_internal_details(): void
+    {
+        // Ключа нет — приложение отвечает запасным текстом.
+        config(['ai.providers.openrouter.api_key' => null]);
+        $this->app->forgetInstance(AiChatProvider::class);
+
+        $chat = Chat::factory()->for(User::factory())->create();
+
+        (new SendMessage($this->app->make(AiChatProvider::class)))
+            ->handle($chat, 'Вопрос');
+
+        $reply = $chat->messages()->latest('id')->first()->content;
+
+        // Пользователь не должен видеть внутреннюю кухню: названия
+        // переменных, сервисов, файлов настроек и слова вроде «демо».
+        foreach ([
+            'OPENROUTER', 'openrouter', '.env', 'API key', 'api_key',
+            'demo', 'Demo', 'provider', 'Provider', 'config',
+        ] as $forbidden) {
+            $this->assertStringNotContainsString($forbidden, $reply);
+        }
     }
 }

@@ -54,9 +54,11 @@ class SendMessage
                 'message' => $exception->getMessage(),
             ]);
 
+            // Причина сбоя ушла в лог. Пользователю показываем короткое
+            // сообщение без технических подробностей.
             return $chat->messages()->create([
                 'role' => Message::ROLE_ASSISTANT,
-                'content' => 'Could not get a response from the model. Please try again.',
+                'content' => "I'm having trouble responding right now. Please try again in a moment.",
                 'model' => null,
             ]);
         }
