@@ -1,0 +1,133 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    html {
+        color-scheme: dark;
+    }
+
+    html.light {
+        color-scheme: light;
+    }
+
+    body {
+        @apply bg-black text-white antialiased;
+    }
+
+    /*
+     * Светлая тема.
+     *
+     * Вёрстка написана в тёмной палитре (белый текст, белые стеклянные
+     * поверхности). Вместо дублирования классов в каждом компоненте
+     * инвертируем эти же токены на уровне темы: так светлая тема
+     * автоматически подхватывается новыми страницами.
+     */
+    html.light body {
+        background-color: rgb(255 255 255);
+        color: rgb(15 23 42);
+    }
+
+    html.light .text-white {
+        color: rgb(15 23 42);
+    }
+
+    html.light .text-white\/90 {
+        color: rgb(30 41 59);
+    }
+
+    html.light .text-white\/80,
+    html.light .text-white\/75,
+    html.light .text-white\/70 {
+        color: rgb(51 65 85);
+    }
+
+    html.light .text-white\/65,
+    html.light .text-white\/60,
+    html.light .text-white\/55 {
+        color: rgb(71 85 105);
+    }
+
+    html.light .text-white\/50,
+    html.light .text-white\/45,
+    html.light .text-white\/40,
+    html.light .text-white\/35 {
+        color: rgb(100 116 139);
+    }
+
+    html.light .bg-white\/5,
+    html.light .bg-white\/\[0\.04\],
+    html.light .bg-white\/\[0\.05\],
+    html.light .bg-white\/\[0\.06\],
+    html.light .bg-white\/\[0\.07\],
+    html.light .bg-white\/\[0\.09\] {
+        background-color: rgb(15 23 42 / 0.05);
+    }
+
+    html.light .bg-white\/10,
+    html.light .bg-white\/\[0\.13\] {
+        background-color: rgb(15 23 42 / 0.1);
+    }
+
+    html.light .border-white\/10,
+    html.light .border-white\/\[0\.1\],
+    html.light .border-white\/\[0\.12\],
+    html.light .border-white\/\[0\.07\] {
+        border-color: rgb(15 23 42 / 0.12);
+    }
+
+    /* Боковое меню в светлой теме остаётся светлым, а не чёрным.
+       Мобильное меню перекрывает страницу целиком, поэтому оно плотное. */
+    html.light .bg-\[\#0a0a0f\]\/85 {
+        background-color: rgb(248 250 252 / 0.92);
+    }
+
+    html.light .bg-\[\#0a0a0f\] {
+        background-color: rgb(248 250 252);
+    }
+
+    /* Плотные тёмные панели (поле ввода, карточка входа, pill-кнопки)
+       в светлой теме становятся светлыми. */
+    html.light .bg-slate-950\/55,
+    html.light .bg-slate-950\/50,
+    html.light .bg-slate-950\/70 {
+        background-color: rgb(255 255 255 / 0.75);
+    }
+
+    html.light .bg-slate-900\/60 {
+        background-color: rgb(255 255 255 / 0.85);
+    }
+
+    /* Pro-баннер остаётся тёмным, поэтому его текст не инвертируем. */
+    html.light .from-slate-800\/80 .text-white,
+    html.light .from-slate-800\/80 .text-white\/55 {
+        color: rgb(255 255 255 / 0.92);
+    }
+
+    /* Кнопка отправки: в светлой теме белое на белом не читается. */
+    html.light .bg-white.text-black {
+        background-color: rgb(15 23 42);
+        color: rgb(255 255 255);
+    }
+}
+
+@layer utilities {
+    /* Тонкий скроллбар для списков чатов и меню */
+    .scrollbar-thin {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+        background-color: rgba(255, 255, 255, 0.15);
+        border-radius: 9999px;
+    }
+}
