@@ -16,7 +16,7 @@ import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
 
 const PORT = Number(process.env.PREVIEW_PORT ?? 3000);
-const BACKEND = process.env.PREVIEW_BACKEND ?? 'http://154.41.135.175';
+const BACKEND = process.env.PREVIEW_BACKEND ?? 'https://154-41-135-175.sslip.io';
 const PUBLIC_DIR = join(process.cwd(), 'public');
 
 const MIME = {
