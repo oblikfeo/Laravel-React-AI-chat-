@@ -4,8 +4,10 @@ import { LogoMark } from '@/Components/Layout/Logo';
  * Одно сообщение диалога.
  *
  * Сообщение пользователя — стеклянный пузырь справа.
- * Ответ модели — текст во всю ширину слева со значком, без рамки:
- * так читается длинный ответ, как в большинстве AI-интерфейсов.
+ * Ответ модели — панель слева со значком: фон с планетой местами
+ * светлый, и белый текст на нём терялся, поэтому под ответом лежит
+ * затемнённое стекло. Пузырь пользователя оставлен светлее, чтобы
+ * две стороны диалога различались с первого взгляда.
  */
 export default function MessageBubble({ message }) {
     const isUser = message.role === 'user';
@@ -30,8 +32,8 @@ export default function MessageBubble({ message }) {
 
             {/* Название модели намеренно не показываем: это внутренняя
                 деталь, она хранится в базе и видна только в админке. */}
-            <div className="min-w-0 flex-1 pt-1">
-                <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-white/90">
+            <div className="min-w-0 flex-1 rounded-3xl rounded-tl-lg border border-white/[0.07] bg-slate-950/70 px-5 py-4 shadow-lg shadow-black/20 backdrop-blur-xl">
+                <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-white/95">
                     {message.content}
                 </p>
             </div>
