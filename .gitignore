@@ -1,0 +1,40 @@
+# Доступы и ключи никогда не попадают в репозиторий
+/credentials/
+
+# Зависимости
+**/node_modules/
+**/vendor/
+
+# Сборка фронтенда — собирается на месте
+**/public/build/
+**/public/hot/
+
+# Окружение
+**/.env
+**/.env.backup
+**/.env.production
+
+# Локальная база и загруженные файлы
+**/database/*.sqlite
+**/database/*.sqlite-journal
+**/storage/*.key
+**/public/storage/
+
+# Логи и кеши
+**/*.log
+**/storage/logs/*
+**/storage/framework/cache/*
+**/storage/framework/sessions/*
+**/storage/framework/views/*
+**/.phpunit.result.cache
+**/.phpunit.cache/
+
+# Редакторы
+.idea/
+.vscode/
+.fleet/
+*.swp
+
+# ОС
+Thumbs.db
+.DS_Store
