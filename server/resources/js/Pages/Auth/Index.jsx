@@ -56,7 +56,7 @@ export default function AuthIndex({ mode: initialMode }) {
 
                 <div className="flex flex-1 items-center justify-center px-4 pb-16 sm:px-6">
                     <div className="w-full max-w-[420px] rounded-3xl border border-white/[0.14] bg-slate-950/70 p-7 shadow-2xl shadow-black/50 backdrop-blur-2xl sm:p-8">
-                        <div className="mb-7">
+                        <div className="mb-7 text-center">
                             <h1 className="text-2xl font-light tracking-tight text-white">
                                 {title}
                             </h1>
