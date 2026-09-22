@@ -3,6 +3,8 @@
 namespace App\Http\Middleware;
 
 use App\Http\Resources\ChatResource;
+use App\Models\User;
+use App\Services\Billing\PaymentGateway;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -45,6 +47,7 @@ class HandleInertiaRequests extends Middleware
                     // Баннер и меню показываются по-разному тем,
                     // кто уже платит, и тем, кто на бесплатном.
                     'canUpgrade' => $request->user()->isPromotedPlan(),
+                    'subscription' => $this->subscriptionOf($request->user()),
                 ] : null,
             ],
 
@@ -52,9 +55,30 @@ class HandleInertiaRequests extends Middleware
                 ? ChatResource::collection($request->user()->chats()->limit(30)->get())
                 : [],
 
+            // Интерфейс скрывает кнопки оплаты, пока реквизиты
+            // платёжной системы не заданы.
+            'billingReady' => fn () => app(PaymentGateway::class)->isConfigured(),
+
             'flash' => [
                 'error' => fn () => $request->session()->get('error'),
             ],
+        ];
+    }
+
+    /**
+     * Краткие сведения о подписке для интерфейса.
+     */
+    private function subscriptionOf(User $user): ?array
+    {
+        $subscription = $user->activeSubscription();
+
+        if (! $subscription) {
+            return null;
+        }
+
+        return [
+            'endsAt' => $subscription->ends_at?->format('j M Y'),
+            'cancelled' => $subscription->cancelled_at !== null,
         ];
     }
 }

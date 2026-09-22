@@ -65,6 +65,24 @@ class User extends Authenticatable
         return $this->hasMany(Chat::class)->latest('last_message_at');
     }
 
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class)->latest('id');
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class)->latest('id');
+    }
+
+    /**
+     * Действующая подписка, если есть.
+     */
+    public function activeSubscription(): ?Subscription
+    {
+        return $this->subscriptions()->active()->first();
+    }
+
     /**
      * Показывать ли предложение перейти на платный тариф.
      */

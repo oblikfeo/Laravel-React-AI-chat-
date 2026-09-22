@@ -3,6 +3,7 @@ import { usePage } from '@inertiajs/react';
 import { Menu } from 'lucide-react';
 import { ThemeProvider } from '@/Contexts/ThemeContext';
 import { PlansProvider } from '@/Contexts/PlansContext';
+import { SettingsProvider } from '@/Contexts/SettingsContext';
 import AppBackground from '@/Components/Layout/AppBackground';
 import Sidebar from '@/Components/Layout/Sidebar';
 import MobileMenu from '@/Components/Layout/MobileMenu';
@@ -99,7 +100,9 @@ export default function MainLayout({ children }) {
     return (
         <ThemeProvider>
             <PlansProvider>
-                <MainLayoutInner>{children}</MainLayoutInner>
+                <SettingsProvider>
+                    <MainLayoutInner>{children}</MainLayoutInner>
+                </SettingsProvider>
             </PlansProvider>
         </ThemeProvider>
     );

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { usePage } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
 import { Check, X } from 'lucide-react';
 import { plans as allPlans } from '@/Constants/plans';
 
@@ -10,8 +10,21 @@ import { plans as allPlans } from '@/Constants/plans';
  * состоянием управляет usePlans, см. Contexts/PlansContext.
  */
 export default function PlansDialog({ open, onClose }) {
-    const { auth } = usePage().props;
+    const { auth, billingReady } = usePage().props;
     const [yearly, setYearly] = useState(false);
+    const [busy, setBusy] = useState(null);
+
+    // Оплата уходит на сторону платёжной системы, поэтому обычный
+    // переход Inertia здесь не подходит: нужен полноценный запрос.
+    const subscribe = (plan) => {
+        setBusy(plan);
+
+        router.post(
+            '/billing/subscribe',
+            { plan, period: yearly ? 'yearly' : 'monthly' },
+            { onFinish: () => setBusy(null) },
+        );
+    };
 
     if (!open) {
         return null;
@@ -73,6 +86,9 @@ export default function PlansDialog({ open, onClose }) {
                             plan={plan}
                             yearly={yearly}
                             current={plan.name === current}
+                            available={billingReady}
+                            busy={busy === plan.key}
+                            onSelect={() => subscribe(plan.key)}
                         />
                     ))}
                 </div>
@@ -114,7 +130,7 @@ function PeriodSwitch({ yearly, onChange }) {
 }
 
 /** Карточка одного тарифа. */
-function PlanCard({ plan, yearly, current }) {
+function PlanCard({ plan, yearly, current, available, busy, onSelect }) {
     // При годовой оплате показываем цену за месяц: так тарифы
     // сравнимы между собой, а полная сумма идёт отдельной строкой.
     const price = yearly ? Math.round(plan.priceYearly / 12) : plan.priceMonthly;
@@ -155,16 +171,23 @@ function PlanCard({ plan, yearly, current }) {
 
             <button
                 type="button"
-                disabled={current}
+                onClick={current || !available ? undefined : onSelect}
+                disabled={current || !available || busy}
                 className={`mt-4 h-10 w-full rounded-full text-[13px] font-semibold transition ${
-                    current
+                    current || !available
                         ? 'cursor-default border border-white/[0.12] text-white/40'
                         : plan.popular
                           ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/25 hover:bg-sky-400'
                           : 'bg-white/10 text-white ring-1 ring-inset ring-white/15 hover:bg-white/[0.16]'
                 }`}
             >
-                {current ? 'Current plan' : plan.cta}
+                {current
+                    ? 'Current plan'
+                    : !available
+                      ? 'Coming soon'
+                      : busy
+                        ? 'Opening…'
+                        : plan.cta}
             </button>
 
             <ul className="mt-5 flex-1 space-y-2.5 border-t border-white/[0.07] pt-4">

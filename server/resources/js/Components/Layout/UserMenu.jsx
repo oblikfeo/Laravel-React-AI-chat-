@@ -1,8 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { router } from '@inertiajs/react';
-import { Sparkles, LogOut, Moon, Sun } from 'lucide-react';
+import { Sparkles, LogOut, Moon, Sun, Settings } from 'lucide-react';
 import { useTheme } from '@/Contexts/ThemeContext';
 import { usePlans } from '@/Contexts/PlansContext';
+import { useSettings } from '@/Contexts/SettingsContext';
 
 /**
  * Меню по клику на карточку пользователя.
@@ -14,6 +15,7 @@ export default function UserMenu({ user, collapsed, onClose }) {
     const ref = useRef(null);
     const { theme, toggleTheme } = useTheme();
     const { openPlans } = usePlans();
+    const { openSettings } = useSettings();
 
     // Закрытие по клику мимо меню и по Escape — обычное поведение
     // всплывающих меню, без него оно ощущается сломанным.
@@ -76,6 +78,19 @@ export default function UserMenu({ user, collapsed, onClose }) {
                         Upgrade plan
                     </button>
                 )}
+
+                <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                        onClose();
+                        openSettings();
+                    }}
+                    className={item}
+                >
+                    <Settings className="h-4 w-4" strokeWidth={1.75} />
+                    Settings
+                </button>
 
                 <button
                     type="button"
