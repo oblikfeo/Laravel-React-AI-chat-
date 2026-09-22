@@ -19,10 +19,19 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
+    /**
+     * Тариф по умолчанию задан и в базе, и здесь: иначе у только что
+     * созданной модели поле остаётся пустым до перечитывания из базы.
+     */
+    protected $attributes = [
+        'plan' => 'free',
+    ];
+
     protected $fillable = [
         'name',
         'email',
         'password',
+        'plan',
     ];
 
     /**
@@ -54,5 +63,21 @@ class User extends Authenticatable
     public function chats(): HasMany
     {
         return $this->hasMany(Chat::class)->latest('last_message_at');
+    }
+
+    /**
+     * Показывать ли предложение перейти на платный тариф.
+     */
+    public function isPromotedPlan(): bool
+    {
+        return in_array($this->plan, config('plans.promoted'), true);
+    }
+
+    /**
+     * Название тарифа для интерфейса.
+     */
+    public function planName(): string
+    {
+        return config("plans.list.{$this->plan}.name", 'Free');
     }
 }

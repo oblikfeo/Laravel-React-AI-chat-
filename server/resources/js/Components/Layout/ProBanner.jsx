@@ -1,6 +1,21 @@
+import { usePage } from '@inertiajs/react';
 import { Rocket } from 'lucide-react';
+import { usePlans } from '@/Contexts/PlansContext';
 
+/**
+ * Предложение перейти на платный тариф.
+ *
+ * Скрывается у тех, кто уже платит, и у гостей: показывать переход
+ * на Pro до входа в систему бессмысленно.
+ */
 export default function ProBanner() {
+    const { auth } = usePage().props;
+    const { openPlans } = usePlans();
+
+    if (!auth?.user?.canUpgrade) {
+        return null;
+    }
+
     return (
         <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-slate-800/80 via-slate-900/60 to-sky-950/60 p-4 backdrop-blur-md">
             <div className="relative z-10 pr-16">
@@ -21,6 +36,7 @@ export default function ProBanner() {
 
             <button
                 type="button"
+                onClick={openPlans}
                 className="relative z-10 mt-4 w-full rounded-full bg-white py-2.5 text-sm font-semibold text-black transition hover:bg-white/90"
             >
                 Upgrade Now

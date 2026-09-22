@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { usePage } from '@inertiajs/react';
 import { Menu } from 'lucide-react';
 import { ThemeProvider } from '@/Contexts/ThemeContext';
+import { PlansProvider } from '@/Contexts/PlansContext';
 import AppBackground from '@/Components/Layout/AppBackground';
 import Sidebar from '@/Components/Layout/Sidebar';
 import MobileMenu from '@/Components/Layout/MobileMenu';
@@ -79,9 +80,11 @@ function MainLayoutInner({ children, current, activeChatId }) {
 export default function MainLayout({ children, current, activeChatId }) {
     return (
         <ThemeProvider>
-            <MainLayoutInner current={current} activeChatId={activeChatId}>
-                {children}
-            </MainLayoutInner>
+            <PlansProvider>
+                <MainLayoutInner current={current} activeChatId={activeChatId}>
+                    {children}
+                </MainLayoutInner>
+            </PlansProvider>
         </ThemeProvider>
     );
 }

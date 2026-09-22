@@ -1,5 +1,7 @@
-import { Link, usePage, router } from '@inertiajs/react';
-import { Settings, LogIn, LogOut } from 'lucide-react';
+import { useState } from 'react';
+import { Link, usePage } from '@inertiajs/react';
+import { LogIn } from 'lucide-react';
+import UserMenu from '@/Components/Layout/UserMenu';
 
 function initialsOf(name) {
     return name
@@ -18,6 +20,7 @@ function initialsOf(name) {
 export default function UserCard({ collapsed = false }) {
     const { auth } = usePage().props;
     const user = auth?.user;
+    const [menuOpen, setMenuOpen] = useState(false);
 
     if (!user) {
         return collapsed ? (
@@ -48,37 +51,52 @@ export default function UserCard({ collapsed = false }) {
 
     if (collapsed) {
         return (
-            <button
-                type="button"
-                title={user.name}
-                className="flex items-center justify-center rounded-xl p-1 transition hover:bg-white/10"
-            >
-                {avatar}
-            </button>
+            <div className="relative">
+                {menuOpen && (
+                    <UserMenu
+                        user={user}
+                        collapsed
+                        onClose={() => setMenuOpen(false)}
+                    />
+                )}
+
+                <button
+                    type="button"
+                    title={user.name}
+                    aria-haspopup="menu"
+                    aria-expanded={menuOpen}
+                    onClick={() => setMenuOpen((value) => !value)}
+                    className="flex items-center justify-center rounded-xl p-1 transition hover:bg-white/10"
+                >
+                    {avatar}
+                </button>
+            </div>
         );
     }
 
     return (
-        <div className="flex items-center gap-3 px-1">
-            {avatar}
-
-            <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-medium text-white">
-                    {user.name}
-                </span>
-                <span className="block truncate text-xs text-white/45">
-                    0 Credits · local preview
-                </span>
-            </span>
+        <div className="relative">
+            {menuOpen && (
+                <UserMenu user={user} onClose={() => setMenuOpen(false)} />
+            )}
 
             <button
                 type="button"
-                onClick={() => router.post('/logout')}
-                aria-label="Sign out"
-                title="Sign out"
-                className="shrink-0 rounded-lg p-1.5 text-white/50 transition hover:bg-white/10 hover:text-white"
+                aria-haspopup="menu"
+                aria-expanded={menuOpen}
+                onClick={() => setMenuOpen((value) => !value)}
+                className="flex w-full items-center gap-3 rounded-xl px-1 py-1.5 text-left transition hover:bg-white/[0.07]"
             >
-                <LogOut className="h-4 w-4" />
+                {avatar}
+
+                <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-medium text-white">
+                        {user.name}
+                    </span>
+                    <span className="block truncate text-xs text-white/45">
+                        {user.plan} plan
+                    </span>
+                </span>
             </button>
         </div>
     );

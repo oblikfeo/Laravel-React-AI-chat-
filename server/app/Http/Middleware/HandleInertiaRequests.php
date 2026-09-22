@@ -41,6 +41,10 @@ class HandleInertiaRequests extends Middleware
                     'id' => $request->user()->id,
                     'name' => $request->user()->name,
                     'email' => $request->user()->email,
+                    'plan' => $request->user()->planName(),
+                    // Баннер и меню показываются по-разному тем,
+                    // кто уже платит, и тем, кто на бесплатном.
+                    'canUpgrade' => $request->user()->isPromotedPlan(),
                 ] : null,
             ],
 
