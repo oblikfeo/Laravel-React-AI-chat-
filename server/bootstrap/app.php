@@ -17,6 +17,11 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
         ]);
 
+        // Приложение работает за Nginx. Без этого Laravel считает
+        // соединение незащищённым и строит ссылки по http, а браузер
+        // блокирует их на странице, открытой по https.
+        $middleware->trustProxies(at: '*');
+
         // Неавторизованных отправляем на общую страницу входа.
         $middleware->redirectGuestsTo(fn (Request $request) => route('auth'));
     })
