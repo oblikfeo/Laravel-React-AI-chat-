@@ -46,11 +46,17 @@ echo "==> Перезапускаем PHP"
 systemctl reload php8.3-fpm
 
 echo "==> Проверка"
-code=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1/)
+
+# Проверяем по тому же адресу, что и пользователь. Обращение по http
+# вернуло бы 301: оно переадресуется на защищённое соединение.
+SITE_URL="${SITE_URL:-https://154-41-135-175.sslip.io}"
+code=$(curl -sL -o /dev/null -w '%{http_code}' "${SITE_URL}/")
+
 if [ "$code" = "200" ]; then
-    echo "Готово. Главная отвечает 200."
+    echo "Готово. Сайт отвечает: ${SITE_URL}"
 else
-    echo "ВНИМАНИЕ: главная вернула ${code}, смотрите логи:"
+    echo "ВНИМАНИЕ: сайт вернул ${code}, смотрите логи:"
     echo "  tail -30 ${SRV_DIR}/storage/logs/laravel.log"
+    echo "  tail -30 /var/log/nginx/error.log"
     exit 1
 fi
