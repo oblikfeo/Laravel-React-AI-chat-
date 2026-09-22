@@ -45,7 +45,7 @@ export default function PlansDialog({ open, onClose }) {
                 className="pointer-events-none fixed inset-0 bg-gradient-to-b from-[#06060b]/40 via-[#06060b]/75 to-[#06060b]"
             />
 
-            <div className="relative min-h-full px-4 py-8 sm:px-6 sm:py-10">
+            <div className="relative flex min-h-full flex-col justify-center px-4 py-8 sm:px-6 sm:py-10">
                 <button
                     type="button"
                     onClick={onClose}
