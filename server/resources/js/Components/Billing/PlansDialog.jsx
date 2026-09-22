@@ -21,7 +21,7 @@ export default function PlansDialog({ open, onClose }) {
 
     return (
         <div
-            className="fixed inset-0 z-50 overflow-y-auto bg-[#0a0a0f]/92 backdrop-blur-sm"
+            className="fixed inset-0 z-50 overflow-y-auto bg-[#07070c]/[0.97] backdrop-blur-xl"
             role="dialog"
             aria-modal="true"
             aria-label="Upgrade your plan"
@@ -48,7 +48,7 @@ export default function PlansDialog({ open, onClose }) {
 
                 <PeriodSwitch yearly={yearly} onChange={setYearly} />
 
-                <div className="mx-auto mt-10 grid w-full max-w-[1280px] gap-5 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="mx-auto mt-10 grid w-full max-w-[1280px] items-stretch gap-5 sm:grid-cols-2 xl:grid-cols-4">
                     {allPlans.map((plan) => (
                         <PlanCard
                             key={plan.key}
@@ -104,8 +104,8 @@ function PlanCard({ plan, yearly, current }) {
         <div
             className={`relative flex flex-col rounded-2xl border p-6 backdrop-blur-xl ${
                 plan.popular
-                    ? 'border-sky-400/30 bg-slate-950/70'
-                    : 'border-white/[0.09] bg-slate-950/55'
+                    ? 'border-sky-400/40 bg-white/[0.04]'
+                    : 'border-white/[0.09] bg-white/[0.02]'
             }`}
         >
             {plan.popular && (
@@ -139,7 +139,7 @@ function PlanCard({ plan, yearly, current }) {
                 {current ? 'Current plan' : plan.cta}
             </button>
 
-            <ul className="mt-6 space-y-3">
+            <ul className="mt-6 flex-1 space-y-3">
                 {plan.features.map((feature) => (
                     <li key={feature} className="flex gap-2.5">
                         <Check
