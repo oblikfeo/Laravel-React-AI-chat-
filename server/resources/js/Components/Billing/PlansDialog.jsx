@@ -124,7 +124,7 @@ function PlanCard({ plan, yearly, current }) {
         <div
             className={`group relative flex flex-col rounded-[18px] border p-5 backdrop-blur-xl transition duration-300 ${
                 plan.popular
-                    ? 'border-sky-400/45 bg-gradient-to-b from-sky-500/[0.10] to-white/[0.02] shadow-xl shadow-sky-500/10'
+                    ? 'border-sky-400/50 bg-gradient-to-b from-sky-500/[0.12] to-white/[0.02] ring-1 ring-inset ring-sky-400/20'
                     : 'border-white/[0.09] bg-white/[0.025] hover:border-white/20'
             }`}
         >
