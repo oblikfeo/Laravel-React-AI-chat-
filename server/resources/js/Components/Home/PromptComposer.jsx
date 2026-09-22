@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Plus, Globe, Mic, ArrowUp } from 'lucide-react';
+import { Plus, Sparkles, Mic, ArrowUp } from 'lucide-react';
 
 /**
  * Поле ввода промпта — центральный элемент главной (figma/1440w dark.jpg).
@@ -9,8 +9,8 @@ export default function PromptComposer({
     value,
     onChange,
     onSubmit,
-    visibility = 'Public',
-    onToggleVisibility,
+    model = 'Auto',
+    onSelectModel,
     placeholder = 'Generate or animate videos...',
     busy = false,
     autoFocus = false,
@@ -77,11 +77,12 @@ export default function PromptComposer({
 
                     <button
                         type="button"
-                        onClick={onToggleVisibility}
+                        onClick={onSelectModel}
+                        aria-label="Choose model"
                         className="flex h-10 items-center gap-2 rounded-full border border-white/[0.12] px-4 text-[15px] text-white/75 transition hover:bg-white/10 hover:text-white"
                     >
-                        <Globe className="h-[18px] w-[18px]" strokeWidth={1.75} />
-                        {visibility}
+                        <Sparkles className="h-[18px] w-[18px]" strokeWidth={1.75} />
+                        {model}
                     </button>
                 </div>
 

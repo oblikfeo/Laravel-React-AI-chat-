@@ -7,7 +7,9 @@ import QuickActions from '@/Components/Home/QuickActions';
 export default function Home() {
     const { auth } = usePage().props;
     const [prompt, setPrompt] = useState('');
-    const [visibility, setVisibility] = useState('Public');
+    // Выбор модели: пока одна, поэтому значение постоянное.
+    // Список появится, когда моделей станет несколько.
+    const [model] = useState('Auto');
     const [busy, setBusy] = useState(false);
 
     // Возвращаем текст, набранный до входа.
@@ -38,7 +40,7 @@ export default function Home() {
 
         router.post(
             '/chats',
-            { message: prompt, visibility },
+            { message: prompt },
             { onFinish: () => setBusy(false) },
         );
     };
@@ -63,12 +65,7 @@ export default function Home() {
                             value={prompt}
                             onChange={setPrompt}
                             onSubmit={submit}
-                            visibility={visibility}
-                            onToggleVisibility={() =>
-                                setVisibility((value) =>
-                                    value === 'Public' ? 'Private' : 'Public',
-                                )
-                            }
+                            model={model}
                             busy={busy}
                         />
                     </div>
