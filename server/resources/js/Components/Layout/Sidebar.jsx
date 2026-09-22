@@ -5,10 +5,15 @@ import { LogoMark, LogoFull } from '@/Components/Layout/Logo';
 import ProBanner from '@/Components/Layout/ProBanner';
 import UserCard from '@/Components/Layout/UserCard';
 import ChatList from '@/Components/Layout/ChatList';
+import CollapsedChatList from '@/Components/Layout/CollapsedChatList';
 
 /**
  * Десктопный сайдбар. Два состояния по макетам:
  * свёрнутый (72px, только иконки) и развёрнутый (280px, с подписями).
+ *
+ * Высота ограничена окном, прокручивается только список чатов. Иначе при
+ * десятке чатов блок пользователя уезжает за нижний край экрана и до
+ * кнопки выхода не добраться.
  */
 export default function Sidebar({
     collapsed,
@@ -18,7 +23,7 @@ export default function Sidebar({
 }) {
     return (
         <aside
-            className={`relative z-30 hidden shrink-0 flex-col border-r border-white/[0.07] bg-[#0a0a0f]/85 backdrop-blur-xl transition-[width] duration-300 ease-out lg:flex ${
+            className={`sticky top-0 z-30 hidden h-screen shrink-0 flex-col border-r border-white/[0.07] bg-[#0a0a0f]/85 backdrop-blur-xl transition-[width] duration-300 ease-out lg:flex ${
                 collapsed ? 'w-[72px]' : 'w-[280px]'
             }`}
         >
@@ -32,6 +37,7 @@ export default function Sidebar({
                         type="button"
                         onClick={onToggle}
                         aria-label="Expand menu"
+                        title="Expand menu"
                         className="rounded-lg p-1 transition hover:bg-white/10"
                     >
                         <LogoMark className="h-8 w-8" />
@@ -71,48 +77,84 @@ export default function Sidebar({
             </div>
 
             <nav
-                className={`flex flex-1 flex-col gap-0.5 overflow-y-auto py-2 ${
+                className={`flex min-h-0 flex-1 flex-col overflow-y-auto scrollbar-thin py-2 ${
                     collapsed ? 'items-center px-3' : 'px-4'
                 }`}
             >
-                {navigationItems.map(({ key, label, icon: Icon, href }) => {
-                    const active = current === key;
+                <div
+                    className={`flex flex-col gap-0.5 ${collapsed ? 'items-center' : ''}`}
+                >
+                    {navigationItems.map(
+                        ({ key, label, icon: Icon, href, ready }) => {
+                            const active = current === key;
 
-                    return (
-                        <Link
-                            key={key}
-                            href={href}
-                            title={collapsed ? label : undefined}
-                            className={`flex items-center rounded-xl transition ${
+                            const classes = `flex items-center rounded-xl transition ${
                                 collapsed
                                     ? 'h-11 w-11 justify-center'
                                     : 'h-11 gap-3 px-3'
                             } ${
                                 active
                                     ? 'bg-white/10 text-white'
-                                    : 'text-white/60 hover:bg-white/[0.07] hover:text-white'
-                            }`}
-                        >
-                            <Icon
-                                className="h-5 w-5 shrink-0"
-                                strokeWidth={1.75}
-                            />
-                            {!collapsed && (
-                                <span
-                                    className={`text-[15px] ${active ? 'font-medium' : ''}`}
-                                >
-                                    {label}
-                                </span>
-                            )}
-                        </Link>
-                    );
-                })}
+                                    : ready
+                                      ? 'text-white/60 hover:bg-white/[0.07] hover:text-white'
+                                      : 'cursor-not-allowed text-white/25'
+                            }`;
 
-                {!collapsed && <ChatList activeId={activeChatId} />}
+                            const inner = (
+                                <>
+                                    <Icon
+                                        className="h-5 w-5 shrink-0"
+                                        strokeWidth={1.75}
+                                    />
+                                    {!collapsed && (
+                                        <span
+                                            className={`text-[15px] ${active ? 'font-medium' : ''}`}
+                                        >
+                                            {label}
+                                        </span>
+                                    )}
+                                </>
+                            );
+
+                            // Неготовый раздел — неактивная кнопка, а не ссылка:
+                            // клик по ссылке вёл бы на страницу с ошибкой.
+                            return ready ? (
+                                <Link
+                                    key={key}
+                                    href={href}
+                                    title={collapsed ? label : undefined}
+                                    className={classes}
+                                >
+                                    {inner}
+                                </Link>
+                            ) : (
+                                <button
+                                    key={key}
+                                    type="button"
+                                    disabled
+                                    title={
+                                        collapsed
+                                            ? `${label} — coming soon`
+                                            : 'Coming soon'
+                                    }
+                                    className={classes}
+                                >
+                                    {inner}
+                                </button>
+                            );
+                        },
+                    )}
+                </div>
+
+                {collapsed ? (
+                    <CollapsedChatList activeId={activeChatId} />
+                ) : (
+                    <ChatList activeId={activeChatId} />
+                )}
             </nav>
 
             <div
-                className={`mt-auto space-y-4 pb-5 ${collapsed ? 'px-3' : 'px-4'}`}
+                className={`mt-auto shrink-0 space-y-4 pb-5 pt-2 ${collapsed ? 'px-3' : 'px-4'}`}
             >
                 {!collapsed && <ProBanner />}
 

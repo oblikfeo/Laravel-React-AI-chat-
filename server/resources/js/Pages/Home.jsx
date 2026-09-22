@@ -47,7 +47,7 @@ export default function Home() {
         <MainLayout>
             <Head title="Uncensia" />
 
-            <div className="flex flex-1 flex-col items-center justify-center px-4 pb-16 pt-4 sm:px-6">
+            <div className="flex flex-1 flex-col items-center justify-center overflow-y-auto scrollbar-thin px-4 pb-16 pt-4 sm:px-6">
                 <div className="w-full max-w-[720px]">
                     <h1 className="text-center text-[56px] font-light leading-none tracking-tight text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.5)] sm:text-7xl lg:text-8xl">
                         uncensia

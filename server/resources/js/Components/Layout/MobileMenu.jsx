@@ -63,27 +63,48 @@ export default function MobileMenu({ open, onClose, current, activeChatId }) {
             </div>
 
             <nav className="flex flex-col gap-1 px-5 py-3">
-                {navigationItems.map(({ key, label, icon: Icon, href }) => {
+                {navigationItems.map(({ key, label, icon: Icon, href, ready }) => {
                     const active = current === key;
 
-                    return (
-                        <Link
-                            key={key}
-                            href={href}
-                            onClick={onClose}
-                            className={`flex h-12 items-center gap-3.5 rounded-xl px-2 transition ${
-                                active
-                                    ? 'text-white'
-                                    : 'text-white/65 hover:bg-white/[0.07] hover:text-white'
-                            }`}
-                        >
+                    const classes = `flex h-12 items-center gap-3.5 rounded-xl px-2 transition ${
+                        active
+                            ? 'text-white'
+                            : ready
+                              ? 'text-white/65 hover:bg-white/[0.07] hover:text-white'
+                              : 'cursor-not-allowed text-white/25'
+                    }`;
+
+                    const inner = (
+                        <>
                             <Icon className="h-5 w-5" strokeWidth={1.75} />
                             <span
                                 className={`text-base ${active ? 'font-medium' : ''}`}
                             >
                                 {label}
                             </span>
+                        </>
+                    );
+
+                    // Неготовый раздел — неактивная кнопка, а не ссылка.
+                    return ready ? (
+                        <Link
+                            key={key}
+                            href={href}
+                            onClick={onClose}
+                            className={classes}
+                        >
+                            {inner}
                         </Link>
+                    ) : (
+                        <button
+                            key={key}
+                            type="button"
+                            disabled
+                            title="Coming soon"
+                            className={classes}
+                        >
+                            {inner}
+                        </button>
                     );
                 })}
 

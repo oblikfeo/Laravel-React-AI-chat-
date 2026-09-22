@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { usePage } from '@inertiajs/react';
 import { Menu } from 'lucide-react';
 import { ThemeProvider } from '@/Contexts/ThemeContext';
 import AppBackground from '@/Components/Layout/AppBackground';
@@ -9,7 +10,12 @@ import ThemeToggle from '@/Components/Layout/ThemeToggle';
 const SIDEBAR_STORAGE_KEY = 'uncensia-sidebar-collapsed';
 
 function MainLayoutInner({ children, current, activeChatId }) {
-    const [collapsed, setCollapsed] = useState(true);
+    const { auth } = usePage().props;
+
+    // У авторизованного меню развёрнуто: иначе список его чатов
+    // оказывается скрыт и найти прошлый разговор невозможно.
+    // Гостю показывать нечего, поэтому меню свёрнуто.
+    const [collapsed, setCollapsed] = useState(!auth?.user);
     const [mobileOpen, setMobileOpen] = useState(false);
 
     useEffect(() => {
@@ -29,7 +35,7 @@ function MainLayoutInner({ children, current, activeChatId }) {
     };
 
     return (
-        <div className="relative flex min-h-screen w-full">
+        <div className="relative flex h-screen w-full overflow-hidden">
             <AppBackground />
 
             <Sidebar
@@ -46,7 +52,7 @@ function MainLayoutInner({ children, current, activeChatId }) {
                 activeChatId={activeChatId}
             />
 
-            <div className="relative flex min-w-0 flex-1 flex-col">
+            <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
                 <header className="flex h-16 shrink-0 items-center justify-between px-4 sm:px-6">
                     <button
                         type="button"
@@ -62,7 +68,9 @@ function MainLayoutInner({ children, current, activeChatId }) {
                     </div>
                 </header>
 
-                <main className="flex flex-1 flex-col">{children}</main>
+                {/* Прокрутку задаёт сама страница: у диалога прокручивается
+                    лента сообщений, а поле ввода остаётся внизу экрана. */}
+                <main className="flex min-h-0 flex-1 flex-col">{children}</main>
             </div>
         </div>
     );
