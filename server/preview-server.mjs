@@ -34,6 +34,50 @@ const MIME = {
     '.woff2': 'font/woff2',
 };
 
+/**
+ * Подменяет имена файлов сборки на локальные.
+ *
+ * Разметку отдаёт боевой сервер, поэтому в ней стоят его имена с хешами
+ * (`app-CDGGQ3fL.js`). Локальная сборка даёт другие хеши, таких файлов у
+ * нас нет, и запрос уходил обратно на сервер — правки фронтенда не было
+ * видно, пока их не выкатишь. Поэтому подставляем свои имена из манифеста.
+ */
+async function localAssets(html) {
+    let manifest;
+
+    try {
+        manifest = JSON.parse(
+            await readFile(join(PUBLIC_DIR, 'build', 'manifest.json'), 'utf8'),
+        );
+    } catch {
+        return html; // сборки нет — показываем как есть
+    }
+
+    // Ключ манифеста вида `resources/js/Pages/Chat/Show.jsx` даёт имя файла,
+    // по которому узнаём такой же файл в разметке сервера.
+    const byName = new Map();
+
+    for (const entry of Object.values(manifest)) {
+        for (const file of [entry.file, ...(entry.css ?? [])]) {
+            if (!file) {
+                continue;
+            }
+
+            // `assets/Show-CLRQEK2X.js` → base `Show`, ext `js`
+            const match = file.match(/^assets\/(.+)-[A-Za-z0-9_-]+\.(js|css)$/);
+
+            if (match) {
+                byName.set(`${match[1]}.${match[2]}`, file);
+            }
+        }
+    }
+
+    return html.replace(
+        /assets\/(.+?)-[A-Za-z0-9_-]+\.(js|css)/g,
+        (whole, base, ext) => byName.get(`${base}.${ext}`) ?? whole,
+    );
+}
+
 /** Отдаёт файл из public/, если он там есть. */
 async function serveStatic(pathname, res) {
     // normalize отсекает попытки выйти за пределы public/
@@ -116,10 +160,11 @@ async function proxy(req, res) {
         // Переписываем их на локальные, иначе браузер загрузит сборку
         // с сервера и местные правки фронтенда не будут видны.
         if (type.includes('text/html')) {
-            payload = Buffer.from(
-                payload.toString('utf8').replaceAll(BACKEND, `http://localhost:${PORT}`),
-                'utf8',
-            );
+            const html = payload
+                .toString('utf8')
+                .replaceAll(BACKEND, `http://localhost:${PORT}`);
+
+            payload = Buffer.from(await localAssets(html), 'utf8');
             out['content-type'] = 'text/html; charset=utf-8';
         }
 
