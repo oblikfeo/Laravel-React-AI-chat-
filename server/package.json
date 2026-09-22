@@ -3,8 +3,10 @@
     "private": true,
     "type": "module",
     "scripts": {
+        "dev": "vite",
         "build": "vite build",
-        "dev": "vite"
+        "preview": "node preview-server.mjs",
+        "watch": "vite build --watch"
     },
     "devDependencies": {
         "@headlessui/react": "^2.0.0",
