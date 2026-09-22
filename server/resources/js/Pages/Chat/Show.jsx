@@ -45,7 +45,7 @@ export default function ChatShow({ chat, messages }) {
     };
 
     return (
-        <MainLayout current="chat" activeChatId={chat.id}>
+        <>
             <Head title={`${chat.title} — Uncensia`} />
 
             <div className="flex min-h-0 flex-1 flex-col">
@@ -75,6 +75,10 @@ export default function ChatShow({ chat, messages }) {
                     </div>
                 </div>
             </div>
-        </MainLayout>
+        </>
     );
 }
+
+// Постоянный макет: не пересоздаётся при переходах,
+// поэтому боковое меню сохраняет состояние.
+ChatShow.layout = (page) => <MainLayout>{page}</MainLayout>;

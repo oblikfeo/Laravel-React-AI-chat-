@@ -8,17 +8,17 @@ export default function ChatIndex({ chats }) {
     };
 
     return (
-        <MainLayout current="chat">
+        <>
             <Head title="Chats — Uncensia" />
 
             <div className="flex-1 overflow-y-auto scrollbar-thin">
                 <div className="mx-auto w-full max-w-[760px] px-4 py-8 sm:px-6">
-                    <h1 className="text-2xl font-light tracking-tight text-white">
+                    <h1 className="text-outline text-2xl font-light tracking-tight text-white">
                         Your chats
                     </h1>
 
                     {chats.length === 0 ? (
-                        <p className="mt-6 text-[15px] text-white/55">
+                        <p className="mt-6 rounded-2xl border border-white/[0.08] bg-slate-950/70 px-4 py-3.5 text-[15px] text-white/60 backdrop-blur-xl">
                             Nothing here yet. Start a conversation from the home
                             page.
                         </p>
@@ -27,7 +27,7 @@ export default function ChatIndex({ chats }) {
                             {chats.map((chat) => (
                                 <div
                                     key={chat.id}
-                                    className="group flex items-center gap-3 rounded-2xl border border-white/[0.1] bg-white/[0.05] px-4 py-3.5 backdrop-blur-xl transition hover:bg-white/[0.09]"
+                                    className="group flex items-center gap-3 rounded-2xl border border-white/[0.08] bg-slate-950/70 px-4 py-3.5 backdrop-blur-xl transition hover:bg-slate-950/85"
                                 >
                                     <MessageSquare
                                         className="h-5 w-5 shrink-0 text-white/45"
@@ -55,6 +55,10 @@ export default function ChatIndex({ chats }) {
                     )}
                 </div>
             </div>
-        </MainLayout>
+        </>
     );
 }
+
+// Постоянный макет: не пересоздаётся при переходах,
+// поэтому боковое меню сохраняет состояние.
+ChatIndex.layout = (page) => <MainLayout>{page}</MainLayout>;

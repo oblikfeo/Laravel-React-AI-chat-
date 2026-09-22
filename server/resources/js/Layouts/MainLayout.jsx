@@ -10,22 +10,33 @@ import ThemeToggle from '@/Components/Layout/ThemeToggle';
 
 const SIDEBAR_STORAGE_KEY = 'uncensia-sidebar-collapsed';
 
-function MainLayoutInner({ children, current, activeChatId }) {
-    const { auth } = usePage().props;
+/** Первое состояние меню: из памяти браузера, иначе развёрнуто. */
+function initialCollapsed() {
+    if (typeof window === 'undefined') {
+        return false;
+    }
 
-    // У авторизованного меню развёрнуто: иначе список его чатов
-    // оказывается скрыт и найти прошлый разговор невозможно.
-    // Гостю показывать нечего, поэтому меню свёрнуто.
-    const [collapsed, setCollapsed] = useState(!auth?.user);
+    return window.localStorage.getItem(SIDEBAR_STORAGE_KEY) === 'true';
+}
+
+function MainLayoutInner({ children }) {
+    const { url } = usePage();
+
+    // Состояние читается сразу при создании: если сделать это в
+    // useEffect, меню успевает моргнуть чужим состоянием.
+    const [collapsed, setCollapsed] = useState(initialCollapsed);
     const [mobileOpen, setMobileOpen] = useState(false);
 
-    useEffect(() => {
-        const stored = window.localStorage.getItem(SIDEBAR_STORAGE_KEY);
+    // Текущий раздел и открытый чат берём из адреса, а не из пропсов
+    // страницы: макет постоянный и переживает переходы между страницами.
+    const current = url.startsWith('/chats') ? 'chat' : null;
+    const activeChatId = Number(url.match(/^\/chats\/(\d+)/)?.[1]) || null;
 
-        if (stored !== null) {
-            setCollapsed(stored === 'true');
-        }
-    }, []);
+    // Переход на другую страницу закрывает мобильное меню: иначе
+    // оно остаётся поверх новой страницы.
+    useEffect(() => {
+        setMobileOpen(false);
+    }, [url]);
 
     const toggleSidebar = () => {
         setCollapsed((value) => {
@@ -77,13 +88,18 @@ function MainLayoutInner({ children, current, activeChatId }) {
     );
 }
 
-export default function MainLayout({ children, current, activeChatId }) {
+/**
+ * Основной макет.
+ *
+ * Подключается как постоянный макет Inertia (Page.layout), поэтому при
+ * переходах между страницами не пересоздаётся: боковое меню сохраняет
+ * состояние и не моргает.
+ */
+export default function MainLayout({ children }) {
     return (
         <ThemeProvider>
             <PlansProvider>
-                <MainLayoutInner current={current} activeChatId={activeChatId}>
-                    {children}
-                </MainLayoutInner>
+                <MainLayoutInner>{children}</MainLayoutInner>
             </PlansProvider>
         </ThemeProvider>
     );

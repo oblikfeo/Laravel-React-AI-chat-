@@ -46,16 +46,16 @@ export default function Home() {
     };
 
     return (
-        <MainLayout>
+        <>
             <Head title="Uncensia" />
 
             <div className="flex flex-1 flex-col items-center justify-center overflow-y-auto scrollbar-thin px-4 pb-16 pt-4 sm:px-6">
                 <div className="w-full max-w-[720px]">
-                    <h1 className="text-center text-[56px] font-light leading-none tracking-tight text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.5)] sm:text-7xl lg:text-8xl">
+                    <h1 className="text-outline text-center text-[56px] font-light leading-none tracking-tight text-white sm:text-7xl lg:text-8xl">
                         uncensia
                     </h1>
 
-                    <p className="mt-5 text-center text-base text-white/75 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)] sm:text-lg">
+                    <p className="text-outline mt-5 text-center text-base text-white/85 sm:text-lg">
                         The universe has no restrictions. Neither should AI.
                         Uncensia.
                     </p>
@@ -75,6 +75,10 @@ export default function Home() {
                     </div>
                 </div>
             </div>
-        </MainLayout>
+        </>
     );
 }
+
+// Постоянный макет: не пересоздаётся при переходах,
+// поэтому боковое меню сохраняет состояние.
+Home.layout = (page) => <MainLayout>{page}</MainLayout>;
