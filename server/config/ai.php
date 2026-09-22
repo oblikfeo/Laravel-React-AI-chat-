@@ -1,0 +1,70 @@
+<?php
+
+return [
+
+    /*
+    |--------------------------------------------------------------------------
+    | Провайдер по умолчанию
+    |--------------------------------------------------------------------------
+    |
+    | Все поддерживаемые провайдеры совместимы с форматом OpenAI
+    | (POST /chat/completions), поэтому переключение между ними —
+    | это смена базового URL, ключа и названия модели.
+    |
+    | Если ключ не задан, приложение работает в режиме "fake":
+    | отвечает заглушкой, чтобы интерфейс можно было проверить без ключа.
+    |
+    */
+
+    'provider' => env('AI_PROVIDER', 'openrouter'),
+
+    'providers' => [
+
+        // Бесплатные модели, ключ выдаётся без привязки карты.
+        // https://openrouter.ai/keys
+        'openrouter' => [
+            'base_url' => env('OPENROUTER_BASE_URL', 'https://openrouter.ai/api/v1'),
+            'api_key' => env('OPENROUTER_API_KEY'),
+            'model' => env('OPENROUTER_MODEL', 'meta-llama/llama-3.3-70b-instruct:free'),
+        ],
+
+        // Локальный запуск моделей без интернета и ключей.
+        // https://ollama.com
+        'ollama' => [
+            'base_url' => env('OLLAMA_BASE_URL', 'http://localhost:11434/v1'),
+            'api_key' => env('OLLAMA_API_KEY', 'ollama'),
+            'model' => env('OLLAMA_MODEL', 'llama3.2'),
+        ],
+
+        'openai' => [
+            'base_url' => env('OPENAI_BASE_URL', 'https://api.openai.com/v1'),
+            'api_key' => env('OPENAI_API_KEY'),
+            'model' => env('OPENAI_MODEL', 'gpt-4o-mini'),
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Системный промпт
+    |--------------------------------------------------------------------------
+    */
+
+    'system_prompt' => env(
+        'AI_SYSTEM_PROMPT',
+        'You are Uncensia, a direct and helpful AI assistant. Answer clearly and concisely.'
+    ),
+
+    'timeout' => (int) env('AI_TIMEOUT', 60),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Глубина контекста
+    |--------------------------------------------------------------------------
+    |
+    | Сколько последних сообщений чата отправляем модели.
+    | Ограничение бережёт токены на длинных диалогах.
+    |
+    */
+
+    'context_messages' => (int) env('AI_CONTEXT_MESSAGES', 20),
+];
