@@ -21,7 +21,7 @@ export default function PlansDialog({ open, onClose }) {
 
     return (
         <div
-            className="fixed inset-0 z-50 overflow-y-auto bg-[#06060b]/[0.94] backdrop-blur-2xl"
+            className="fixed inset-0 z-50 overflow-y-auto bg-[#06060b]"
             role="dialog"
             aria-modal="true"
             aria-label="Upgrade your plan"
@@ -32,14 +32,20 @@ export default function PlansDialog({ open, onClose }) {
                 }
             }}
         >
-            {/* Мягкое свечение за карточками: оно даёт глубину вместо
-                плоской заливки и перекликается с планетой на фоне. */}
+            {/* Туманность (figma/2.png): собственный фон баннера.
+                Снизу гасим её в цвет подложки, чтобы карточки не
+                спорили с картинкой, а текст оставался читаемым. */}
             <div
                 aria-hidden
-                className="pointer-events-none fixed inset-x-0 top-0 h-[560px] bg-[radial-gradient(ellipse_70%_100%_at_50%_0%,rgba(56,189,248,0.16),rgba(99,102,241,0.08)_45%,transparent_75%)]"
+                className="pointer-events-none fixed inset-0 bg-cover bg-center opacity-[0.55]"
+                style={{ backgroundImage: "url('/images/plans-bg.png')" }}
+            />
+            <div
+                aria-hidden
+                className="pointer-events-none fixed inset-0 bg-gradient-to-b from-[#06060b]/40 via-[#06060b]/75 to-[#06060b]"
             />
 
-            <div className="relative min-h-full px-4 py-10 sm:px-6 sm:py-14">
+            <div className="relative min-h-full px-4 py-8 sm:px-6 sm:py-10">
                 <button
                     type="button"
                     onClick={onClose}
@@ -49,18 +55,18 @@ export default function PlansDialog({ open, onClose }) {
                     <X className="h-6 w-6" strokeWidth={1.75} />
                 </button>
 
-                <h2 className="text-center text-[28px] font-semibold tracking-tight text-white sm:text-[34px]">
+                <h2 className="text-center text-[24px] font-semibold tracking-tight text-white sm:text-[30px]">
                     Choose your plan
                 </h2>
 
-                <p className="mx-auto mt-3 max-w-[420px] text-center text-[15px] leading-relaxed text-white/50">
+                <p className="mx-auto mt-2.5 max-w-[420px] text-center text-sm leading-relaxed text-white/50">
                     No limits, no filters. Upgrade any time, cancel whenever
                     you like.
                 </p>
 
                 <PeriodSwitch yearly={yearly} onChange={setYearly} />
 
-                <div className="mx-auto mt-10 grid w-full max-w-[1280px] items-stretch gap-5 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="mx-auto mt-7 grid w-full max-w-[1200px] items-stretch gap-4 sm:grid-cols-2 xl:grid-cols-4">
                     {allPlans.map((plan) => (
                         <PlanCard
                             key={plan.key}
@@ -78,7 +84,7 @@ export default function PlansDialog({ open, onClose }) {
 /** Переключатель периода оплаты. */
 function PeriodSwitch({ yearly, onChange }) {
     return (
-        <div className="mt-7 flex justify-center">
+        <div className="mt-5 flex justify-center">
             <div className="flex items-center gap-1 rounded-full border border-white/[0.12] bg-white/[0.04] p-1">
                 {[
                     { label: 'Monthly', value: false },
@@ -116,7 +122,7 @@ function PlanCard({ plan, yearly, current }) {
 
     return (
         <div
-            className={`group relative flex flex-col rounded-[20px] border p-6 backdrop-blur-xl transition duration-300 hover:-translate-y-1 ${
+            className={`group relative flex flex-col rounded-[18px] border p-5 backdrop-blur-xl transition duration-300 hover:-translate-y-1 ${
                 plan.popular
                     ? 'border-sky-400/45 bg-gradient-to-b from-sky-500/[0.10] to-white/[0.02] shadow-xl shadow-sky-500/10'
                     : 'border-white/[0.09] bg-white/[0.025] hover:border-white/20'
@@ -128,10 +134,10 @@ function PlanCard({ plan, yearly, current }) {
                 </span>
             )}
 
-            <p className="text-[17px] font-semibold text-white">{plan.name}</p>
+            <p className="text-[15px] font-semibold text-white">{plan.name}</p>
 
-            <p className="mt-3 flex items-baseline gap-1.5">
-                <span className="text-[38px] font-semibold leading-none tracking-tight text-white">
+            <p className="mt-2.5 flex items-baseline gap-1.5">
+                <span className="text-[32px] font-semibold leading-none tracking-tight text-white">
                     ${price}
                 </span>
                 <span className="text-sm text-white/45">/mo</span>
@@ -139,18 +145,18 @@ function PlanCard({ plan, yearly, current }) {
 
             {/* Строка держит высоту и когда пуста: иначе карточки
                 разъезжаются при переключении периода. */}
-            <p className="mt-2 h-4 text-xs text-white/40">
+            <p className="mt-1.5 h-4 text-xs text-white/40">
                 {yearly && !free && `$${plan.priceYearly} billed yearly`}
             </p>
 
-            <p className="mt-3 h-[44px] text-sm leading-relaxed text-white/55">
+            <p className="mt-2.5 h-[38px] text-[13px] leading-relaxed text-white/55">
                 {plan.tagline}
             </p>
 
             <button
                 type="button"
                 disabled={current}
-                className={`mt-5 h-11 w-full rounded-full text-sm font-semibold transition ${
+                className={`mt-4 h-10 w-full rounded-full text-[13px] font-semibold transition ${
                     current
                         ? 'cursor-default border border-white/[0.12] text-white/40'
                         : plan.popular
@@ -161,16 +167,16 @@ function PlanCard({ plan, yearly, current }) {
                 {current ? 'Current plan' : plan.cta}
             </button>
 
-            <ul className="mt-6 flex-1 space-y-3 border-t border-white/[0.07] pt-5">
+            <ul className="mt-5 flex-1 space-y-2.5 border-t border-white/[0.07] pt-4">
                 {plan.features.map((feature) => (
-                    <li key={feature} className="flex gap-2.5">
+                    <li key={feature} className="flex gap-2">
                         <Check
-                            className={`mt-0.5 h-4 w-4 shrink-0 ${
+                            className={`mt-[3px] h-3.5 w-3.5 shrink-0 ${
                                 plan.popular ? 'text-sky-300' : 'text-white/35'
                             }`}
                             strokeWidth={2.5}
                         />
-                        <span className="text-[13px] leading-relaxed text-white/75">
+                        <span className="text-[12.5px] leading-snug text-white/70">
                             {feature}
                         </span>
                     </li>

@@ -27,6 +27,7 @@ export const plans = [
         priceYearly: 194,
         tagline: 'Your private studio — every model, no limits',
         cta: 'Get Pro',
+        popular: true,
         features: [
             'All Pro models',
             'Unlimited text prompts',
@@ -45,7 +46,6 @@ export const plans = [
         priceYearly: 734,
         tagline: 'Everything in Pro, scaled for serious creators',
         cta: 'Get Pro+',
-        popular: true,
         features: [
             'Everything in Pro',
             'Higher image generation limits',

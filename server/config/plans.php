@@ -36,6 +36,7 @@ return [
             'price_yearly' => 194,
             'tagline' => 'Your private studio — every model, no limits',
             'cta' => 'Get Pro',
+            'popular' => true,
             'features' => [
                 'All Pro models',
                 'Unlimited text prompts',
@@ -54,7 +55,6 @@ return [
             'price_yearly' => 734,
             'tagline' => 'Everything in Pro, scaled for serious creators',
             'cta' => 'Get Pro+',
-            'popular' => true,
             'features' => [
                 'Everything in Pro',
                 'Higher image generation limits',
