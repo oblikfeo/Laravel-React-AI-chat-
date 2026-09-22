@@ -105,6 +105,21 @@
         background-color: rgb(255 255 255 / 0.85);
     }
 
+    /* Разметка в ответе модели: в светлой теме блок кода должен быть
+       светлым, а ссылки и встроенный код — заметно темнее фона. */
+    html.light .bg-black\/40 {
+        background-color: rgb(241 245 249);
+    }
+
+    html.light .text-sky-200,
+    html.light .text-sky-300 {
+        color: rgb(2 105 161);
+    }
+
+    html.light .marker\:text-white\/35 > li::marker {
+        color: rgb(100 116 139);
+    }
+
     /* Pro-баннер остаётся тёмным, поэтому его текст не инвертируем. */
     html.light .from-slate-800\/80 .text-white,
     html.light .from-slate-800\/80 .text-white\/55 {

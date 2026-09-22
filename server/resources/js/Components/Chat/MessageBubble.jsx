@@ -1,4 +1,5 @@
 import { LogoMark } from '@/Components/Layout/Logo';
+import Markdown from '@/Components/Chat/Markdown';
 
 /**
  * Одно сообщение диалога.
@@ -31,11 +32,12 @@ export default function MessageBubble({ message }) {
             </span>
 
             {/* Название модели намеренно не показываем: это внутренняя
-                деталь, она хранится в базе и видна только в админке. */}
+                деталь, она хранится в базе и видна только в админке.
+
+                Ответ приходит в Markdown, сообщение пользователя — обычным
+                текстом: звёздочки в его словах разметкой быть не должны. */}
             <div className="min-w-0 flex-1 rounded-3xl rounded-tl-lg border border-white/[0.07] bg-slate-950/70 px-5 py-4 shadow-lg shadow-black/20 backdrop-blur-xl">
-                <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-white/95">
-                    {message.content}
-                </p>
+                <Markdown>{message.content}</Markdown>
             </div>
         </div>
     );
