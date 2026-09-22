@@ -143,7 +143,7 @@ function PlanCard({ plan, yearly, current }) {
                 {yearly && !free && `$${plan.priceYearly} billed yearly`}
             </p>
 
-            <p className="mt-3 min-h-[40px] text-sm leading-relaxed text-white/55">
+            <p className="mt-3 h-[44px] text-sm leading-relaxed text-white/55">
                 {plan.tagline}
             </p>
 
