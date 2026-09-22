@@ -66,7 +66,7 @@ export default function PlansDialog({ open, onClose }) {
 
                 <PeriodSwitch yearly={yearly} onChange={setYearly} />
 
-                <div className="mx-auto mt-7 grid w-full max-w-[1200px] items-stretch gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="mx-auto mt-7 grid w-full max-w-[1200px] grid-cols-1 items-stretch gap-4 sm:grid-cols-4">
                     {allPlans.map((plan) => (
                         <PlanCard
                             key={plan.key}
@@ -122,7 +122,7 @@ function PlanCard({ plan, yearly, current }) {
 
     return (
         <div
-            className={`group relative flex flex-col rounded-[18px] border p-5 backdrop-blur-xl transition duration-300 hover:-translate-y-1 ${
+            className={`group relative flex flex-col rounded-[18px] border p-5 backdrop-blur-xl transition duration-300 ${
                 plan.popular
                     ? 'border-sky-400/45 bg-gradient-to-b from-sky-500/[0.10] to-white/[0.02] shadow-xl shadow-sky-500/10'
                     : 'border-white/[0.09] bg-white/[0.025] hover:border-white/20'
