@@ -32,7 +32,10 @@ return [
     |
     */
 
-    'lifetime' => (int) env('SESSION_LIFETIME', 120),
+    // 30 дней. Стандартные 2 часа для чата мало: вкладку оставляют
+    // открытой надолго, и человек возвращается к разговору через день.
+    // Сессия продлевается при каждом запросе, см. expire_on_close.
+    'lifetime' => (int) env('SESSION_LIFETIME', 43200),
 
     'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', false),
 
