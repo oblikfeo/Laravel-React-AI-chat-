@@ -1,7 +1,26 @@
 import { useEffect, useRef, useState } from 'react';
 
-/** Символов в секунду: быстрее чтения, но видно, что текст набирается. */
-const SPEED = 900;
+/**
+ * Символов в секунду.
+ *
+ * 900 было незаметно: короткий ответ дорисовывался за десятые доли
+ * секунды. 45 — примерно вдвое быстрее чтения вслух: видно, что текст
+ * набирается, и при этом не приходится ждать.
+ */
+const SPEED = 45;
+
+/** Длинный ответ печатаем быстрее, иначе конца не дождёшься. */
+function speedFor(length) {
+    if (length > 1200) {
+        return 200;
+    }
+
+    if (length > 400) {
+        return 110;
+    }
+
+    return SPEED;
+}
 
 /**
  * Постепенное проявление текста.
@@ -38,7 +57,7 @@ export default function useTypewriter(text, enabled = true) {
         const step = (now) => {
             start ??= now;
 
-            const count = Math.floor(((now - start) / 1000) * SPEED);
+            const count = Math.floor(((now - start) / 1000) * speedFor(text.length));
 
             if (count >= text.length) {
                 setShown(text);

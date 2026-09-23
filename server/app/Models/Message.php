@@ -15,6 +15,14 @@ class Message extends Model
 
     public const ROLE_ASSISTANT = 'assistant';
 
+    /**
+     * Отметка в ленте: смена модели и прочие события.
+     *
+     * Модели не отправляется, показывается тонкой строкой между
+     * сообщениями, чтобы было видно, где разговор сменил собеседника.
+     */
+    public const ROLE_SYSTEM = 'system';
+
     protected $fillable = [
         'role',
         'content',

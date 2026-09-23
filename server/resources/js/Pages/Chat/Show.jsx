@@ -49,6 +49,9 @@ export default function ChatShow({ chat, messages, awaitingReply }) {
             {},
             {
                 preserveScroll: true,
+                // Полоса загрузки тут лишняя: ожидание уже показано
+                // индикатором набора в ленте сообщений.
+                showProgress: false,
                 onSuccess: (page) => {
                     const last = page.props.messages?.at(-1);
 
@@ -81,6 +84,7 @@ export default function ChatShow({ chat, messages, awaitingReply }) {
             {
                 forceFormData: true,
                 preserveScroll: true,
+                showProgress: false,
                 onFinish: () => setPending(null),
             },
         );
@@ -94,7 +98,7 @@ export default function ChatShow({ chat, messages, awaitingReply }) {
         router.put(
             `/chats/${chat.id}/model`,
             { model: key },
-            { preserveScroll: true, preserveState: true },
+            { preserveScroll: true, preserveState: true, showProgress: false },
         );
     };
 

@@ -33,7 +33,10 @@ return [
         'fast' => [
             'label' => 'Fast',
             'description' => 'Quick replies, long context',
-            'provider_model' => 'qwen/qwen3.7-flash',
+            // Прежняя модель была рассуждающей: тратила минуту на
+            // размышления и возвращала пустой ответ. Эта отвечает
+            // за 1–2 секунды.
+            'provider_model' => 'nex-agi/nex-n2.5-mini',
             'vision' => true,
             'free' => false,
         ],

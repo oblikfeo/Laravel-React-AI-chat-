@@ -27,6 +27,12 @@ class ModelCatalog
         return config("models.list.{$key}.provider_model");
     }
 
+    /** Название модели для интерфейса. */
+    public static function labelOf(string $key): string
+    {
+        return config("models.list.{$key}.label", 'Auto');
+    }
+
     public static function supportsVision(string $key): bool
     {
         return (bool) config("models.list.{$key}.vision");

@@ -147,6 +147,8 @@ class SendMessage
     {
         $history = $chat->messages()
             ->with('attachments')
+            // Отметки о смене модели — для человека, не для модели.
+            ->whereIn('role', [Message::ROLE_USER, Message::ROLE_ASSISTANT])
             ->latest('id')
             ->limit(config('ai.context_messages'))
             ->get()

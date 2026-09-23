@@ -41,6 +41,10 @@ class OpenAiCompatibleProvider implements AiChatProvider
                 'model' => $model ?: $this->model,
                 'messages' => $messages,
                 'max_tokens' => $this->maxTokens,
+                // Рассуждающие модели тратят весь лимит на размышления
+                // и отвечают через десятки секунд пустотой. В чате важна
+                // скорость, поэтому размышления отключаем.
+                'reasoning' => ['exclude' => true],
             ]);
 
         if ($response->failed()) {
@@ -56,12 +60,9 @@ class OpenAiCompatibleProvider implements AiChatProvider
 
         $content = trim((string) $response->json('choices.0.message.content'));
 
-        // Рассуждающие модели тратят лимит на размышления и могут вернуть
-        // пустой content. Тогда берём сами рассуждения, иначе пользователь
-        // получил бы пустое сообщение.
-        if ($content === '') {
-            $content = trim((string) $response->json('choices.0.message.reasoning'));
-        }
+        // Если модель всё же ответила одними размышлениями, показывать
+        // их нельзя: это внутренняя кухня, а не ответ. Лучше отдать
+        // ошибку и уйти на запасную модель.
 
         if ($content === '') {
             throw new RuntimeException('Провайдер вернул пустой ответ.');

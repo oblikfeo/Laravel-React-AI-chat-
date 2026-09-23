@@ -21,7 +21,12 @@ class RequestReply
     /** Нужен ли ответ: последнее слово должно быть за пользователем. */
     public function isPending(Chat $chat): bool
     {
-        $last = $chat->messages()->latest('id')->first();
+        // Отметку о смене модели пропускаем: она не меняет того,
+        // чья очередь говорить.
+        $last = $chat->messages()
+            ->whereIn('role', [Message::ROLE_USER, Message::ROLE_ASSISTANT])
+            ->latest('id')
+            ->first();
 
         return $last !== null && $last->role === Message::ROLE_USER;
     }

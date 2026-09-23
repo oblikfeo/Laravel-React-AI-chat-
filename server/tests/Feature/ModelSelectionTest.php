@@ -211,4 +211,72 @@ class ModelSelectionTest extends TestCase
             ->get("/attachments/{$attachment->id}")
             ->assertForbidden();
     }
+
+    public function test_model_change_leaves_a_mark_in_the_chat(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user)->post('/chats', ['message' => 'Hi', 'model' => 'auto']);
+        $chat = $user->chats()->latest('id')->first();
+
+        $this->actingAs($user)->put("/chats/{$chat->id}/model", ['model' => 'smart']);
+
+        $mark = $chat->messages()->where('role', 'system')->first();
+
+        $this->assertNotNull($mark);
+        $this->assertSame('Smart', $mark->content);
+    }
+
+    public function test_choosing_the_same_model_leaves_no_mark(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user)->post('/chats', ['message' => 'Hi', 'model' => 'auto']);
+        $chat = $user->chats()->latest('id')->first();
+
+        $this->actingAs($user)->put("/chats/{$chat->id}/model", ['model' => 'auto']);
+
+        $this->assertSame(0, $chat->messages()->where('role', 'system')->count());
+    }
+
+    /**
+     * Отметка — для человека. Модели она не отправляется, иначе та
+     * примет её за указание.
+     */
+    public function test_mark_is_not_sent_to_the_model(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user)->post('/chats', ['message' => 'Hi', 'model' => 'auto']);
+        $chat = $user->chats()->latest('id')->first();
+
+        $this->actingAs($user)->put("/chats/{$chat->id}/model", ['model' => 'smart']);
+        $this->actingAs($user)->post("/chats/{$chat->id}/messages", ['message' => 'Again']);
+        $this->actingAs($user)->post("/chats/{$chat->id}/reply");
+
+        Http::assertSent(function ($request) {
+            foreach ($request->data()['messages'] as $message) {
+                if (($message['role'] ?? '') === 'system'
+                    && $message['content'] === 'Smart') {
+                    return false;
+                }
+            }
+
+            return true;
+        });
+    }
+
+    /**
+     * Отметка не меняет того, чья очередь говорить.
+     */
+    public function test_mark_does_not_trigger_a_reply(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user)->post('/chats', ['message' => 'Hi']);
+        $chat = $user->chats()->latest('id')->first();
+        $this->actingAs($user)->post("/chats/{$chat->id}/reply");
+
+        $this->actingAs($user)->put("/chats/{$chat->id}/model", ['model' => 'smart']);
+
+        $this->actingAs($user)
+            ->get("/chats/{$chat->id}")
+            ->assertInertia(fn ($page) => $page->where('awaitingReply', false));
+    }
 }

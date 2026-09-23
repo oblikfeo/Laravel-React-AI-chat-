@@ -2,6 +2,7 @@ import { LogoMark } from '@/Components/Layout/Logo';
 import Markdown from '@/Components/Chat/Markdown';
 import MessageAttachments from '@/Components/Chat/MessageAttachments';
 import useTypewriter from '@/Components/Chat/useTypewriter';
+import ModelChangeMark from '@/Components/Chat/ModelChangeMark';
 
 /**
  * Одно сообщение диалога.
@@ -18,6 +19,10 @@ export default function MessageBubble({ message, typing = false }) {
     // Печатается только свежий ответ: при открытии старого диалога
     // текст должен быть на месте сразу.
     const shown = useTypewriter(message.content ?? '', typing);
+
+    if (message.role === 'system') {
+        return <ModelChangeMark label={message.content} />;
+    }
 
     if (isUser) {
         return (
