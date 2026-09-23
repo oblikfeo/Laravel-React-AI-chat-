@@ -57,6 +57,15 @@ export default function ChatShow({ chat, messages, awaitingReply }) {
 
                     if (last?.role === 'assistant') {
                         setTypingId(last.id);
+
+                        // Снимаем признак, когда печать закончится:
+                        // иначе следующая перерисовка запустит её заново.
+                        const ms = Math.min(
+                            (last.content?.length ?? 0) * 22 + 400,
+                            20000,
+                        );
+
+                        window.setTimeout(() => setTypingId(null), ms);
                     }
                 },
                 onFinish: () => {
