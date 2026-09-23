@@ -21,8 +21,9 @@ export default function ChatShow({ chat, messages, awaitingReply }) {
     const bottomRef = useRef(null);
 
     // Печатаем только тот ответ, что пришёл при нас: при открытии
-    // старого диалога текст должен быть на месте сразу.
-    const typingIdRef = useRef(null);
+    // старого диалога текст должен быть на месте сразу. Это состояние,
+    // а не ref: ref не вызывает перерисовку, и печать бы не началась.
+    const [typingId, setTypingId] = useState(null);
     const askedRef = useRef(false);
 
     const list = pending
@@ -52,7 +53,7 @@ export default function ChatShow({ chat, messages, awaitingReply }) {
                     const last = page.props.messages?.at(-1);
 
                     if (last?.role === 'assistant') {
-                        typingIdRef.current = last.id;
+                        setTypingId(last.id);
                     }
                 },
                 onFinish: () => {
@@ -111,7 +112,7 @@ export default function ChatShow({ chat, messages, awaitingReply }) {
                                 <MessageBubble
                                     key={message.id}
                                     message={message}
-                                    typing={message.id === typingIdRef.current}
+                                    typing={message.id === typingId}
                                 />
                             ))}
 
