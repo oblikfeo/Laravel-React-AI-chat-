@@ -54,6 +54,8 @@ return [
         'uncensored' => [
             'label' => 'Uncensored',
             'description' => 'Fewer refusals, direct answers',
+            // Ради этой модели к нам и приходят: выделяем её в списке.
+            'signature' => true,
             'provider_model' => 'cognitivecomputations/dolphin-mistral-24b-venice-edition',
             'vision' => false,
             'free' => false,

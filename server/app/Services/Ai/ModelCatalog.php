@@ -79,6 +79,7 @@ class ModelCatalog
                 'description' => $model['description'],
                 'vision' => (bool) ($model['vision'] ?? false),
                 'free' => (bool) ($model['free'] ?? false),
+                'signature' => (bool) ($model['signature'] ?? false),
             ])
             ->values()
             ->all();
