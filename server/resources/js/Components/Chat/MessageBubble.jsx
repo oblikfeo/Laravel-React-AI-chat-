@@ -1,5 +1,6 @@
 import { LogoMark } from '@/Components/Layout/Logo';
 import Markdown from '@/Components/Chat/Markdown';
+import MessageAttachments from '@/Components/Chat/MessageAttachments';
 
 /**
  * Одно сообщение диалога.
@@ -17,9 +18,13 @@ export default function MessageBubble({ message }) {
         return (
             <div className="flex justify-end">
                 <div className="max-w-[80%] rounded-3xl rounded-br-lg border border-white/[0.12] bg-white/[0.09] px-5 py-3.5 backdrop-blur-xl">
-                    <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-white">
-                        {message.content}
-                    </p>
+                    <MessageAttachments items={message.attachments} />
+
+                    {message.content && (
+                        <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-white">
+                            {message.content}
+                        </p>
+                    )}
                 </div>
             </div>
         );

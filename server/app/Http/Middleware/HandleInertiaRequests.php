@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Http\Resources\ChatResource;
 use App\Models\User;
+use App\Services\Ai\ModelCatalog;
 use App\Services\Billing\PaymentGateway;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -54,6 +55,10 @@ class HandleInertiaRequests extends Middleware
             'sidebarChats' => fn () => $request->user()
                 ? ChatResource::collection($request->user()->chats()->limit(30)->get())
                 : [],
+
+            // Список моделей общий: он нужен и на главной, и в диалоге.
+            'models' => fn () => ModelCatalog::forInterface(),
+            'defaultModel' => config('models.default'),
 
             // Интерфейс скрывает кнопки оплаты, пока реквизиты
             // платёжной системы не заданы.

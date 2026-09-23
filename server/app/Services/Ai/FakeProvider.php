@@ -16,7 +16,7 @@ class FakeProvider implements AiChatProvider
         return false;
     }
 
-    public function complete(array $messages): AiResponse
+    public function complete(array $messages, ?string $model = null): AiResponse
     {
         return new AiResponse(
             content: "I'm having trouble responding right now. Please try again in a moment.",

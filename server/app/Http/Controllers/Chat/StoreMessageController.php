@@ -20,7 +20,11 @@ class StoreMessageController extends Controller
     ): RedirectResponse {
         $this->authorize('update', $chat);
 
-        $sendMessage->handle($chat, $request->string('message')->toString());
+        $sendMessage->handle(
+            $chat,
+            $request->string('message')->toString(),
+            $request->file('files', []),
+        );
 
         return back();
     }

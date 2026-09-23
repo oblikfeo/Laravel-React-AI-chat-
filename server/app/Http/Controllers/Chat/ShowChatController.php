@@ -22,7 +22,7 @@ class ShowChatController extends Controller
         return Inertia::render('Chat/Show', [
             'chat' => ChatResource::make($chat),
             'messages' => MessageResource::collection(
-                $chat->messages()->oldest('id')->get()
+                $chat->messages()->with('attachments')->oldest('id')->get()
             ),
             'chats' => ChatResource::collection($request->user()->chats),
         ]);

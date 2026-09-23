@@ -12,6 +12,7 @@ class ChatResource extends JsonResource
         return [
             'id' => $this->id,
             'title' => $this->title,
+            'modelKey' => $this->model_key,
             'visibility' => $this->visibility,
             'is_pinned' => $this->is_pinned,
             'last_message_at' => $this->last_message_at?->toIso8601String(),

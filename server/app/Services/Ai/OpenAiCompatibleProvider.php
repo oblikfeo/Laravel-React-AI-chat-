@@ -27,13 +27,18 @@ class OpenAiCompatibleProvider implements AiChatProvider
         return filled($this->apiKey);
     }
 
-    public function complete(array $messages): AiResponse
+    /**
+     * @param  array<int, array<string, mixed>>  $messages
+     * @param  string|null  $model  Название модели у провайдера.
+     *                              Пусто — берём из настроек.
+     */
+    public function complete(array $messages, ?string $model = null): AiResponse
     {
         $response = Http::withToken($this->apiKey)
             ->timeout($this->timeout)
             ->acceptJson()
             ->post($this->baseUrl.'/chat/completions', [
-                'model' => $this->model,
+                'model' => $model ?: $this->model,
                 'messages' => $messages,
                 'max_tokens' => $this->maxTokens,
             ]);
@@ -64,7 +69,7 @@ class OpenAiCompatibleProvider implements AiChatProvider
 
         return new AiResponse(
             content: $content,
-            model: $response->json('model') ?? $this->model,
+            model: $response->json('model') ?? $model ?? $this->model,
         );
     }
 }

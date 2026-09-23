@@ -2,9 +2,11 @@
 
 use App\Http\Controllers\Chat\DestroyChatController;
 use App\Http\Controllers\Chat\IndexChatController;
+use App\Http\Controllers\Chat\ShowAttachmentController;
 use App\Http\Controllers\Chat\ShowChatController;
 use App\Http\Controllers\Chat\StoreChatController;
 use App\Http\Controllers\Chat\StoreMessageController;
+use App\Http\Controllers\Chat\UpdateChatModelController;
 use App\Http\Controllers\Billing\HandleWebhookController;
 use App\Http\Controllers\Billing\ReturnController;
 use App\Http\Controllers\Billing\StoreSubscriptionController;
@@ -24,6 +26,12 @@ Route::middleware('auth')->group(function () {
 
     Route::post('chats/{chat}/messages', StoreMessageController::class)
         ->name('chats.messages.store');
+
+    Route::put('chats/{chat}/model', UpdateChatModelController::class)
+        ->name('chats.model.update');
+
+    Route::get('attachments/{attachment}', ShowAttachmentController::class)
+        ->name('attachments.show');
 
     Route::put('settings/profile', UpdateProfileController::class)
         ->name('settings.profile.update');

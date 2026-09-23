@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Head, router } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import MainLayout from '@/Layouts/MainLayout';
 import PromptComposer from '@/Components/Home/PromptComposer';
 import MessageBubble from '@/Components/Chat/MessageBubble';
@@ -12,7 +12,10 @@ import TypingIndicator from '@/Components/Chat/TypingIndicator';
  * а под ним — индикатор набора. Так интерфейс не выглядит зависшим.
  */
 export default function ChatShow({ chat, messages }) {
+    const { defaultModel } = usePage().props;
     const [draft, setDraft] = useState('');
+    const [files, setFiles] = useState([]);
+    const [model, setModel] = useState(chat.modelKey ?? defaultModel);
     const [pending, setPending] = useState(null);
     const bottomRef = useRef(null);
 
@@ -27,20 +30,35 @@ export default function ChatShow({ chat, messages }) {
     const submit = () => {
         const text = draft.trim();
 
-        if (!text) {
+        if (!text && !files.length) {
             return;
         }
 
-        setPending(text);
+        setPending(text || 'Attached file');
         setDraft('');
+        const sending = files;
+        setFiles([]);
 
         router.post(
             `/chats/${chat.id}/messages`,
-            { message: text },
+            { message: text, files: sending },
             {
+                forceFormData: true,
                 preserveScroll: true,
                 onFinish: () => setPending(null),
             },
+        );
+    };
+
+    // Смена модели сохраняется за чатом: выбор делается один раз,
+    // а не при каждом сообщении.
+    const changeModel = (key) => {
+        setModel(key);
+
+        router.put(
+            `/chats/${chat.id}/model`,
+            { model: key },
+            { preserveScroll: true, preserveState: true },
         );
     };
 
@@ -67,6 +85,10 @@ export default function ChatShow({ chat, messages }) {
                             value={draft}
                             onChange={setDraft}
                             onSubmit={submit}
+                            model={model}
+                            onModelChange={changeModel}
+                            files={files}
+                            onFilesChange={setFiles}
                             busy={Boolean(pending)}
                             placeholder="Ask anything…"
                             minRows={1}

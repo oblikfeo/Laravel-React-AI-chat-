@@ -13,6 +13,7 @@ class Chat extends Model
 
     protected $fillable = [
         'title',
+        'model_key',
         'visibility',
         'is_pinned',
         'last_message_at',

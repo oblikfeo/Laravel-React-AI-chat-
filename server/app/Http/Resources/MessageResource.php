@@ -14,6 +14,16 @@ class MessageResource extends JsonResource
             'role' => $this->role,
             'content' => $this->content,
             'model' => $this->model,
+            'attachments' => $this->whenLoaded('attachments', fn () => $this->attachments
+                ->map(fn ($a) => [
+                    'id' => $a->id,
+                    'name' => $a->name,
+                    'size' => $a->size,
+                    'isImage' => $a->isImage(),
+                    'url' => route('attachments.show', $a),
+                ])
+                ->values()
+                ->all(), []),
             'created_at' => $this->created_at?->toIso8601String(),
         ];
     }

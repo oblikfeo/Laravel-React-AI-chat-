@@ -5,11 +5,10 @@ import PromptComposer from '@/Components/Home/PromptComposer';
 import QuickActions from '@/Components/Home/QuickActions';
 
 export default function Home() {
-    const { auth } = usePage().props;
+    const { auth, defaultModel } = usePage().props;
     const [prompt, setPrompt] = useState('');
-    // Выбор модели: пока одна, поэтому значение постоянное.
-    // Список появится, когда моделей станет несколько.
-    const [model] = useState('Auto');
+    const [model, setModel] = useState(defaultModel);
+    const [files, setFiles] = useState([]);
     const [busy, setBusy] = useState(false);
 
     // Возвращаем текст, набранный до входа.
@@ -23,7 +22,7 @@ export default function Home() {
     }, [auth?.user]);
 
     const submit = () => {
-        if (!prompt.trim()) {
+        if (!prompt.trim() && !files.length) {
             return;
         }
 
@@ -38,10 +37,15 @@ export default function Home() {
 
         setBusy(true);
 
+        // forceFormData: файлы уходят обычной формой, иначе Inertia
+        // отправит JSON и вложения потеряются.
         router.post(
             '/chats',
-            { message: prompt },
-            { onFinish: () => setBusy(false) },
+            { message: prompt, model, files },
+            {
+                forceFormData: true,
+                onFinish: () => setBusy(false),
+            },
         );
     };
 
@@ -66,6 +70,9 @@ export default function Home() {
                             onChange={setPrompt}
                             onSubmit={submit}
                             model={model}
+                            onModelChange={setModel}
+                            files={files}
+                            onFilesChange={setFiles}
                             busy={busy}
                         />
                     </div>
