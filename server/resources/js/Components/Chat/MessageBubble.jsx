@@ -1,6 +1,7 @@
 import { LogoMark } from '@/Components/Layout/Logo';
 import Markdown from '@/Components/Chat/Markdown';
 import MessageAttachments from '@/Components/Chat/MessageAttachments';
+import useTypewriter from '@/Components/Chat/useTypewriter';
 
 /**
  * Одно сообщение диалога.
@@ -11,8 +12,12 @@ import MessageAttachments from '@/Components/Chat/MessageAttachments';
  * затемнённое стекло. Пузырь пользователя оставлен светлее, чтобы
  * две стороны диалога различались с первого взгляда.
  */
-export default function MessageBubble({ message }) {
+export default function MessageBubble({ message, typing = false }) {
     const isUser = message.role === 'user';
+
+    // Печатается только свежий ответ: при открытии старого диалога
+    // текст должен быть на месте сразу.
+    const shown = useTypewriter(message.content ?? '', typing);
 
     if (isUser) {
         return (
@@ -42,7 +47,7 @@ export default function MessageBubble({ message }) {
                 Ответ приходит в Markdown, сообщение пользователя — обычным
                 текстом: звёздочки в его словах разметкой быть не должны. */}
             <div className="min-w-0 flex-1 rounded-3xl rounded-tl-lg border border-white/[0.07] bg-slate-950/70 px-5 py-4 shadow-lg shadow-black/20 backdrop-blur-xl">
-                <Markdown>{message.content}</Markdown>
+                <Markdown>{shown}</Markdown>
             </div>
         </div>
     );

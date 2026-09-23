@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Chat\DestroyChatController;
 use App\Http\Controllers\Chat\IndexChatController;
+use App\Http\Controllers\Chat\ReplyController;
 use App\Http\Controllers\Chat\ShowAttachmentController;
 use App\Http\Controllers\Chat\ShowChatController;
 use App\Http\Controllers\Chat\StoreChatController;
@@ -26,6 +27,9 @@ Route::middleware('auth')->group(function () {
 
     Route::post('chats/{chat}/messages', StoreMessageController::class)
         ->name('chats.messages.store');
+
+    Route::post('chats/{chat}/reply', ReplyController::class)
+        ->name('chats.reply');
 
     Route::put('chats/{chat}/model', UpdateChatModelController::class)
         ->name('chats.model.update');

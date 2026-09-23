@@ -11,6 +11,9 @@ class StoreChatController extends Controller
 {
     /**
      * Создаёт чат с первым сообщением и открывает его.
+     *
+     * Ответ модели здесь не запрашивается: человек переходит в диалог
+     * сразу и ждёт уже там, видя своё сообщение и индикатор набора.
      */
     public function __invoke(StoreChatRequest $request, SendMessage $sendMessage): RedirectResponse
     {
@@ -26,7 +29,7 @@ class StoreChatController extends Controller
             'last_message_at' => now(),
         ]);
 
-        $sendMessage->handle($chat, $message, $files);
+        $sendMessage->store($chat, $message, $files);
 
         return to_route('chats.show', $chat);
     }

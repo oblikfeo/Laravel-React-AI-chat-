@@ -7,6 +7,7 @@ use App\Models\Chat;
 use App\Models\Message;
 use App\Services\Ai\AiChatProvider;
 use App\Services\Ai\ModelCatalog;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Throwable;
@@ -29,17 +30,40 @@ class SendMessage
      */
     public function handle(Chat $chat, string $content, array $files = []): Message
     {
-        $userMessage = $chat->messages()->create([
+        $message = $this->store($chat, $content, $files);
+
+        $this->reply($chat);
+
+        return $message;
+    }
+
+    /**
+     * Сохраняет сообщение пользователя, не обращаясь к модели.
+     *
+     * Отделено от ответа, чтобы создание чата не ждало провайдера:
+     * человек попадает в диалог сразу и ждёт уже там.
+     *
+     * @param  array<int, UploadedFile>  $files
+     */
+    public function store(Chat $chat, string $content, array $files = []): Message
+    {
+        $message = $chat->messages()->create([
             'role' => Message::ROLE_USER,
             'content' => $content,
         ]);
 
         foreach ($files as $file) {
-            app(StoreAttachment::class)->handle($userMessage, $file);
+            app(StoreAttachment::class)->handle($message, $file);
         }
 
         $chat->forceFill(['last_message_at' => now()])->save();
 
+        return $message;
+    }
+
+    /** Запрашивает ответ модели и сохраняет его. */
+    public function reply(Chat $chat): Message
+    {
         $reply = $this->askProvider($chat);
 
         $chat->forceFill(['last_message_at' => now()])->save();

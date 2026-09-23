@@ -11,7 +11,10 @@ use Illuminate\Http\RedirectResponse;
 class StoreMessageController extends Controller
 {
     /**
-     * Добавляет сообщение в существующий чат.
+     * Добавляет сообщение в чат.
+     *
+     * Ответ запрашивается отдельно, см. ReplyController: так сообщение
+     * появляется на экране мгновенно, а ожидание видно индикатором.
      */
     public function __invoke(
         StoreMessageRequest $request,
@@ -20,7 +23,7 @@ class StoreMessageController extends Controller
     ): RedirectResponse {
         $this->authorize('update', $chat);
 
-        $sendMessage->handle(
+        $sendMessage->store(
             $chat,
             $request->string('message')->toString(),
             $request->file('files', []),

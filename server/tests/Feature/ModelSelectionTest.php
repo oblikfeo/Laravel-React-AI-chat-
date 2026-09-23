@@ -133,6 +133,10 @@ class ModelSelectionTest extends TestCase
             ],
         ])->assertRedirect();
 
+        // Ответ запрашивается отдельно, из открытого диалога.
+        $chat = $user->chats()->latest('id')->first();
+        $this->actingAs($user)->post("/chats/{$chat->id}/reply");
+
         // Текст документа должен уйти в запросе: модель не открывает
         // файлы сама, она видит только то, что ей прислали.
         Http::assertSent(function ($request) {

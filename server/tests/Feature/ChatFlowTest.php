@@ -37,7 +37,11 @@ class ChatFlowTest extends TestCase
         $this->assertAuthenticatedAs($user);
     }
 
-    public function test_creating_chat_stores_question_and_reply(): void
+    /**
+     * Создание чата не ждёт модель: человек переходит в диалог сразу,
+     * а ответ запрашивается уже оттуда.
+     */
+    public function test_creating_chat_stores_the_question_only(): void
     {
         $user = User::factory()->create();
 
@@ -49,9 +53,50 @@ class ChatFlowTest extends TestCase
 
         $this->assertNotNull($chat);
         $this->assertSame($user->id, $chat->user_id);
-        $this->assertSame(2, $chat->messages()->count());
+        $this->assertSame(1, $chat->messages()->count());
         $this->assertTrue($chat->messages()->where('role', Message::ROLE_USER)->exists());
+        $this->assertFalse($chat->messages()->where('role', Message::ROLE_ASSISTANT)->exists());
+    }
+
+    public function test_opening_the_chat_marks_the_reply_as_awaited(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->post('/chats', ['message' => 'Вопрос']);
+
+        $this->actingAs($user)
+            ->get('/chats/'.Chat::first()->id)
+            ->assertInertia(fn ($page) => $page->where('awaitingReply', true));
+    }
+
+    public function test_reply_request_adds_the_answer(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user)->post('/chats', ['message' => 'Вопрос']);
+        $chat = Chat::first();
+
+        $this->actingAs($user)
+            ->post("/chats/{$chat->id}/reply")
+            ->assertRedirect();
+
+        $this->assertSame(2, $chat->messages()->count());
         $this->assertTrue($chat->messages()->where('role', Message::ROLE_ASSISTANT)->exists());
+    }
+
+    /**
+     * Запрос ответа повторяется при обновлении страницы: второй ответ
+     * на то же сообщение появиться не должен.
+     */
+    public function test_repeated_reply_request_adds_nothing(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user)->post('/chats', ['message' => 'Вопрос']);
+        $chat = Chat::first();
+
+        $this->actingAs($user)->post("/chats/{$chat->id}/reply");
+        $this->actingAs($user)->post("/chats/{$chat->id}/reply");
+
+        $this->assertSame(2, $chat->messages()->count());
     }
 
     public function test_chat_of_another_user_is_forbidden(): void
