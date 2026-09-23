@@ -35,12 +35,18 @@ export default function useTypewriter(text, enabled = true) {
     const [shown, setShown] = useState(enabled ? '' : text);
     const frame = useRef(null);
 
+    // Один и тот же ответ печатаем только раз: перерисовка страницы
+    // не должна запускать анимацию заново.
+    const played = useRef(false);
+
     useEffect(() => {
-        if (!enabled) {
+        if (!enabled || played.current) {
             setShown(text);
 
             return;
         }
+
+        played.current = true;
 
         const reduced = window.matchMedia?.(
             '(prefers-reduced-motion: reduce)',

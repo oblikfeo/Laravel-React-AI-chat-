@@ -44,6 +44,8 @@ export default function Home() {
             { message: prompt, model, files },
             {
                 forceFormData: true,
+                // Переход мгновенный, полоса только мигает.
+                showProgress: false,
                 onFinish: () => setBusy(false),
             },
         );
