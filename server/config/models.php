@@ -24,9 +24,13 @@ return [
         'auto' => [
             'label' => 'Auto',
             'description' => 'Balanced everyday model',
-            'provider_model' => 'nex-agi/nex-n2.5-pro:free',
+            // Бесплатная модель стоит в очереди: первый запрос мог
+            // ждать 15–25 секунд, следующие полторы. Для модели по
+            // умолчанию это неприемлемо, поэтому берём платную —
+            // она стоит копейки и отвечает за секунду.
+            'provider_model' => 'nex-agi/nex-n2.5-pro',
             'vision' => true,
-            'free' => true,
+            'free' => false,
             'fallback' => 'fast',
         ],
 
