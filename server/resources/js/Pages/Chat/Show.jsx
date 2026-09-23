@@ -20,11 +20,23 @@ export default function ChatShow({ chat, messages, awaitingReply }) {
     const [pending, setPending] = useState(null);
     const bottomRef = useRef(null);
 
-    // Печатаем только тот ответ, что пришёл при нас: при открытии
-    // старого диалога текст должен быть на месте сразу. Это состояние,
-    // а не ref: ref не вызывает перерисовку, и печать бы не началась.
-    const [typingId, setTypingId] = useState(null);
     const askedRef = useRef(false);
+
+    // Ответы, которые уже были на экране к моменту отрисовки.
+    // Вычисляется при первом рендере страницы, поэтому новый ответ
+    // сразу попадает в печать: если ждать onSuccess, Inertia успевает
+    // показать текст целиком, и печать начинается со второго кадра.
+    const seenRef = useRef(null);
+
+    if (seenRef.current === null) {
+        seenRef.current = new Set(
+            messages.filter((m) => m.role === 'assistant').map((m) => m.id),
+        );
+    }
+
+    const lastReply = [...messages].reverse().find((m) => m.role === 'assistant');
+    const typingId =
+        lastReply && !seenRef.current.has(lastReply.id) ? lastReply.id : null;
 
     const list = pending
         ? [...messages, { id: 'pending', role: 'user', content: pending }]
@@ -35,6 +47,14 @@ export default function ChatShow({ chat, messages, awaitingReply }) {
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [list.length, waiting]);
+
+    // Напечатанный ответ становится виденным: следующая перерисовка
+    // покажет его целиком, а не запустит печать заново.
+    useEffect(() => {
+        if (typingId) {
+            seenRef.current.add(typingId);
+        }
+    }, [typingId]);
 
     // Ответ ещё не получен — запрашиваем его, оказавшись на странице.
     useEffect(() => {
@@ -52,22 +72,6 @@ export default function ChatShow({ chat, messages, awaitingReply }) {
                 // Полоса загрузки тут лишняя: ожидание уже показано
                 // индикатором набора в ленте сообщений.
                 showProgress: false,
-                onSuccess: (page) => {
-                    const last = page.props.messages?.at(-1);
-
-                    if (last?.role === 'assistant') {
-                        setTypingId(last.id);
-
-                        // Снимаем признак, когда печать закончится:
-                        // иначе следующая перерисовка запустит её заново.
-                        const ms = Math.min(
-                            (last.content?.length ?? 0) * 22 + 400,
-                            20000,
-                        );
-
-                        window.setTimeout(() => setTypingId(null), ms);
-                    }
-                },
                 onFinish: () => {
                     askedRef.current = false;
                 },
