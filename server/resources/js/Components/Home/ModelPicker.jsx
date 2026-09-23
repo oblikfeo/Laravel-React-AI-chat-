@@ -77,13 +77,19 @@ export default function ModelPicker({ value, onChange }) {
                             className={`flex w-full items-start gap-2.5 rounded-xl px-3 py-2.5 text-left transition hover:bg-white/10 ${
                                 // Наша особенность: выделяем рамкой.
                                 model.signature
-                                    ? 'ring-1 ring-inset ring-sky-400/35'
+                                    ? 'bg-sky-400/[0.07] ring-1 ring-inset ring-sky-400/45'
                                     : ''
                             }`}
                         >
                             <span className="min-w-0 flex-1">
                                 <span className="flex items-center gap-2">
-                                    <span className="text-sm font-medium text-white">
+                                    <span
+                                        className={`text-sm font-medium ${
+                                            model.signature
+                                                ? 'text-white'
+                                                : 'text-white/70'
+                                        }`}
+                                    >
                                         {model.label}
                                     </span>
 
@@ -95,7 +101,13 @@ export default function ModelPicker({ value, onChange }) {
                                     )}
                                 </span>
 
-                                <span className="mt-0.5 block text-xs leading-snug text-white/45">
+                                <span
+                                    className={`mt-0.5 block text-xs leading-snug ${
+                                        model.signature
+                                            ? 'text-sky-100/60'
+                                            : 'text-white/35'
+                                    }`}
+                                >
                                     {model.description}
                                 </span>
                             </span>
