@@ -10,7 +10,11 @@ class GoogleAuthTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_button_is_hidden_without_credentials(): void
+    /**
+     * Кнопка на месте всегда, меняется только её состояние:
+     * без ключей она неактивна.
+     */
+    public function test_interface_knows_google_is_not_ready(): void
     {
         config(['services.google.client_id' => null]);
         config(['services.google.client_secret' => null]);
@@ -19,7 +23,7 @@ class GoogleAuthTest extends TestCase
             ->assertInertia(fn ($page) => $page->where('googleReady', false));
     }
 
-    public function test_button_appears_once_credentials_are_set(): void
+    public function test_interface_knows_google_is_ready(): void
     {
         config(['services.google.client_id' => 'test-id']);
         config(['services.google.client_secret' => 'test-secret']);
