@@ -89,10 +89,10 @@ export default function ModelPicker({ value, onChange }) {
                             aria-selected={model.key === value}
                             onClick={() => pick(model)}
                             className={`flex w-full items-start gap-2.5 rounded-xl px-3 py-2.5 text-left transition hover:bg-white/10 ${
-                                // Наша особенность: выделяем медленным
-                                // движением фона. Рамка читалась как
-                                // «выбрано» и спорила с галочкой.
-                                model.signature ? 'signature-glow' : ''
+                                // Наша особенность: выделяем мерцающими
+                                // звёздами. Рамка читалась как «выбрано»
+                                // и спорила с галочкой выбора.
+                                model.signature ? 'signature-stars' : ''
                             }`}
                         >
                             <span className="min-w-0 flex-1">

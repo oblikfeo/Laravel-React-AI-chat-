@@ -138,67 +138,78 @@
      * Подсветка нашей особенной модели в списке.
      *
      * Рамка читалась как «выбрано» и спорила с галочкой выбора,
-     * поэтому выделяем медленным движением фона: взгляд цепляется,
-     * но с состоянием выбора это не путается.
+     * поэтому выделяем мерцающими звёздами: они перекликаются с
+     * космическим фоном и заметны постоянно, а не волной.
+     *
+     * Звёзды нарисованы градиентами, без картинок и разметки: ячейка
+     * остаётся обычной кнопкой, а список — лёгким.
      */
-    .signature-glow {
+    .signature-stars {
         position: relative;
         overflow: hidden;
+        background-color: rgba(56, 189, 248, 0.05);
     }
 
-    .signature-glow::before {
+    .signature-stars::before,
+    .signature-stars::after {
         content: '';
         position: absolute;
         inset: 0;
-        background: linear-gradient(
-            110deg,
-            transparent 25%,
-            rgba(56, 189, 248, 0.16) 50%,
-            transparent 75%
-        );
-        background-size: 250% 100%;
-        animation: signature-sweep 4.5s ease-in-out infinite;
         pointer-events: none;
+        background-repeat: no-repeat;
     }
 
-    @keyframes signature-sweep {
+    /* Первый слой: звёзды помельче, мерцают чаще. */
+    .signature-stars::before {
+        background-image:
+            radial-gradient(1px 1px at 12% 30%, rgba(255, 255, 255, 0.9), transparent),
+            radial-gradient(1px 1px at 34% 70%, rgba(186, 230, 253, 0.8), transparent),
+            radial-gradient(1px 1px at 58% 22%, rgba(255, 255, 255, 0.75), transparent),
+            radial-gradient(1px 1px at 81% 62%, rgba(186, 230, 253, 0.85), transparent),
+            radial-gradient(1px 1px at 93% 35%, rgba(255, 255, 255, 0.7), transparent);
+        animation: stars-near 3.2s ease-in-out infinite;
+    }
+
+    /* Второй слой: крупнее и медленнее, со сдвигом по времени —
+       так мерцание не выглядит одинаковым тиканьем. */
+    .signature-stars::after {
+        background-image:
+            radial-gradient(1.5px 1.5px at 22% 58%, rgba(125, 211, 252, 0.9), transparent),
+            radial-gradient(1.5px 1.5px at 47% 38%, rgba(255, 255, 255, 0.8), transparent),
+            radial-gradient(1.5px 1.5px at 69% 76%, rgba(125, 211, 252, 0.85), transparent),
+            radial-gradient(1.5px 1.5px at 88% 18%, rgba(255, 255, 255, 0.75), transparent);
+        animation: stars-far 4.7s ease-in-out infinite;
+        animation-delay: -1.6s;
+    }
+
+    @keyframes stars-near {
         0%,
         100% {
-            background-position: 150% 0;
+            opacity: 0.35;
         }
         50% {
-            background-position: -50% 0;
+            opacity: 1;
         }
     }
 
-    /* Уважаем системную настройку «уменьшить движение». */
+    @keyframes stars-far {
+        0%,
+        100% {
+            opacity: 0.9;
+        }
+        45% {
+            opacity: 0.25;
+        }
+    }
+
+    /* Уважаем системную настройку «уменьшить движение»:
+       звёзды остаются, но перестают мерцать. */
     @media (prefers-reduced-motion: reduce) {
-        .signature-glow::before {
+        .signature-stars::before,
+        .signature-stars::after {
             animation: none;
-            background: rgba(56, 189, 248, 0.1);
+            opacity: 0.7;
         }
-    }
-
-    /*
-     * Тонкая тёмная обводка у самих букв.
-     *
-     * Фон — фотография, и у свечения планеты белый текст пропадал.
-     * Тень под текстом помогала слабо, поэтому обводим контур:
-     * буквы остаются читаемыми на любом участке фона.
-     *
-     * paint-order рисует обводку под заливкой, иначе она съедает
-     * тонкие штрихи и текст выглядит грязным.
-     */
-    .text-outline {
-        -webkit-text-stroke: 0.6px rgba(0, 0, 0, 0.55);
-        paint-order: stroke fill;
-        text-shadow: 0 2px 18px rgba(0, 0, 0, 0.45);
-    }
-
-    /* В светлой теме текст тёмный, обводка ему только вредит. */
-    html.light .text-outline {
-        -webkit-text-stroke: 0;
-        text-shadow: none;
     }
 
     /* Тонкий скроллбар для списков чатов и меню */
