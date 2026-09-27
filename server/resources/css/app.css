@@ -147,7 +147,6 @@
     .signature-stars {
         position: relative;
         overflow: hidden;
-        background-color: rgba(56, 189, 248, 0.05);
     }
 
     .signature-stars::before,
@@ -162,11 +161,11 @@
     /* Первый слой: звёзды помельче, мерцают чаще. */
     .signature-stars::before {
         background-image:
-            radial-gradient(1px 1px at 12% 30%, rgba(255, 255, 255, 0.9), transparent),
-            radial-gradient(1px 1px at 34% 70%, rgba(186, 230, 253, 0.8), transparent),
-            radial-gradient(1px 1px at 58% 22%, rgba(255, 255, 255, 0.75), transparent),
-            radial-gradient(1px 1px at 81% 62%, rgba(186, 230, 253, 0.85), transparent),
-            radial-gradient(1px 1px at 93% 35%, rgba(255, 255, 255, 0.7), transparent);
+            radial-gradient(2.5px 2.5px at 12% 30%, #fff 35%, rgba(186, 230, 253, 0.45) 60%, transparent 100%),
+            radial-gradient(2.5px 2.5px at 34% 70%, #fff 35%, rgba(186, 230, 253, 0.45) 60%, transparent 100%),
+            radial-gradient(2px 2px at 58% 22%, #fff 35%, rgba(186, 230, 253, 0.4) 60%, transparent 100%),
+            radial-gradient(2.5px 2.5px at 81% 62%, #fff 35%, rgba(186, 230, 253, 0.45) 60%, transparent 100%),
+            radial-gradient(2px 2px at 93% 35%, #fff 35%, rgba(186, 230, 253, 0.4) 60%, transparent 100%);
         animation: stars-near 3.2s ease-in-out infinite;
     }
 
@@ -174,10 +173,10 @@
        так мерцание не выглядит одинаковым тиканьем. */
     .signature-stars::after {
         background-image:
-            radial-gradient(1.5px 1.5px at 22% 58%, rgba(125, 211, 252, 0.9), transparent),
-            radial-gradient(1.5px 1.5px at 47% 38%, rgba(255, 255, 255, 0.8), transparent),
-            radial-gradient(1.5px 1.5px at 69% 76%, rgba(125, 211, 252, 0.85), transparent),
-            radial-gradient(1.5px 1.5px at 88% 18%, rgba(255, 255, 255, 0.75), transparent);
+            radial-gradient(3px 3px at 22% 58%, #fff 30%, rgba(125, 211, 252, 0.5) 55%, transparent 100%),
+            radial-gradient(3px 3px at 47% 38%, #fff 30%, rgba(125, 211, 252, 0.5) 55%, transparent 100%),
+            radial-gradient(3px 3px at 69% 76%, #fff 30%, rgba(125, 211, 252, 0.5) 55%, transparent 100%),
+            radial-gradient(2.5px 2.5px at 88% 18%, #fff 30%, rgba(125, 211, 252, 0.45) 55%, transparent 100%);
         animation: stars-far 4.7s ease-in-out infinite;
         animation-delay: -1.6s;
     }
@@ -185,7 +184,7 @@
     @keyframes stars-near {
         0%,
         100% {
-            opacity: 0.35;
+            opacity: 0.2;
         }
         50% {
             opacity: 1;
@@ -195,10 +194,10 @@
     @keyframes stars-far {
         0%,
         100% {
-            opacity: 0.9;
+            opacity: 1;
         }
         45% {
-            opacity: 0.25;
+            opacity: 0.15;
         }
     }
 
