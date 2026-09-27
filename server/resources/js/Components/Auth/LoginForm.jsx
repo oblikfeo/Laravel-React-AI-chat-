@@ -1,6 +1,7 @@
 import { useForm } from '@inertiajs/react';
 import AuthField from '@/Components/Auth/AuthField';
 import AuthSubmit from '@/Components/Auth/AuthSubmit';
+import GoogleButton from '@/Components/Auth/GoogleButton';
 
 export default function LoginForm({ onSwitch }) {
     const { data, setData, post, processing, errors } = useForm({
@@ -15,6 +16,9 @@ export default function LoginForm({ onSwitch }) {
     };
 
     return (
+        <>
+            <GoogleButton label="Sign in with Google" />
+
         <form onSubmit={submit} className="space-y-5">
             <AuthField
                 id="email"
@@ -76,5 +80,6 @@ export default function LoginForm({ onSwitch }) {
                 </button>
             </p>
         </form>
+        </>
     );
 }

@@ -1,6 +1,7 @@
 import { useForm } from '@inertiajs/react';
 import AuthField from '@/Components/Auth/AuthField';
 import AuthSubmit from '@/Components/Auth/AuthSubmit';
+import GoogleButton from '@/Components/Auth/GoogleButton';
 
 /**
  * Регистрация строго в три поля: имя, почта, пароль.
@@ -19,6 +20,9 @@ export default function RegisterForm({ onSwitch }) {
     };
 
     return (
+        <>
+            <GoogleButton label="Sign up with Google" />
+
         <form onSubmit={submit} className="space-y-5">
             <AuthField
                 id="name"
@@ -68,5 +72,6 @@ export default function RegisterForm({ onSwitch }) {
                 </button>
             </p>
         </form>
+        </>
     );
 }

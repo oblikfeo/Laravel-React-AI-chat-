@@ -3,6 +3,20 @@
 return [
 
     /*
+    | Вход через Google.
+    |
+    | Пока значения пустые, кнопка входа не показывается. Ключи берутся
+    | в Google Cloud Console, раздел «Credentials», тип «OAuth client ID».
+    | В разрешённые адреса возврата добавляется /auth/google/callback.
+    */
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_REDIRECT_URI', '/auth/google/callback'),
+    ],
+
+
+    /*
     |--------------------------------------------------------------------------
     | Third Party Services
     |--------------------------------------------------------------------------

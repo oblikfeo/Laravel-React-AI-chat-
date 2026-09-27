@@ -2,12 +2,19 @@ import { Link, usePage } from '@inertiajs/react';
 
 /**
  * Список чатов в боковом меню. Свежие сверху.
- * Показывается только авторизованному пользователю.
+ *
+ * Показывается и гостю: он тоже ведёт разговоры, просто ограниченно.
+ * Пустой список скрываем, чтобы не занимать место у того, кто зашёл
+ * впервые.
  */
 export default function ChatList({ activeId, onNavigate }) {
-    const { sidebarChats = [], auth } = usePage().props;
+    const { sidebarChats = [], auth, guest } = usePage().props;
 
-    if (!auth?.user) {
+    if (!auth?.user && !guest) {
+        return null;
+    }
+
+    if (guest && sidebarChats.length === 0) {
         return null;
     }
 

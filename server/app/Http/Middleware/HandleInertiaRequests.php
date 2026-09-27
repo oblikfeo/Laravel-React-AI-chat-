@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Http\Resources\ChatResource;
 use App\Models\User;
 use App\Services\Ai\ModelCatalog;
+use App\Services\Auth\GoogleAuth;
 use App\Services\Billing\PaymentGateway;
 use App\Services\Guests\CurrentGuest;
 use App\Services\Guests\GuestLimiter;
@@ -67,6 +68,9 @@ class HandleInertiaRequests extends Middleware
             // Интерфейс скрывает кнопки оплаты, пока реквизиты
             // платёжной системы не заданы.
             'billingReady' => fn () => app(PaymentGateway::class)->isConfigured(),
+
+            // Кнопка входа через Google скрыта, пока не заданы ключи.
+            'googleReady' => fn () => GoogleAuth::isConfigured(),
 
             'flash' => [
                 'error' => fn () => $request->session()->get('error'),
