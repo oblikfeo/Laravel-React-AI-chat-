@@ -49,25 +49,17 @@ export default function Home() {
 
             <div className="flex flex-1 flex-col items-center justify-center overflow-y-auto scrollbar-thin px-4 pb-16 pt-4 sm:px-6">
                 <div className="w-full max-w-[720px]">
-                    {/* Свечение планеты съедало текст: слева буквы
-                        пропадали целиком. Под заголовком лежит мягкое
-                        затемнение — края растворяются, поэтому это
-                        читается как тень, а не как плашка. */}
-                    <div className="relative">
-                        <div
-                            aria-hidden
-                            className="pointer-events-none absolute -inset-x-10 -inset-y-8 bg-[radial-gradient(ellipse_60%_55%_at_50%_50%,rgba(3,7,18,0.72),rgba(3,7,18,0.45)_55%,transparent_78%)]"
-                        />
+                    {/* Свечение планеты съедает белый текст, а тёмная
+                        подложка под ним выглядит пятном. Обводим сами
+                        буквы: контур держится на любом фоне. */}
+                    <h1 className="text-outline text-center text-[56px] font-light leading-none tracking-tight text-white sm:text-7xl lg:text-8xl">
+                        uncensia
+                    </h1>
 
-                        <h1 className="relative text-center text-[56px] font-light leading-none tracking-tight text-white [text-shadow:0_2px_30px_rgba(0,0,0,0.85)] sm:text-7xl lg:text-8xl">
-                            uncensia
-                        </h1>
-
-                        <p className="relative mt-5 text-center text-base text-white/90 [text-shadow:0_1px_16px_rgba(0,0,0,0.9)] sm:text-lg">
-                            The universe has no restrictions. Neither should
-                            AI. Uncensia.
-                        </p>
-                    </div>
+                    <p className="text-outline-thin mt-5 text-center text-base text-white sm:text-lg">
+                        The universe has no restrictions. Neither should AI.
+                        Uncensia.
+                    </p>
 
                     <div className="mt-8">
                         <GuestNotice />
