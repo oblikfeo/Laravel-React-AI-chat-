@@ -89,10 +89,10 @@ export default function ModelPicker({ value, onChange }) {
                             aria-selected={model.key === value}
                             onClick={() => pick(model)}
                             className={`flex w-full items-start gap-2.5 rounded-xl px-3 py-2.5 text-left transition hover:bg-white/10 ${
-                                // Наша особенность: выделяем рамкой.
-                                model.signature
-                                    ? 'bg-sky-400/[0.07] ring-1 ring-inset ring-sky-400/45'
-                                    : ''
+                                // Наша особенность: выделяем медленным
+                                // движением фона. Рамка читалась как
+                                // «выбрано» и спорила с галочкой.
+                                model.signature ? 'signature-glow' : ''
                             }`}
                         >
                             <span className="min-w-0 flex-1">

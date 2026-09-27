@@ -135,6 +135,51 @@
 
 @layer utilities {
     /*
+     * Подсветка нашей особенной модели в списке.
+     *
+     * Рамка читалась как «выбрано» и спорила с галочкой выбора,
+     * поэтому выделяем медленным движением фона: взгляд цепляется,
+     * но с состоянием выбора это не путается.
+     */
+    .signature-glow {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .signature-glow::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            110deg,
+            transparent 25%,
+            rgba(56, 189, 248, 0.16) 50%,
+            transparent 75%
+        );
+        background-size: 250% 100%;
+        animation: signature-sweep 4.5s ease-in-out infinite;
+        pointer-events: none;
+    }
+
+    @keyframes signature-sweep {
+        0%,
+        100% {
+            background-position: 150% 0;
+        }
+        50% {
+            background-position: -50% 0;
+        }
+    }
+
+    /* Уважаем системную настройку «уменьшить движение». */
+    @media (prefers-reduced-motion: reduce) {
+        .signature-glow::before {
+            animation: none;
+            background: rgba(56, 189, 248, 0.1);
+        }
+    }
+
+    /*
      * Тонкая тёмная обводка у самих букв.
      *
      * Фон — фотография, и у свечения планеты белый текст пропадал.
