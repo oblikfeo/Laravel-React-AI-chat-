@@ -153,32 +153,45 @@
     .signature-stars::after {
         content: '';
         position: absolute;
-        inset: 0;
+        /* Слой шире ячейки: звёзды уезжают за край и возвращаются,
+           поэтому узор не выглядит прибитым к одному месту. */
+        top: 0;
+        bottom: 0;
+        left: -100%;
+        width: 300%;
         pointer-events: none;
-        background-repeat: no-repeat;
+        /* Плитка шириной в треть слоя повторяется: при сдвиге ровно
+           на плитку узор совпадает сам с собой, поэтому движение
+           бесшовное. */
+        background-repeat: repeat-x;
+        background-size: 33.333% 100%;
     }
 
     /* Первый слой: звёзды помельче, мерцают чаще. */
     .signature-stars::before {
         background-image:
-            radial-gradient(2.5px 2.5px at 12% 30%, #fff 35%, rgba(186, 230, 253, 0.45) 60%, transparent 100%),
-            radial-gradient(2.5px 2.5px at 34% 70%, #fff 35%, rgba(186, 230, 253, 0.45) 60%, transparent 100%),
-            radial-gradient(2px 2px at 58% 22%, #fff 35%, rgba(186, 230, 253, 0.4) 60%, transparent 100%),
-            radial-gradient(2.5px 2.5px at 81% 62%, #fff 35%, rgba(186, 230, 253, 0.45) 60%, transparent 100%),
-            radial-gradient(2px 2px at 93% 35%, #fff 35%, rgba(186, 230, 253, 0.4) 60%, transparent 100%);
-        animation: stars-near 3.2s ease-in-out infinite;
+            radial-gradient(2.5px 2.5px at 8% 28%, #fff 35%, rgba(186, 230, 253, 0.45) 60%, transparent 100%),
+            radial-gradient(2.5px 2.5px at 31% 72%, #fff 35%, rgba(186, 230, 253, 0.45) 60%, transparent 100%),
+            radial-gradient(2px 2px at 52% 20%, #fff 35%, rgba(186, 230, 253, 0.4) 60%, transparent 100%),
+            radial-gradient(2.5px 2.5px at 74% 64%, #fff 35%, rgba(186, 230, 253, 0.45) 60%, transparent 100%),
+            radial-gradient(2px 2px at 91% 38%, #fff 35%, rgba(186, 230, 253, 0.4) 60%, transparent 100%);
+        animation:
+            stars-near 3.2s ease-in-out infinite,
+            stars-drift-near 26s linear infinite;
     }
 
     /* Второй слой: крупнее и медленнее, со сдвигом по времени —
        так мерцание не выглядит одинаковым тиканьем. */
     .signature-stars::after {
         background-image:
-            radial-gradient(3px 3px at 22% 58%, #fff 30%, rgba(125, 211, 252, 0.5) 55%, transparent 100%),
-            radial-gradient(3px 3px at 47% 38%, #fff 30%, rgba(125, 211, 252, 0.5) 55%, transparent 100%),
-            radial-gradient(3px 3px at 69% 76%, #fff 30%, rgba(125, 211, 252, 0.5) 55%, transparent 100%),
-            radial-gradient(2.5px 2.5px at 88% 18%, #fff 30%, rgba(125, 211, 252, 0.45) 55%, transparent 100%);
-        animation: stars-far 4.7s ease-in-out infinite;
-        animation-delay: -1.6s;
+            radial-gradient(3px 3px at 18% 55%, #fff 30%, rgba(125, 211, 252, 0.5) 55%, transparent 100%),
+            radial-gradient(3px 3px at 44% 33%, #fff 30%, rgba(125, 211, 252, 0.5) 55%, transparent 100%),
+            radial-gradient(3px 3px at 66% 78%, #fff 30%, rgba(125, 211, 252, 0.5) 55%, transparent 100%),
+            radial-gradient(2.5px 2.5px at 86% 15%, #fff 30%, rgba(125, 211, 252, 0.45) 55%, transparent 100%);
+        animation:
+            stars-far 4.7s ease-in-out infinite,
+            stars-drift-far 38s linear infinite;
+        animation-delay: -1.6s, -12s;
     }
 
     @keyframes stars-near {
@@ -201,13 +214,32 @@
         }
     }
 
+    @keyframes stars-drift-near {
+        from {
+            transform: translateX(0);
+        }
+        to {
+            transform: translateX(33.333%);
+        }
+    }
+
+    @keyframes stars-drift-far {
+        from {
+            transform: translateX(0);
+        }
+        to {
+            transform: translateX(-33.333%);
+        }
+    }
+
     /* Уважаем системную настройку «уменьшить движение»:
-       звёзды остаются, но перестают мерцать. */
+       звёзды остаются, но перестают мерцать и двигаться. */
     @media (prefers-reduced-motion: reduce) {
         .signature-stars::before,
         .signature-stars::after {
             animation: none;
             opacity: 0.7;
+            transform: none;
         }
     }
 
