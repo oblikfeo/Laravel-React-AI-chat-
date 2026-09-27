@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Chat;
 use App\Models\Message;
 use App\Services\Ai\ModelCatalog;
+use App\Services\Guests\ChatOwnership;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class UpdateChatModelController extends Controller
 {
@@ -17,7 +19,14 @@ class UpdateChatModelController extends Controller
      */
     public function __invoke(Request $request, Chat $chat): RedirectResponse
     {
-        $this->authorize('update', $chat);
+        if (! ChatOwnership::owns($request, $chat)) {
+            throw new AccessDeniedHttpException();
+        }
+
+        // Гостю доступна одна модель, менять ему нечего.
+        if (! $request->user()) {
+            return back();
+        }
 
         $validated = $request->validate([
             'model' => ['required', Rule::in(array_keys(config('models.list')))],

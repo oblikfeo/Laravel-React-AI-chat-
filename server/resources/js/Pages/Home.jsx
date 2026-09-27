@@ -3,9 +3,10 @@ import { Head, router, usePage } from '@inertiajs/react';
 import MainLayout from '@/Layouts/MainLayout';
 import PromptComposer from '@/Components/Home/PromptComposer';
 import QuickActions from '@/Components/Home/QuickActions';
+import GuestNotice from '@/Components/Layout/GuestNotice';
 
 export default function Home() {
-    const { auth, defaultModel } = usePage().props;
+    const { auth, defaultModel, guest } = usePage().props;
     const [prompt, setPrompt] = useState('');
     const [model, setModel] = useState(defaultModel);
     const [files, setFiles] = useState([]);
@@ -23,15 +24,6 @@ export default function Home() {
 
     const submit = () => {
         if (!prompt.trim() && !files.length) {
-            return;
-        }
-
-        // Гостя отправляем авторизоваться, сохранив набранный текст,
-        // чтобы после входа его не пришлось печатать заново.
-        if (!auth?.user) {
-            window.sessionStorage.setItem('uncensia-draft', prompt);
-            router.visit('/auth?mode=register');
-
             return;
         }
 
@@ -67,15 +59,17 @@ export default function Home() {
                     </p>
 
                     <div className="mt-8">
+                        <GuestNotice />
+
                         <PromptComposer
                             value={prompt}
                             onChange={setPrompt}
                             onSubmit={submit}
                             model={model}
-                            onModelChange={setModel}
+                            onModelChange={guest ? undefined : setModel}
                             files={files}
                             onFilesChange={setFiles}
-                            busy={busy}
+                            busy={busy || guest?.remaining === 0}
                         />
                     </div>
 

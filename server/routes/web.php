@@ -19,7 +19,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
 
-Route::middleware('auth')->group(function () {
+// Чат доступен и без учётной записи: гость пробует его с одной
+// моделью и небольшим дневным лимитом, см. config/guests.php.
+Route::group([], function () {
     Route::get('chats', IndexChatController::class)->name('chats.index');
     Route::post('chats', StoreChatController::class)->name('chats.store');
     Route::get('chats/{chat}', ShowChatController::class)->name('chats.show');
@@ -36,7 +38,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('attachments/{attachment}', ShowAttachmentController::class)
         ->name('attachments.show');
+});
 
+Route::middleware('auth')->group(function () {
     Route::put('settings/profile', UpdateProfileController::class)
         ->name('settings.profile.update');
     Route::put('settings/password', UpdatePasswordController::class)

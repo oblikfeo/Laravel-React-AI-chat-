@@ -12,6 +12,10 @@ class Chat extends Model
     use HasFactory;
 
     protected $fillable = [
+        // Владельцем может быть пользователь или гость, поэтому оба
+        // поля заполняются явно при создании чата.
+        'user_id',
+        'guest_id',
         'title',
         'model_key',
         'visibility',
@@ -30,6 +34,11 @@ class Chat extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function guest(): BelongsTo
+    {
+        return $this->belongsTo(Guest::class);
     }
 
     public function messages(): HasMany

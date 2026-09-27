@@ -4,6 +4,7 @@ import MainLayout from '@/Layouts/MainLayout';
 import PromptComposer from '@/Components/Home/PromptComposer';
 import MessageBubble from '@/Components/Chat/MessageBubble';
 import TypingIndicator from '@/Components/Chat/TypingIndicator';
+import GuestNotice from '@/Components/Layout/GuestNotice';
 
 /**
  * Режим диалога: лента сообщений с полем ввода, закреплённым снизу.
@@ -13,7 +14,7 @@ import TypingIndicator from '@/Components/Chat/TypingIndicator';
  * а видит свой текст и индикатор набора.
  */
 export default function ChatShow({ chat, messages, awaitingReply }) {
-    const { defaultModel } = usePage().props;
+    const { defaultModel, guest } = usePage().props;
     const [draft, setDraft] = useState('');
     const [files, setFiles] = useState([]);
     const [model, setModel] = useState(chat.modelKey ?? defaultModel);
@@ -141,16 +142,18 @@ export default function ChatShow({ chat, messages, awaitingReply }) {
                 </div>
 
                 <div className="shrink-0 px-4 pb-6 pt-2 sm:px-6">
+                    <GuestNotice />
+
                     <div className="mx-auto w-full max-w-[820px]">
                         <PromptComposer
                             value={draft}
                             onChange={setDraft}
                             onSubmit={submit}
                             model={model}
-                            onModelChange={changeModel}
+                            onModelChange={guest ? undefined : changeModel}
                             files={files}
                             onFilesChange={setFiles}
-                            busy={waiting}
+                            busy={waiting || guest?.remaining === 0}
                             placeholder="Ask anything…"
                             minRows={1}
                             autoFocus

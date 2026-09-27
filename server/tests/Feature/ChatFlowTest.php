@@ -108,9 +108,16 @@ class ChatFlowTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_guest_cannot_create_chat(): void
+    /**
+     * Чат открыт и без учётной записи: гость получает ограниченный
+     * доступ, см. GuestTest. Раньше здесь была переадресация на вход.
+     */
+    public function test_guest_can_create_chat(): void
     {
         $this->post('/chats', ['message' => 'Привет'])
-            ->assertRedirect('/auth');
+            ->assertRedirect();
+
+        $this->assertSame(1, Chat::count());
+        $this->assertNull(Chat::first()->user_id);
     }
 }

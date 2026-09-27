@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers\Chat;
 
+use App\Actions\Chat\RequestReply;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ChatResource;
 use App\Http\Resources\MessageResource;
-use App\Actions\Chat\RequestReply;
 use App\Models\Chat;
+use App\Services\Guests\ChatOwnership;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class ShowChatController extends Controller
 {
@@ -18,14 +20,15 @@ class ShowChatController extends Controller
      */
     public function __invoke(Request $request, Chat $chat, RequestReply $reply): Response
     {
-        $this->authorize('view', $chat);
+        if (! ChatOwnership::owns($request, $chat)) {
+            throw new AccessDeniedHttpException();
+        }
 
         return Inertia::render('Chat/Show', [
             'chat' => ChatResource::make($chat),
             'messages' => MessageResource::collection(
                 $chat->messages()->with('attachments')->oldest('id')->get()
             ),
-            'chats' => ChatResource::collection($request->user()->chats),
             // Последнее слово за пользователем — ответ ещё не получен,
             // страница запросит его сама и покажет индикатор набора.
             'awaitingReply' => $reply->isPending($chat),

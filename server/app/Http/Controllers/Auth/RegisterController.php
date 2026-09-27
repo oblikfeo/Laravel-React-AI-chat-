@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Actions\Guests\ClaimGuestChats;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\User;
@@ -23,6 +24,10 @@ class RegisterController extends Controller
         Auth::login($user);
 
         $request->session()->regenerate();
+
+        // Переписка гостя переходит в учётную запись: человек не
+        // должен терять разговор, ради которого и регистрируется.
+        app(ClaimGuestChats::class)->handle($request, $request->user());
 
         return to_route('home');
     }

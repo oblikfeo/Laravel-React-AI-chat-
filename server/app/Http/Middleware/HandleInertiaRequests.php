@@ -6,6 +6,8 @@ use App\Http\Resources\ChatResource;
 use App\Models\User;
 use App\Services\Ai\ModelCatalog;
 use App\Services\Billing\PaymentGateway;
+use App\Services\Guests\CurrentGuest;
+use App\Services\Guests\GuestLimiter;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -52,9 +54,11 @@ class HandleInertiaRequests extends Middleware
                 ] : null,
             ],
 
-            'sidebarChats' => fn () => $request->user()
-                ? ChatResource::collection($request->user()->chats()->limit(30)->get())
-                : [],
+            // Гость тоже видит свои чаты: он пользуется сервисом,
+            // просто ограниченно.
+            'sidebarChats' => fn () => $this->chatsOf($request),
+
+            'guest' => fn () => $this->guestState($request),
 
             // Список моделей общий: он нужен и на главной, и в диалоге.
             'models' => fn () => ModelCatalog::forInterface(),
@@ -84,6 +88,43 @@ class HandleInertiaRequests extends Middleware
         return [
             'endsAt' => $subscription->ends_at?->format('j M Y'),
             'cancelled' => $subscription->cancelled_at !== null,
+        ];
+    }
+
+    /**
+     * Чаты владельца: пользователя или гостя.
+     */
+    private function chatsOf(Request $request): mixed
+    {
+        $owner = $request->user() ?? CurrentGuest::get($request);
+
+        if (! $owner) {
+            return [];
+        }
+
+        return ChatResource::collection($owner->chats()->limit(30)->get());
+    }
+
+    /**
+     * Состояние гостя для интерфейса.
+     *
+     * Авторизованному не нужно: у него нет ограничений гостя.
+     */
+    private function guestState(Request $request): ?array
+    {
+        if ($request->user()) {
+            return null;
+        }
+
+        $guest = CurrentGuest::get($request);
+
+        if (! $guest) {
+            return null;
+        }
+
+        return [
+            'remaining' => app(GuestLimiter::class)->remaining($guest),
+            'limit' => config('guests.daily_messages'),
         ];
     }
 }
