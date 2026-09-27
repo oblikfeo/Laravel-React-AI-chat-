@@ -66,7 +66,7 @@ export default function Home() {
                             onChange={setPrompt}
                             onSubmit={submit}
                             model={model}
-                            onModelChange={guest ? undefined : setModel}
+                            onModelChange={setModel}
                             files={files}
                             onFilesChange={setFiles}
                             busy={busy || guest?.remaining === 0}

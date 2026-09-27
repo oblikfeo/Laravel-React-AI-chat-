@@ -3,8 +3,8 @@ import { Link, usePage } from '@inertiajs/react';
 /**
  * Остаток бесплатных сообщений для посетителя без учётной записи.
  *
- * Показывается только когда запас подходит к концу: пока сообщений
- * много, счётчик лишь мешает.
+ * Показывается всегда: человек должен понимать, что пользуется
+ * пробным доступом, и видеть, сколько осталось.
  */
 export default function GuestNotice() {
     const { guest } = usePage().props;
@@ -15,10 +15,6 @@ export default function GuestNotice() {
 
     const { remaining, limit } = guest;
     const exhausted = remaining <= 0;
-
-    if (!exhausted && remaining > Math.min(3, limit)) {
-        return null;
-    }
 
     return (
         <div

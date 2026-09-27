@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { usePage } from '@inertiajs/react';
-import { Sparkles, Check, Image as ImageIcon } from 'lucide-react';
+import { router, usePage } from '@inertiajs/react';
+import { Sparkles, Check, Image as ImageIcon, Lock } from 'lucide-react';
 
 /**
  * Выбор модели в поле ввода.
@@ -9,7 +9,7 @@ import { Sparkles, Check, Image as ImageIcon } from 'lucide-react';
  * только наши ярлыки, см. дизайн-систему, §12.
  */
 export default function ModelPicker({ value, onChange }) {
-    const { models = [] } = usePage().props;
+    const { models = [], guest } = usePage().props;
     const [open, setOpen] = useState(false);
     const ref = useRef(null);
 
@@ -41,6 +41,23 @@ export default function ModelPicker({ value, onChange }) {
 
     const active = models.find((m) => m.key === value) ?? models[0];
 
+    // Гость видит весь список, но платные модели под замком: скрывать
+    // их бессмысленно — человек должен понимать, что получит после
+    // регистрации.
+    const lockedFor = (model) => Boolean(guest) && model.key !== guest.model;
+
+    const pick = (model) => {
+        setOpen(false);
+
+        if (lockedFor(model)) {
+            router.visit('/auth?mode=register');
+
+            return;
+        }
+
+        onChange(model.key);
+    };
+
     if (!active) {
         return null;
     }
@@ -70,10 +87,7 @@ export default function ModelPicker({ value, onChange }) {
                             type="button"
                             role="option"
                             aria-selected={model.key === value}
-                            onClick={() => {
-                                onChange(model.key);
-                                setOpen(false);
-                            }}
+                            onClick={() => pick(model)}
                             className={`flex w-full items-start gap-2.5 rounded-xl px-3 py-2.5 text-left transition hover:bg-white/10 ${
                                 // Наша особенность: выделяем рамкой.
                                 model.signature
@@ -112,11 +126,18 @@ export default function ModelPicker({ value, onChange }) {
                                 </span>
                             </span>
 
-                            {model.key === value && (
-                                <Check
-                                    className="mt-1 h-4 w-4 shrink-0 text-sky-300"
-                                    strokeWidth={2.5}
+                            {lockedFor(model) ? (
+                                <Lock
+                                    className="mt-1 h-3.5 w-3.5 shrink-0 text-white/30"
+                                    strokeWidth={2}
                                 />
+                            ) : (
+                                model.key === value && (
+                                    <Check
+                                        className="mt-1 h-4 w-4 shrink-0 text-sky-300"
+                                        strokeWidth={2.5}
+                                    />
+                                )
                             )}
                         </button>
                     ))}

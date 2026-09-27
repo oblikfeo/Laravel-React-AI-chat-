@@ -150,7 +150,7 @@ export default function ChatShow({ chat, messages, awaitingReply }) {
                             onChange={setDraft}
                             onSubmit={submit}
                             model={model}
-                            onModelChange={guest ? undefined : changeModel}
+                            onModelChange={changeModel}
                             files={files}
                             onFilesChange={setFiles}
                             busy={waiting || guest?.remaining === 0}
