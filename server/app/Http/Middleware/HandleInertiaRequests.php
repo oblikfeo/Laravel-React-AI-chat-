@@ -129,6 +129,9 @@ class HandleInertiaRequests extends Middleware
         return [
             'remaining' => app(GuestLimiter::class)->remaining($guest),
             'limit' => config('guests.daily_messages'),
+            // Какая модель ему доступна: остальные интерфейс покажет
+            // под замком, чтобы было видно, что даёт регистрация.
+            'model' => config('guests.model'),
         ];
     }
 }

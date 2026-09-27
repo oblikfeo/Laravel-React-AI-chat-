@@ -195,6 +195,17 @@ class GuestTest extends TestCase
         );
     }
 
+    /**
+     * Интерфейс показывает закрытые модели под замком, поэтому ему
+     * нужно знать, какая гостю доступна.
+     */
+    public function test_interface_knows_which_model_the_guest_may_use(): void
+    {
+        $this->get('/')->assertInertia(fn ($page) => $page
+            ->where('guest.model', config('guests.model'))
+        );
+    }
+
     public function test_signed_in_user_has_no_guest_limits(): void
     {
         $this->actingAs(User::factory()->create())
