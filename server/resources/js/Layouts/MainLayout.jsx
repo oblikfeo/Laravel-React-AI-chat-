@@ -31,7 +31,11 @@ function MainLayoutInner({ children }) {
 
     // Текущий раздел и открытый чат берём из адреса, а не из пропсов
     // страницы: макет постоянный и переживает переходы между страницами.
-    const current = url.startsWith('/chats') ? 'chat' : null;
+    const current = url.startsWith('/chats')
+        ? 'chat'
+        : url.startsWith('/studio')
+          ? 'studio'
+          : null;
     const activeChatId = Number(url.match(/^\/chats\/(\d+)/)?.[1]) || null;
 
     // Переход на другую страницу закрывает мобильное меню: иначе

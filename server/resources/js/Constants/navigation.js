@@ -33,7 +33,7 @@ export const navigationItems = [
         icon: Sparkles,
         ready: false,
     },
-    { key: 'studio', label: 'Studio', icon: Video, ready: false },
+    { key: 'studio', label: 'Studio', icon: Video, href: '/studio', ready: true },
     { key: 'feed', label: 'Feed', icon: Table2, ready: false },
     { key: 'characters', label: 'Characters', icon: Users, ready: false },
     { key: 'stories', label: 'Stories', icon: BookOpen, ready: false },
