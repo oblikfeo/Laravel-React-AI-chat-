@@ -3,6 +3,7 @@
 use App\Http\Controllers\Chat\DestroyChatController;
 use App\Http\Controllers\Chat\IndexChatController;
 use App\Http\Controllers\Chat\ReplyController;
+use App\Http\Controllers\Chat\RetryReplyController;
 use App\Http\Controllers\Chat\ShowAttachmentController;
 use App\Http\Controllers\Chat\ShowChatController;
 use App\Http\Controllers\Chat\StoreChatController;
@@ -32,6 +33,9 @@ Route::group([], function () {
 
     Route::post('chats/{chat}/reply', ReplyController::class)
         ->name('chats.reply');
+
+    Route::post('chats/{chat}/retry', RetryReplyController::class)
+        ->name('chats.retry');
 
     Route::put('chats/{chat}/model', UpdateChatModelController::class)
         ->name('chats.model.update');

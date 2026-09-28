@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/Contexts/ThemeContext';
 import { PlansProvider } from '@/Contexts/PlansContext';
 import { SettingsProvider } from '@/Contexts/SettingsContext';
 import AppBackground from '@/Components/Layout/AppBackground';
+import FlashMessage from '@/Components/Layout/FlashMessage';
 import Sidebar from '@/Components/Layout/Sidebar';
 import MobileMenu from '@/Components/Layout/MobileMenu';
 import ThemeToggle from '@/Components/Layout/ThemeToggle';
@@ -50,6 +51,7 @@ function MainLayoutInner({ children }) {
     return (
         <div className="relative flex h-screen w-full overflow-hidden">
             <AppBackground />
+            <FlashMessage />
 
             <Sidebar
                 collapsed={collapsed}

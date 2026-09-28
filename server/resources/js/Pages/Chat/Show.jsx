@@ -99,6 +99,12 @@ export default function ChatShow({ chat, messages, awaitingReply }) {
                 forceFormData: true,
                 preserveScroll: true,
                 showProgress: false,
+                // Сообщение не должно пропасть при сбое: возвращаем
+                // его в поле ввода вместе с файлами.
+                onError: () => {
+                    setDraft(text);
+                    setFiles(sending);
+                },
                 onFinish: () => setPending(null),
             },
         );
@@ -106,6 +112,15 @@ export default function ChatShow({ chat, messages, awaitingReply }) {
 
     // Смена модели сохраняется за чатом: выбор делается один раз,
     // а не при каждом сообщении.
+    // Повтор после сбоя: удаляем неудачный ответ и просим заново.
+    const retry = () => {
+        router.post(
+            `/chats/${chat.id}/retry`,
+            {},
+            { preserveScroll: true, showProgress: false },
+        );
+    };
+
     const changeModel = (key) => {
         setModel(key);
 
@@ -131,6 +146,7 @@ export default function ChatShow({ chat, messages, awaitingReply }) {
                                     key={message.id}
                                     message={message}
                                     typing={message.id === typingId}
+                                    onRetry={retry}
                                 />
                             ))}
 
