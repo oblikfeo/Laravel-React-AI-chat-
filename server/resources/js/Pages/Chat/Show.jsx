@@ -39,14 +39,30 @@ export default function ChatShow({ chat, messages, awaitingReply }) {
     const typingId =
         lastReply && !seenRef.current.has(lastReply.id) ? lastReply.id : null;
 
+    // Сообщения, уже побывавшие на экране, не анимируем повторно:
+    // иначе при каждом обновлении ленты дёргается вся переписка.
+    const shownRef = useRef(null);
+
+    if (shownRef.current === null) {
+        shownRef.current = new Set(messages.map((m) => m.id));
+    }
+
     const list = pending
         ? [...messages, { id: 'pending', role: 'user', content: pending }]
         : messages;
 
     const waiting = Boolean(pending) || awaitingReply;
 
+    const countRef = useRef(list.length);
+
     useEffect(() => {
-        bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+        // Прокручиваем, только когда сообщений стало больше: иначе
+        // страница дёргается при каждом обновлении ленты.
+        if (list.length > countRef.current || waiting) {
+            bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        countRef.current = list.length;
     }, [list.length, waiting]);
 
     // Напечатанный ответ становится виденным: следующая перерисовка
@@ -141,14 +157,20 @@ export default function ChatShow({ chat, messages, awaitingReply }) {
                         {/* Общая подложка под всей перепиской: выделяет
                             область разговора на фоне с планетой. */}
                         <div className="space-y-7 rounded-[28px] border border-white/[0.06] bg-slate-950/45 p-4 backdrop-blur-md sm:p-6">
-                            {list.map((message) => (
-                                <MessageBubble
-                                    key={message.id}
-                                    message={message}
-                                    typing={message.id === typingId}
-                                    onRetry={retry}
-                                />
-                            ))}
+                            {list.map((message) => {
+                                const fresh = !shownRef.current.has(message.id);
+                                shownRef.current.add(message.id);
+
+                                return (
+                                    <MessageBubble
+                                        key={message.id}
+                                        message={message}
+                                        typing={message.id === typingId}
+                                        fresh={fresh}
+                                        onRetry={retry}
+                                    />
+                                );
+                            })}
 
                             {waiting && <TypingIndicator />}
                         </div>

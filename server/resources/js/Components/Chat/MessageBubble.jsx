@@ -14,7 +14,12 @@ import ModelChangeMark from '@/Components/Chat/ModelChangeMark';
  * затемнённое стекло. Пузырь пользователя оставлен светлее, чтобы
  * две стороны диалога различались с первого взгляда.
  */
-export default function MessageBubble({ message, typing = false, onRetry }) {
+export default function MessageBubble({
+    message,
+    typing = false,
+    fresh = false,
+    onRetry,
+}) {
     const isUser = message.role === 'user';
 
     // Печатается только свежий ответ: при открытии старого диалога
@@ -32,9 +37,13 @@ export default function MessageBubble({ message, typing = false, onRetry }) {
         return <ModelChangeMark label={message.content} />;
     }
 
+    // Анимация только у новых сообщений: если вешать её на все,
+    // при каждой перерисовке ленты дёргается вся переписка.
+    const enter = fresh ? 'animate-[message-in_0.3s_ease-out]' : '';
+
     if (isUser) {
         return (
-            <div className="flex animate-[message-in_0.3s_ease-out] justify-end">
+            <div className={`flex justify-end ${enter}`}>
                 <div className="max-w-[80%] rounded-3xl rounded-br-lg border border-white/[0.12] bg-white/[0.09] px-5 py-3.5 backdrop-blur-xl">
                     <MessageAttachments items={message.attachments} />
 
@@ -49,7 +58,7 @@ export default function MessageBubble({ message, typing = false, onRetry }) {
     }
 
     return (
-        <div className="flex animate-[message-in_0.3s_ease-out] gap-3.5">
+        <div className={`flex gap-3.5 ${enter}`}>
             <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.06]">
                 <LogoMark className="h-5 w-5" />
             </span>
