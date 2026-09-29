@@ -3,8 +3,11 @@ import { useTheme } from '@/Contexts/ThemeContext';
 /**
  * Фон приложения — фотография космоса с планетой снизу (figma/fon.png).
  *
- * Картинка одна на обе темы. В светлой теме поверх неё кладётся белая вуаль,
- * чтобы контент оставался читаемым, а композиция макета не менялась.
+ * Поверх фотографии лежит затемнение на весь экран: на исходнике
+ * свечение планеты настолько яркое, что съедает белый текст. Раньше
+ * с этим боролись обводкой букв и пятном под заголовком — и то и
+ * другое выглядело грязно. На макете свечение приглушено по всей
+ * картинке, текст читается сам собой.
  */
 export default function AppBackground() {
     const { isDark } = useTheme();
@@ -14,6 +17,21 @@ export default function AppBackground() {
             <div
                 className="absolute inset-0 bg-cover bg-bottom bg-no-repeat"
                 style={{ backgroundImage: "url('/images/space-bg.png')" }}
+            />
+
+            {/* Ровная вуаль гасит общую яркость. */}
+            <div
+                className={`absolute inset-0 bg-[#05070d] transition-opacity duration-700 ${
+                    isDark ? 'opacity-[0.55]' : 'opacity-0'
+                }`}
+            />
+
+            {/* Дополнительное затемнение сверху и снизу: сверху лежит
+                заголовок, снизу — поле ввода, и оба должны читаться. */}
+            <div
+                className={`absolute inset-0 bg-gradient-to-b from-[#05070d]/85 via-transparent to-[#05070d]/70 transition-opacity duration-700 ${
+                    isDark ? 'opacity-100' : 'opacity-0'
+                }`}
             />
 
             {/* В светлой теме приглушаем фон, но не перекрываем его целиком:

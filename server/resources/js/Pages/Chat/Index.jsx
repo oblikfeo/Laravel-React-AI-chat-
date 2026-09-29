@@ -13,7 +13,7 @@ export default function ChatIndex({ chats }) {
 
             <div className="flex-1 overflow-y-auto scrollbar-thin">
                 <div className="mx-auto w-full max-w-[760px] px-4 py-8 sm:px-6">
-                    <h1 className="text-outline text-2xl font-light tracking-tight text-white">
+                    <h1 className="text-2xl font-light tracking-tight text-white">
                         Your chats
                     </h1>
 
