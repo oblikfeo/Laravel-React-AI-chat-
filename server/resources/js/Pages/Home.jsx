@@ -4,7 +4,6 @@ import MainLayout from '@/Layouts/MainLayout';
 import PromptComposer from '@/Components/Home/PromptComposer';
 import QuickActions from '@/Components/Home/QuickActions';
 import GuestNotice from '@/Components/Layout/GuestNotice';
-import GlareShield from '@/Components/Layout/GlareShield';
 
 export default function Home() {
     const { auth, defaultModel, guest } = usePage().props;
@@ -50,24 +49,17 @@ export default function Home() {
 
             <div className="flex flex-1 flex-col items-center justify-center overflow-y-auto scrollbar-thin px-4 pb-16 pt-4 sm:px-6">
                 <div className="w-full max-w-[720px]">
-                    {/* У каждой строки своё затемнение по её размеру:
-                        одно общее пятно читалось как клякса. */}
-                    <div className="relative">
-                        <GlareShield className="h-[150px] w-[740px] max-w-[130vw] sm:h-[180px] sm:w-[900px]" />
+                    {/* Затемнение под текстом больше не нужно: на новом
+                        фоне верх экрана тёмный, свечение только по краю
+                        планеты внизу. */}
+                    <h1 className="text-center text-[56px] font-light leading-none tracking-tight text-white sm:text-7xl lg:text-8xl">
+                        uncensia
+                    </h1>
 
-                        <h1 className="text-center text-[56px] font-light leading-none tracking-tight text-white sm:text-7xl lg:text-8xl">
-                            uncensia
-                        </h1>
-                    </div>
-
-                    <div className="relative mt-9">
-                        <GlareShield className="h-[110px] w-[980px] max-w-[145vw] sm:h-[120px] sm:w-[1180px]" />
-
-                        <p className="text-center text-base text-white/85 sm:text-lg">
-                            The universe has no restrictions. Neither should
-                            AI. Uncensia.
-                        </p>
-                    </div>
+                    <p className="mt-5 text-center text-base text-white/85 sm:text-lg">
+                        The universe has no restrictions. Neither should AI.
+                        Uncensia.
+                    </p>
 
                     <div className="mt-8">
                         <GuestNotice />
