@@ -50,16 +50,20 @@ export default function Home() {
 
             <div className="flex flex-1 flex-col items-center justify-center overflow-y-auto scrollbar-thin px-4 pb-16 pt-4 sm:px-6">
                 <div className="w-full max-w-[720px]">
-                    {/* Блик гасится точечно за текстом: картинка в
-                        остальном не трогается. */}
+                    {/* У каждой строки своё затемнение по её размеру:
+                        одно общее пятно читалось как клякса. */}
                     <div className="relative">
-                        <GlareShield />
+                        <GlareShield className="h-[190px] w-[620px] max-w-[120vw] sm:h-[230px] sm:w-[760px]" />
 
                         <h1 className="text-center text-[56px] font-light leading-none tracking-tight text-white sm:text-7xl lg:text-8xl">
                             uncensia
                         </h1>
+                    </div>
 
-                        <p className="mt-5 text-center text-base text-white/85 sm:text-lg">
+                    <div className="relative mt-5">
+                        <GlareShield className="h-[90px] w-[660px] max-w-[110vw] sm:h-[100px] sm:w-[780px]" />
+
+                        <p className="text-center text-base text-white/85 sm:text-lg">
                             The universe has no restrictions. Neither should
                             AI. Uncensia.
                         </p>
