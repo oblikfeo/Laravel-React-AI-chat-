@@ -71,7 +71,9 @@ function MainLayoutInner({ children }) {
                 activeChatId={activeChatId}
             />
 
-            <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
+            {/* Отступ равен ширине свёрнутой панели и не меняется при её
+                раскрытии: композиция страницы должна стоять на месте. */}
+            <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden lg:pl-[72px]">
                 <header className="flex h-16 shrink-0 items-center justify-between px-4 sm:px-6">
                     <button
                         type="button"

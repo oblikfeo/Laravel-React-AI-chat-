@@ -23,7 +23,9 @@ export default function Sidebar({
 }) {
     return (
         <aside
-            className={`sticky top-0 z-30 hidden h-screen shrink-0 flex-col border-r border-white/[0.07] bg-[#0a0a0f]/85 backdrop-blur-xl transition-[width] duration-300 ease-out lg:flex ${
+            // Панель плавающая: при раскрытии она наезжает на фон, а не
+            // раздвигает страницу. Иначе центр композиции уезжает вбок.
+            className={`fixed inset-y-0 left-0 z-30 hidden h-screen flex-col border-r border-white/[0.07] bg-[#0a0a0f]/85 backdrop-blur-xl transition-[width] duration-300 ease-out lg:flex ${
                 collapsed ? 'w-[72px]' : 'w-[280px]'
             }`}
         >
