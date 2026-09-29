@@ -4,7 +4,6 @@ import MainLayout from '@/Layouts/MainLayout';
 import PromptComposer from '@/Components/Home/PromptComposer';
 import QuickActions from '@/Components/Home/QuickActions';
 import GuestNotice from '@/Components/Layout/GuestNotice';
-import GlareEllipse from '@/Components/Layout/GlareEllipse';
 
 export default function Home() {
     const { auth, defaultModel, guest } = usePage().props;
@@ -50,20 +49,14 @@ export default function Home() {
 
             <div className="flex flex-1 flex-col items-center justify-center overflow-y-auto scrollbar-thin px-4 pb-16 pt-4 sm:px-6">
                 <div className="w-full max-w-[720px]">
-                    {/* Затемнение живёт вместе с текстом: привязанное
-                        к экрану, оно уезжало от заголовка. */}
-                    <div className="relative">
-                        <GlareEllipse />
+                    <h1 className="text-center text-[56px] font-light leading-none tracking-tight text-white sm:text-7xl lg:text-8xl">
+                        uncensia
+                    </h1>
 
-                        <h1 className="text-center text-[56px] font-light leading-none tracking-tight text-white sm:text-7xl lg:text-8xl">
-                            uncensia
-                        </h1>
-
-                        <p className="mt-5 text-center text-base text-white/85 sm:text-lg">
-                            The universe has no restrictions. Neither should
-                            AI. Uncensia.
-                        </p>
-                    </div>
+                    <p className="mt-5 text-center text-base text-white/85 sm:text-lg">
+                        The universe has no restrictions. Neither should AI.
+                        Uncensia.
+                    </p>
 
                     <div className="mt-8">
                         <GuestNotice />
