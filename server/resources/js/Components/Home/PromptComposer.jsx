@@ -79,7 +79,7 @@ export default function PromptComposer({
                 event.preventDefault();
                 addFiles(event.dataTransfer.files);
             }}
-            className="w-full rounded-3xl border border-white/[0.14] bg-slate-950/55 p-4 shadow-2xl shadow-black/50 backdrop-blur-2xl sm:p-5"
+            className="w-full rounded-3xl border border-white/20 bg-white/[0.03] p-4 backdrop-blur-md sm:p-5"
         >
             {onFilesChange && (
                 <AttachedFiles

@@ -39,7 +39,7 @@ export default function QuickActions({ onSelect }) {
                     key={key}
                     type="button"
                     onClick={() => onSelect?.(prompt)}
-                    className="flex h-10 items-center gap-2 rounded-full border border-white/[0.14] bg-slate-950/50 px-4 text-sm text-white/80 backdrop-blur-xl transition hover:bg-white/[0.13] hover:text-white"
+                    className="flex h-10 items-center gap-2 rounded-full border border-white/20 bg-slate-950/50 px-4 text-sm text-white/80 backdrop-blur-xl transition hover:bg-white/[0.13] hover:text-white"
                 >
                     <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
                     {label}
