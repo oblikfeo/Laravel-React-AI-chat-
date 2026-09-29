@@ -3,11 +3,9 @@ import { useTheme } from '@/Contexts/ThemeContext';
 /**
  * Фон приложения — фотография космоса с планетой снизу (figma/fon.png).
  *
- * Поверх фотографии лежит затемнение на весь экран: на исходнике
- * свечение планеты настолько яркое, что съедает белый текст. Раньше
- * с этим боролись обводкой букв и пятном под заголовком — и то и
- * другое выглядело грязно. На макете свечение приглушено по всей
- * картинке, текст читается сам собой.
+ * Гасим только блик над планетой, а не картинку целиком: звёзды и край
+ * планеты должны остаться контрастными. Ровная вуаль поверх всего
+ * убивала глубину снимка.
  */
 export default function AppBackground() {
     const { isDark } = useTheme();
@@ -19,19 +17,17 @@ export default function AppBackground() {
                 style={{ backgroundImage: "url('/images/space-bg.png')" }}
             />
 
-            {/* Ровная вуаль гасит общую яркость. */}
+            {/* Затемнение по форме блика: овал в середине экрана, где
+                свечение сильнее всего. К краям сходит на нет, поэтому
+                звёзды и дуга планеты остаются яркими. */}
             <div
-                className={`absolute inset-0 bg-[#05070d] transition-opacity duration-700 ${
-                    isDark ? 'opacity-[0.55]' : 'opacity-0'
-                }`}
-            />
-
-            {/* Дополнительное затемнение сверху и снизу: сверху лежит
-                заголовок, снизу — поле ввода, и оба должны читаться. */}
-            <div
-                className={`absolute inset-0 bg-gradient-to-b from-[#05070d]/85 via-transparent to-[#05070d]/70 transition-opacity duration-700 ${
+                className={`absolute inset-0 transition-opacity duration-700 ${
                     isDark ? 'opacity-100' : 'opacity-0'
                 }`}
+                style={{
+                    background:
+                        'radial-gradient(ellipse 75% 45% at 50% 52%, rgba(5,7,13,0.82) 0%, rgba(5,7,13,0.55) 45%, rgba(5,7,13,0.15) 72%, transparent 100%)',
+                }}
             />
 
             {/* В светлой теме приглушаем фон, но не перекрываем его целиком:
