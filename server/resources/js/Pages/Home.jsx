@@ -4,6 +4,7 @@ import MainLayout from '@/Layouts/MainLayout';
 import PromptComposer from '@/Components/Home/PromptComposer';
 import QuickActions from '@/Components/Home/QuickActions';
 import GuestNotice from '@/Components/Layout/GuestNotice';
+import GlareShield from '@/Components/Layout/GlareShield';
 
 export default function Home() {
     const { auth, defaultModel, guest } = usePage().props;
@@ -49,16 +50,20 @@ export default function Home() {
 
             <div className="flex flex-1 flex-col items-center justify-center overflow-y-auto scrollbar-thin px-4 pb-16 pt-4 sm:px-6">
                 <div className="w-full max-w-[720px]">
-                    {/* Обводка и подложка больше не нужны: свечение
-                        приглушено в самом фоне, см. AppBackground. */}
-                    <h1 className="text-center text-[56px] font-light leading-none tracking-tight text-white sm:text-7xl lg:text-8xl">
-                        uncensia
-                    </h1>
+                    {/* Блик гасится точечно за текстом: картинка в
+                        остальном не трогается. */}
+                    <div className="relative">
+                        <GlareShield />
 
-                    <p className="mt-5 text-center text-base text-white/85 sm:text-lg">
-                        The universe has no restrictions. Neither should AI.
-                        Uncensia.
-                    </p>
+                        <h1 className="text-center text-[56px] font-light leading-none tracking-tight text-white sm:text-7xl lg:text-8xl">
+                            uncensia
+                        </h1>
+
+                        <p className="mt-5 text-center text-base text-white/85 sm:text-lg">
+                            The universe has no restrictions. Neither should
+                            AI. Uncensia.
+                        </p>
+                    </div>
 
                     <div className="mt-8">
                         <GuestNotice />
