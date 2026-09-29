@@ -53,15 +53,15 @@ export default function Home() {
                     {/* У каждой строки своё затемнение по её размеру:
                         одно общее пятно читалось как клякса. */}
                     <div className="relative">
-                        <GlareShield className="h-[300px] w-[900px] max-w-[150vw] sm:h-[360px] sm:w-[1080px]" />
+                        <GlareShield className="h-[150px] w-[740px] max-w-[130vw] sm:h-[180px] sm:w-[900px]" />
 
                         <h1 className="text-center text-[56px] font-light leading-none tracking-tight text-white sm:text-7xl lg:text-8xl">
                             uncensia
                         </h1>
                     </div>
 
-                    <div className="relative mt-5">
-                        <GlareShield className="h-[170px] w-[860px] max-w-[140vw] sm:h-[190px] sm:w-[1000px]" />
+                    <div className="relative mt-9">
+                        <GlareShield className="h-[110px] w-[980px] max-w-[145vw] sm:h-[120px] sm:w-[1180px]" />
 
                         <p className="text-center text-base text-white/85 sm:text-lg">
                             The universe has no restrictions. Neither should

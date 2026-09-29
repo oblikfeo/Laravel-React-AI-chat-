@@ -13,15 +13,15 @@ export default function GlareShield({ className = '' }) {
     return (
         <div
             aria-hidden
-            className={`pointer-events-none absolute left-1/2 top-1/2 -z-10 -translate-x-1/2 -translate-y-1/2 blur-3xl ${className}`}
+            className={`pointer-events-none absolute left-1/2 top-1/2 -z-10 -translate-x-1/2 -translate-y-1/2 blur-2xl ${className}`}
             style={{
                 background:
                     'radial-gradient(ellipse 50% 50% at 50% 50%,'
                     + ' rgba(3,5,10,0.95) 0%,'
-                    + ' rgba(3,5,10,0.9) 38%,'
-                    + ' rgba(3,5,10,0.7) 56%,'
-                    + ' rgba(3,5,10,0.4) 72%,'
-                    + ' rgba(3,5,10,0.15) 86%,'
+                    + ' rgba(3,5,10,0.92) 50%,'
+                    + ' rgba(3,5,10,0.78) 66%,'
+                    + ' rgba(3,5,10,0.45) 80%,'
+                    + ' rgba(3,5,10,0.16) 92%,'
                     + ' transparent 100%)',
             }}
         />
