@@ -14,7 +14,7 @@ export default function AppBackground() {
         <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-black">
             <div
                 className="absolute inset-0 bg-cover bg-bottom bg-no-repeat"
-                style={{ backgroundImage: "url('/images/space-bg.png')" }}
+                style={{ backgroundImage: "url('/images/space-bg-mountains.png')" }}
             />
 
             {/* В светлой теме приглушаем фон, но не перекрываем его целиком:
