@@ -46,7 +46,11 @@ class VeniceClient
     }
 
     /**
-     * Некоторые инструменты отдают готовый файл, а не JSON.
+     * Инструменты правки отдают готовый файл, а не JSON.
+     *
+     * Провайдер может ответить с кодом 200 и объяснением в JSON —
+     * например, когда цензура не пропустила запрос. Такой ответ
+     * файлом не является, и сохранять его нельзя.
      */
     public function binary(string $path, array $payload): string
     {
@@ -54,7 +58,18 @@ class VeniceClient
 
         $this->guard($response, $path);
 
-        return $response->body();
+        $body = $response->body();
+
+        if (str_starts_with($body, '{')) {
+            Log::warning('Студия: вместо файла пришёл ответ провайдера', [
+                'path' => $path,
+                'body' => mb_substr($body, 0, 300),
+            ]);
+
+            throw new GenerationFailed('Провайдер не вернул файл.');
+        }
+
+        return $body;
     }
 
     public function get(string $path, array $query = []): array

@@ -15,6 +15,9 @@ use App\Services\Studio\SpeechRequest;
  *
  * Один ключ закрывает весь раздел: рисование, правку, увеличение,
  * удаление фона и озвучку. Подробности в docs/STUDIO-API.md.
+ *
+ * Форматы ответа у провайдера разные: рисование отдаёт JSON со
+ * списком, остальные инструменты — готовый файл телом ответа.
  */
 class VeniceGenerator implements ImageGenerator
 {
@@ -85,7 +88,10 @@ class VeniceGenerator implements ImageGenerator
 
         $payload['safe_mode'] = $request->safeMode;
 
-        return $this->single('/image/edit', $payload);
+        return new GeneratedImage(
+            contents: $this->client->binary('/image/edit', $payload),
+            mime: 'image/png',
+        );
     }
 
     public function combine(array $images, string $prompt, ?string $aspectRatio = null): GeneratedImage
@@ -107,7 +113,10 @@ class VeniceGenerator implements ImageGenerator
 
         $payload['safe_mode'] = false;
 
-        return $this->single('/image/multi-edit', $payload);
+        return new GeneratedImage(
+            contents: $this->client->binary('/image/multi-edit', $payload),
+            mime: 'image/png',
+        );
     }
 
     public function upscale(string $image, int $scale = 2, float $creativity = 0.01): GeneratedImage
@@ -150,20 +159,6 @@ class VeniceGenerator implements ImageGenerator
                 'opus' => 'audio/opus',
                 default => 'audio/mpeg',
             },
-        );
-    }
-
-    /**
-     * Инструменты правки возвращают одну картинку, а формат ответа у
-     * провайдера общий — список.
-     */
-    private function single(string $path, array $payload): GeneratedImage
-    {
-        $images = $this->client->images($path, $payload);
-
-        return new GeneratedImage(
-            contents: reset($images),
-            mime: 'image/png',
         );
     }
 }
