@@ -1,46 +1,62 @@
 <?php
 
 /**
- * Студия: генерация изображений и видео.
+ * Студия: изображения, правка и озвучка.
  *
  * Названия моделей у провайдера пользователю не показываются — только
  * наши ярлыки, как и в чате (дизайн-система, §12).
+ *
+ * Провайдер — Venice AI, разбор его возможностей в docs/STUDIO-API.md.
  */
 return [
 
-    'default_model' => env('STUDIO_DEFAULT_MODEL', 'flash'),
+    'provider' => env('STUDIO_PROVIDER', 'venice'),
+
+    'base_url' => env('VENICE_BASE_URL', 'https://api.venice.ai/api/v1'),
+    'api_key' => env('VENICE_API_KEY'),
+
+    'default_model' => env('STUDIO_DEFAULT_MODEL', 'standard'),
 
     /*
     |--------------------------------------------------------------------------
-    | Модели генерации изображений
+    | Модели изображений
     |--------------------------------------------------------------------------
     |
-    | Доступ к ним выдаёт провайдер отдельно от текстовых. Пока его нет,
-    | интерфейс показывает, что Студия скоро откроется, вместо ошибки.
+    | Линейка повторяет логику чата: от быстрой к подробной, отдельно —
+    | модель без ограничений, ради которой к нам и приходят.
     |
     */
 
     'models' => [
 
-        'flash' => [
+        'fast' => [
             'label' => 'Quick',
-            'description' => 'Fast drafts and ideas',
-            'provider_model' => 'google/gemini-3.1-flash-lite-image',
+            'description' => 'Drafts in seconds',
+            'provider_model' => 'z-image-turbo',
             'kind' => 'image',
         ],
 
         'standard' => [
             'label' => 'Standard',
             'description' => 'Balanced quality and speed',
-            'provider_model' => 'google/gemini-3.1-flash-image',
+            'provider_model' => 'qwen-image-3',
             'kind' => 'image',
         ],
 
         'pro' => [
             'label' => 'Pro',
             'description' => 'Highest detail, slower',
-            'provider_model' => 'google/gemini-3-pro-image',
+            'provider_model' => 'flux-2-pro',
             'kind' => 'image',
+            'paid' => true,
+        ],
+
+        'uncensored' => [
+            'label' => 'Uncensored',
+            'description' => 'No content restrictions',
+            'provider_model' => 'lustify-v8',
+            'kind' => 'image',
+            'signature' => true,
             'paid' => true,
         ],
     ],
@@ -49,14 +65,20 @@ return [
     |--------------------------------------------------------------------------
     | Соотношения сторон
     |--------------------------------------------------------------------------
+    |
+    | Набор общий для моделей, которые их поддерживают. Для остальных
+    | провайдер подбирает размер сам по ширине и высоте.
+    |
     */
 
     'aspect_ratios' => [
         '1:1' => ['label' => 'Square', 'width' => 1024, 'height' => 1024],
-        '16:9' => ['label' => 'Landscape', 'width' => 1344, 'height' => 768],
-        '9:16' => ['label' => 'Portrait', 'width' => 768, 'height' => 1344],
-        '4:3' => ['label' => 'Classic', 'width' => 1152, 'height' => 896],
-        '3:2' => ['label' => 'Photo', 'width' => 1216, 'height' => 832],
+        '3:2' => ['label' => 'Landscape', 'width' => 1216, 'height' => 832],
+        '16:9' => ['label' => 'Cinema', 'width' => 1280, 'height' => 720],
+        '21:9' => ['label' => 'Widescreen', 'width' => 1280, 'height' => 544],
+        '9:16' => ['label' => 'Tall', 'width' => 720, 'height' => 1280],
+        '2:3' => ['label' => 'Portrait', 'width' => 832, 'height' => 1216],
+        '3:4' => ['label' => 'Instagram', 'width' => 896, 'height' => 1152],
     ],
 
     /*
@@ -64,37 +86,63 @@ return [
     | Стили
     |--------------------------------------------------------------------------
     |
-    | Стиль дописывается к запросу человека: сам он пишет, что хочет
-    | увидеть, а не как это должно выглядеть.
+    | Справочник держит провайдер (GET /image/styles), поэтому здесь
+    | только отобранные: весь список в полсотни пунктов интерфейсу
+    | не нужен.
     |
     */
 
     'styles' => [
-        'none' => ['label' => 'None', 'suffix' => null],
-        'photo' => [
-            'label' => 'Photo',
-            'suffix' => 'photorealistic, natural lighting, sharp focus, high detail',
+        'none' => null,
+        'photo' => 'Photographic',
+        'cinematic' => 'Cinematic',
+        'anime' => 'Anime',
+        'art' => 'Digital Art',
+        'render' => '3D Model',
+        'comic' => 'Comic Book',
+        'neon' => 'Neon Punk',
+        'pixel' => 'Pixel Art',
+        'minimal' => 'Line Art',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Правка изображений
+    |--------------------------------------------------------------------------
+    */
+
+    'edit' => [
+        'model' => env('STUDIO_EDIT_MODEL', 'firered-image-edit'),
+        'max_combine' => 4,
+        'scales' => [2, 4],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Озвучка
+    |--------------------------------------------------------------------------
+    */
+
+    'speech' => [
+        // Наш ключ из списка ниже, а не название модели у провайдера:
+        // оно наружу не выходит.
+        'default_model' => env('STUDIO_SPEECH_MODEL', 'standard'),
+
+        'models' => [
+            'standard' => [
+                'label' => 'Standard',
+                'description' => 'Natural voice, fast',
+                'provider_model' => 'tts-kokoro',
+            ],
+            'premium' => [
+                'label' => 'Premium',
+                'description' => 'Most lifelike',
+                'provider_model' => 'tts-elevenlabs-turbo-v2-5',
+                'paid' => true,
+            ],
         ],
-        'cinematic' => [
-            'label' => 'Cinematic',
-            'suffix' => 'cinematic lighting, film grain, dramatic composition, anamorphic',
-        ],
-        'anime' => [
-            'label' => 'Anime',
-            'suffix' => 'anime illustration, clean line art, vivid colors',
-        ],
-        'art' => [
-            'label' => 'Digital art',
-            'suffix' => 'digital painting, rich colors, detailed brushwork',
-        ],
-        'render' => [
-            'label' => '3D render',
-            'suffix' => '3D render, octane, soft studio lighting, subsurface scattering',
-        ],
-        'minimal' => [
-            'label' => 'Minimal',
-            'suffix' => 'minimalist, flat design, clean shapes, generous negative space',
-        ],
+
+        'max_characters' => 4000,
     ],
 
     /*
@@ -105,6 +153,8 @@ return [
 
     'daily_limit_guest' => (int) env('STUDIO_GUEST_DAILY', 3),
     'daily_limit_free' => (int) env('STUDIO_FREE_DAILY', 15),
+
+    'max_variants' => 4,
 
     'disk' => env('STUDIO_DISK', 'local'),
 

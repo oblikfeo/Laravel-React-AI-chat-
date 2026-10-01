@@ -1,13 +1,21 @@
 import { useState } from 'react';
 import { router } from '@inertiajs/react';
-import { Download, RotateCw, Trash2, Wand2, AlertCircle } from 'lucide-react';
+import {
+    Download,
+    RotateCw,
+    Trash2,
+    Wand2,
+    AlertCircle,
+    Pencil,
+    Volume2,
+} from 'lucide-react';
 
 /**
  * Лента работ: свежие сверху.
  *
  * Действия появляются при наведении, чтобы не перегружать сетку.
  */
-export default function GenerationGrid({ items, onReuse }) {
+export default function GenerationGrid({ items, onReuse, onEdit }) {
     const [preview, setPreview] = useState(null);
 
     if (!items.length) {
@@ -35,7 +43,10 @@ export default function GenerationGrid({ items, onReuse }) {
                         key={item.id}
                         item={item}
                         onReuse={onReuse}
-                        onOpen={() => item.url && setPreview(item)}
+                        onEdit={onEdit}
+                        onOpen={() =>
+                            item.url && item.kind !== 'audio' && setPreview(item)
+                        }
                     />
                 ))}
             </div>
@@ -47,8 +58,9 @@ export default function GenerationGrid({ items, onReuse }) {
     );
 }
 
-function Card({ item, onReuse, onOpen }) {
+function Card({ item, onReuse, onEdit, onOpen }) {
     const failed = item.status === 'failed';
+    const isAudio = item.kind === 'audio';
 
     const remove = () => {
         router.delete(`/studio/${item.id}`, {
@@ -68,7 +80,19 @@ function Card({ item, onReuse, onOpen }) {
     return (
         <div className="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-slate-950/55 backdrop-blur-xl">
             <div className="aspect-square w-full">
-                {item.url ? (
+                {isAudio && item.url ? (
+                    <div className="flex h-full w-full flex-col items-center justify-center gap-3 px-4">
+                        <Volume2
+                            className="h-7 w-7 text-white/35"
+                            strokeWidth={1.5}
+                        />
+                        <audio
+                            controls
+                            src={item.url}
+                            className="w-full"
+                        />
+                    </div>
+                ) : item.url ? (
                     <button
                         type="button"
                         onClick={onOpen}
@@ -121,11 +145,21 @@ function Card({ item, onReuse, onOpen }) {
                         icon={RotateCw}
                     />
 
-                    <IconButton
-                        title="Use these settings"
-                        onClick={() => onReuse(item)}
-                        icon={Wand2}
-                    />
+                    {!isAudio && (
+                        <IconButton
+                            title="Use these settings"
+                            onClick={() => onReuse(item)}
+                            icon={Wand2}
+                        />
+                    )}
+
+                    {!isAudio && item.url && onEdit && (
+                        <IconButton
+                            title="Edit this image"
+                            onClick={() => onEdit(item)}
+                            icon={Pencil}
+                        />
+                    )}
 
                     <IconButton
                         title="Delete"

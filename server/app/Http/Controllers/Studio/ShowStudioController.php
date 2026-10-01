@@ -40,7 +40,12 @@ class ShowStudioController extends Controller
             'models' => StudioCatalog::models(),
             'aspectRatios' => StudioCatalog::aspectRatios(),
             'styles' => StudioCatalog::styles(),
+            'speechModels' => StudioCatalog::speechModels(),
             'defaultModel' => config('studio.default_model'),
+            'defaultSpeechModel' => config('studio.speech.default_model'),
+            'maxVariants' => (int) config('studio.max_variants'),
+            'upscaleScales' => config('studio.edit.scales'),
+            'maxCombine' => (int) config('studio.edit.max_combine'),
 
             // Пока провайдер не открыл доступ, интерфейс говорит, что
             // Студия скоро заработает, вместо ошибки на весь экран.

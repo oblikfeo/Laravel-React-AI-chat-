@@ -1,14 +1,25 @@
 import { useState } from 'react';
-import { Head, router, usePage } from '@inertiajs/react';
-import { Image as ImageIcon, Video } from 'lucide-react';
+import { Head, router } from '@inertiajs/react';
+import { Image as ImageIcon, Wand2, Music, Video } from 'lucide-react';
 import MainLayout from '@/Layouts/MainLayout';
 import GenerationForm from '@/Components/Studio/GenerationForm';
+import EditForm from '@/Components/Studio/EditForm';
+import SpeechForm from '@/Components/Studio/SpeechForm';
 import GenerationGrid from '@/Components/Studio/GenerationGrid';
+import AssetPicker from '@/Components/Studio/AssetPicker';
+
+/** Вкладки раздела. */
+const TABS = [
+    { key: 'image', label: 'Image', icon: ImageIcon },
+    { key: 'edit', label: 'Edit', icon: Wand2 },
+    { key: 'audio', label: 'Audio', icon: Music },
+    { key: 'video', label: 'Video', icon: Video },
+];
 
 /**
- * Студия: создание изображений и лента работ.
+ * Студия: создание изображений, правка, озвучка и лента работ.
  *
- * Видео появится позже, но переключатель стоит сразу: человек должен
+ * Видео пока заглушка, но вкладка стоит сразу: человек должен
  * понимать, что раздел шире одной задачи.
  */
 export default function StudioIndex({
@@ -16,26 +27,54 @@ export default function StudioIndex({
     models,
     aspectRatios,
     styles,
+    speechModels,
     defaultModel,
+    defaultSpeechModel,
+    maxVariants,
+    upscaleScales,
+    maxCombine,
     studioReady,
     limit,
 }) {
-    const [kind, setKind] = useState('image');
+    const [tab, setTab] = useState('image');
     const [busy, setBusy] = useState(false);
 
     // Повтор подставляет условия готовой работы в форму, а не создаёт
     // копию молча: человек чаще хочет что-то поменять.
     const [preset, setPreset] = useState(null);
 
-    const submit = (values) => {
+    // Исходник для правки: работа из ленты.
+    const [source, setSource] = useState(null);
+
+    const finish = { preserveScroll: true, showProgress: false, onFinish: () => setBusy(false) };
+
+    const submitImage = (values) => {
+        setBusy(true);
+        router.post('/studio', values, finish);
+    };
+
+    const submitEdit = (values) => {
         setBusy(true);
 
-        router.post('/studio', values, {
-            preserveScroll: true,
-            showProgress: false,
-            onFinish: () => setBusy(false),
+        // Файлы уходят как форма, иначе вложения не доедут.
+        router.post('/studio/edit', values, {
+            ...finish,
+            forceFormData: true,
+            onSuccess: () => setSource(null),
         });
     };
+
+    const submitSpeech = (values) => {
+        setBusy(true);
+        router.post('/studio/speech', values, finish);
+    };
+
+    const startEditing = (item) => {
+        setSource(item);
+        setTab('edit');
+    };
+
+    const shared = { available: studioReady, busy, limit };
 
     return (
         <>
@@ -48,32 +87,64 @@ export default function StudioIndex({
                             Studio
                         </h1>
 
-                        <KindSwitch value={kind} onChange={setKind} />
+                        <TabSwitch value={tab} onChange={setTab} />
                     </div>
 
-                    {kind === 'image' ? (
-                        <>
-                            <div className="mt-6">
-                                <GenerationForm
-                                    models={models}
-                                    aspectRatios={aspectRatios}
-                                    styles={styles}
-                                    defaultModel={defaultModel}
-                                    available={studioReady}
-                                    busy={busy}
-                                    limit={limit}
-                                    preset={preset}
-                                    onSubmit={submit}
-                                />
-                            </div>
-
-                            <GenerationGrid
-                                items={generations}
-                                onReuse={setPreset}
+                    <div className="mt-6">
+                        {tab === 'image' && (
+                            <GenerationForm
+                                {...shared}
+                                models={models}
+                                aspectRatios={aspectRatios}
+                                styles={styles}
+                                defaultModel={defaultModel}
+                                maxVariants={maxVariants}
+                                preset={preset}
+                                onSubmit={submitImage}
                             />
-                        </>
-                    ) : (
-                        <ComingSoon />
+                        )}
+
+                        {tab === 'edit' && (
+                            <EditForm
+                                {...shared}
+                                aspectRatios={aspectRatios}
+                                upscaleScales={upscaleScales}
+                                maxCombine={maxCombine}
+                                source={source && source !== 'browse' ? source : null}
+                                onPickSource={setSource}
+                                onSubmit={submitEdit}
+                            />
+                        )}
+
+                        {tab === 'audio' && (
+                            <SpeechForm
+                                {...shared}
+                                models={speechModels}
+                                defaultModel={defaultSpeechModel}
+                                onSubmit={submitSpeech}
+                            />
+                        )}
+
+                        {tab === 'video' && <ComingSoon />}
+                    </div>
+
+                    {source === 'browse' && (
+                        <AssetPicker
+                            items={generations}
+                            onPick={setSource}
+                            onClose={() => setSource(null)}
+                        />
+                    )}
+
+                    {tab !== 'video' && (
+                        <GenerationGrid
+                            items={generations}
+                            onReuse={(item) => {
+                                setPreset(item);
+                                setTab('image');
+                            }}
+                            onEdit={startEditing}
+                        />
                     )}
                 </div>
             </div>
@@ -81,20 +152,16 @@ export default function StudioIndex({
     );
 }
 
-/** Переключатель «Изображение / Видео». */
-function KindSwitch({ value, onChange }) {
-    const options = [
-        { key: 'image', label: 'Image', icon: ImageIcon },
-        { key: 'video', label: 'Video', icon: Video },
-    ];
-
+/** Переключатель вкладок. */
+function TabSwitch({ value, onChange }) {
     return (
         <div className="flex items-center gap-1 rounded-full border border-white/[0.12] bg-slate-950/50 p-1 backdrop-blur-xl">
-            {options.map(({ key, label, icon: Icon }) => (
+            {TABS.map(({ key, label, icon: Icon }) => (
                 <button
                     key={key}
                     type="button"
                     onClick={() => onChange(key)}
+                    title={label}
                     className={`flex h-9 items-center gap-2 rounded-full px-4 text-sm transition ${
                         value === key
                             ? 'bg-white/10 font-medium text-white ring-1 ring-white/15'
@@ -102,7 +169,7 @@ function KindSwitch({ value, onChange }) {
                     }`}
                 >
                     <Icon className="h-4 w-4" strokeWidth={1.75} />
-                    {label}
+                    <span className="hidden sm:inline">{label}</span>
                 </button>
             ))}
         </div>
@@ -111,7 +178,7 @@ function KindSwitch({ value, onChange }) {
 
 function ComingSoon() {
     return (
-        <div className="mt-6 rounded-2xl border border-white/[0.08] bg-slate-950/55 px-6 py-16 text-center backdrop-blur-xl">
+        <div className="rounded-2xl border border-white/[0.08] bg-slate-950/55 px-6 py-16 text-center backdrop-blur-xl">
             <Video
                 className="mx-auto h-8 w-8 text-white/25"
                 strokeWidth={1.5}

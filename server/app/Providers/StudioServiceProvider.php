@@ -3,33 +3,33 @@
 namespace App\Providers;
 
 use App\Services\Studio\ImageGenerator;
-use App\Services\Studio\OpenRouterImageGenerator;
 use App\Services\Studio\UnavailableGenerator;
+use App\Services\Studio\Venice\VeniceClient;
+use App\Services\Studio\Venice\VeniceGenerator;
 use Illuminate\Support\ServiceProvider;
 
 class StudioServiceProvider extends ServiceProvider
 {
     /**
-     * Генерация включается переменной окружения.
+     * Студия включается ключом провайдера.
      *
-     * Одного ключа мало: провайдер открывает доступ к изображениям
-     * отдельно от текста, и наличие ключа этого не гарантирует.
-     * Поэтому признак задаётся явно, см. STUDIO_ENABLED.
+     * Пока ключа нет, раздел показывает, что скоро откроется, вместо
+     * ошибки: интерфейс спрашивает доступность заранее.
      */
     public function register(): void
     {
         $this->app->singleton(ImageGenerator::class, function () {
-            $settings = config('ai.providers.'.config('ai.provider'), []);
+            $apiKey = config('studio.api_key');
 
-            if (! env('STUDIO_ENABLED', false) || blank($settings['api_key'] ?? null)) {
+            if (blank($apiKey)) {
                 return new UnavailableGenerator();
             }
 
-            return new OpenRouterImageGenerator(
-                baseUrl: $settings['base_url'],
-                apiKey: $settings['api_key'],
+            return new VeniceGenerator(new VeniceClient(
+                baseUrl: config('studio.base_url'),
+                apiKey: $apiKey,
                 timeout: config('studio.timeout'),
-            );
+            ));
         });
     }
 }

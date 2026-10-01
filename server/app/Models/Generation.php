@@ -19,12 +19,25 @@ class Generation extends Model
     public const STATUS_FAILED = 'failed';
 
     public const KIND_IMAGE = 'image';
+    public const KIND_AUDIO = 'audio';
     public const KIND_VIDEO = 'video';
+
+    /** Инструменты Студии. */
+    public const OP_GENERATE = 'generate';
+    public const OP_EDIT = 'edit';
+    public const OP_COMBINE = 'combine';
+    public const OP_UPSCALE = 'upscale';
+    public const OP_BACKGROUND = 'background_remove';
+    public const OP_SPEECH = 'speech';
+    public const OP_MUSIC = 'music';
 
     protected $fillable = [
         'user_id',
         'guest_id',
         'kind',
+        'operation',
+        'source_generation_id',
+        'source_path',
         'model_key',
         'status',
         'prompt',
@@ -32,8 +45,10 @@ class Generation extends Model
         'aspect_ratio',
         'style',
         'seed',
+        'variants',
         'disk',
         'path',
+        'mime',
         'width',
         'height',
         'failure_reason',
@@ -44,6 +59,7 @@ class Generation extends Model
     {
         return [
             'seed' => 'integer',
+            'variants' => 'integer',
             'width' => 'integer',
             'height' => 'integer',
             'completed_at' => 'datetime',

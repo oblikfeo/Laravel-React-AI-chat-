@@ -15,10 +15,12 @@ use App\Http\Controllers\Billing\StoreSubscriptionController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Settings\UpdatePasswordController;
 use App\Http\Controllers\Studio\DestroyGenerationController;
+use App\Http\Controllers\Studio\EditGenerationController;
 use App\Http\Controllers\Studio\RetryGenerationController;
 use App\Http\Controllers\Studio\ShowGenerationFileController;
 use App\Http\Controllers\Studio\ShowStudioController;
 use App\Http\Controllers\Studio\StoreGenerationController;
+use App\Http\Controllers\Studio\StoreSpeechController;
 use App\Http\Controllers\Settings\UpdateProfileController;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Support\Facades\Route;
@@ -53,6 +55,10 @@ Route::group([], function () {
     Route::get('studio', ShowStudioController::class)->name('studio');
     Route::post('studio', StoreGenerationController::class)
         ->name('studio.store');
+    Route::post('studio/edit', EditGenerationController::class)
+        ->name('studio.edit');
+    Route::post('studio/speech', StoreSpeechController::class)
+        ->name('studio.speech');
     Route::post('studio/{generation}/retry', RetryGenerationController::class)
         ->name('studio.retry');
     Route::delete('studio/{generation}', DestroyGenerationController::class)

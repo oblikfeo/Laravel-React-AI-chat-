@@ -3,10 +3,10 @@
 namespace App\Services\Studio;
 
 /**
- * Пока генерация изображений недоступна.
+ * Студия без ключа провайдера.
  *
- * Интерфейс спрашивает isAvailable() заранее и показывает, что Студия
- * скоро откроется, поэтому до вызова generate() дело не доходит.
+ * Интерфейс спрашивает isAvailable() заранее и показывает, что раздел
+ * скоро откроется, поэтому до вызова инструментов дело не доходит.
  */
 class UnavailableGenerator implements ImageGenerator
 {
@@ -15,8 +15,38 @@ class UnavailableGenerator implements ImageGenerator
         return false;
     }
 
-    public function generate(GenerationRequest $request): GeneratedImage
+    public function generate(GenerationRequest $request): array
     {
-        throw new GenerationFailed('Генерация изображений не подключена.');
+        throw $this->fail();
+    }
+
+    public function edit(EditRequest $request): GeneratedImage
+    {
+        throw $this->fail();
+    }
+
+    public function combine(array $images, string $prompt, ?string $aspectRatio = null): GeneratedImage
+    {
+        throw $this->fail();
+    }
+
+    public function upscale(string $image, int $scale = 2, float $creativity = 0.01): GeneratedImage
+    {
+        throw $this->fail();
+    }
+
+    public function removeBackground(string $image): GeneratedImage
+    {
+        throw $this->fail();
+    }
+
+    public function speech(SpeechRequest $request): GeneratedAudio
+    {
+        throw $this->fail();
+    }
+
+    private function fail(): GenerationFailed
+    {
+        return new GenerationFailed('Студия не подключена: нет ключа провайдера.');
     }
 }

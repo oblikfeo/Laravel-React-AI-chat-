@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
-import { Sparkles, ChevronDown, Dices } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Sparkles, ChevronDown, Dices, Images } from 'lucide-react';
+import { Select, Panel, NotReady, Remaining } from '@/Components/Studio/Controls';
 
 /**
- * Форма создания изображения.
+ * Создание изображения по описанию.
  *
  * Обязательное на виду, тонкие настройки убраны под «Advanced»:
  * большинству хватает описания, а негативный запрос и зерно нужны
@@ -13,6 +14,7 @@ export default function GenerationForm({
     aspectRatios,
     styles,
     defaultModel,
+    maxVariants = 4,
     available,
     busy,
     limit,
@@ -25,7 +27,9 @@ export default function GenerationForm({
     const [ratio, setRatio] = useState('1:1');
     const [style, setStyle] = useState('none');
     const [seed, setSeed] = useState('');
+    const [variants, setVariants] = useState(1);
     const [advanced, setAdvanced] = useState(false);
+    const textareaRef = useRef(null);
 
     // Повтор работы подставляет её условия: человек чаще хочет
     // поменять деталь, а не получить точную копию.
@@ -41,6 +45,7 @@ export default function GenerationForm({
         setStyle(preset.style ?? 'none');
         setSeed(preset.seed ? String(preset.seed) : '');
         setAdvanced(Boolean(preset.negativePrompt || preset.seed));
+        textareaRef.current?.focus();
     }, [preset, defaultModel]);
 
     const exhausted = limit?.remaining === 0;
@@ -60,37 +65,45 @@ export default function GenerationForm({
             aspect_ratio: ratio,
             style: style === 'none' ? null : style,
             seed: seed ? Number(seed) : null,
+            variants,
         });
     };
 
+    const variantOptions = Array.from({ length: maxVariants }, (_, index) => ({
+        key: String(index + 1),
+        label: index === 0 ? '1 image' : `${index + 1} images`,
+    }));
+
     return (
-        <form
-            onSubmit={submit}
-            className="rounded-3xl border border-white/[0.12] bg-slate-950/55 p-4 shadow-2xl shadow-black/40 backdrop-blur-2xl sm:p-5"
-        >
-            {!available && (
-                <p className="mb-4 rounded-xl border border-amber-400/20 bg-amber-400/[0.07] px-4 py-2.5 text-[13px] text-amber-100/85">
-                    Image generation is coming soon. The studio is ready and
-                    will start working as soon as it opens.
-                </p>
-            )}
+        <Panel onSubmit={submit}>
+            {!available && <NotReady />}
 
             <textarea
+                ref={textareaRef}
                 value={prompt}
                 onChange={(event) => setPrompt(event.target.value)}
-                placeholder="Describe what you want to see…"
+                placeholder="Describe your image…"
                 rows={3}
                 className="w-full resize-none border-0 bg-transparent p-0 text-[16px] leading-relaxed text-white placeholder:text-white/40 focus:outline-none focus:ring-0"
             />
 
             <div className="mt-4 flex flex-wrap items-center gap-2">
-                <Select value={model} onChange={setModel} options={models} />
-                <Select value={ratio} onChange={setRatio} options={aspectRatios} />
-                <Select value={style} onChange={setStyle} options={styles} />
+                <Select value={model} onChange={setModel} options={models} title="Model" />
+                <Select value={ratio} onChange={setRatio} options={aspectRatios} title="Aspect ratio" />
+                <Select value={style} onChange={setStyle} options={styles} title="Style" />
+
+                {/* Несколько вариантов одной идеи: выбрать из набора
+                    проще, чем нажимать «ещё раз». */}
+                <Select
+                    value={String(variants)}
+                    onChange={(value) => setVariants(Number(value))}
+                    options={variantOptions}
+                    title="How many images"
+                />
 
                 <button
                     type="button"
-                    onClick={() => setAdvanced((v) => !v)}
+                    onClick={() => setAdvanced((value) => !value)}
                     className="flex h-9 items-center gap-1.5 rounded-full border border-white/[0.12] px-3.5 text-[13px] text-white/60 transition hover:bg-white/10 hover:text-white"
                 >
                     Advanced
@@ -101,12 +114,7 @@ export default function GenerationForm({
                 </button>
 
                 <div className="ml-auto flex items-center gap-3">
-                    {limit?.remaining !== null &&
-                        limit?.remaining !== undefined && (
-                            <span className="text-[13px] text-white/40">
-                                {limit.remaining} of {limit.total} left today
-                            </span>
-                        )}
+                    <Remaining limit={limit} />
 
                     <button
                         type="submit"
@@ -117,7 +125,11 @@ export default function GenerationForm({
                                 : 'cursor-not-allowed border border-white/[0.12] text-white/35'
                         }`}
                     >
-                        <Sparkles className="h-4 w-4" strokeWidth={2} />
+                        {variants > 1 ? (
+                            <Images className="h-4 w-4" strokeWidth={2} />
+                        ) : (
+                            <Sparkles className="h-4 w-4" strokeWidth={2} />
+                        )}
                         {busy ? 'Creating…' : 'Create'}
                     </button>
                 </div>
@@ -145,9 +157,7 @@ export default function GenerationForm({
                             <input
                                 value={seed}
                                 onChange={(event) =>
-                                    setSeed(
-                                        event.target.value.replace(/\D/g, ''),
-                                    )
+                                    setSeed(event.target.value.replace(/\D/g, ''))
                                 }
                                 placeholder="random"
                                 inputMode="numeric"
@@ -161,9 +171,7 @@ export default function GenerationForm({
                                 onClick={() =>
                                     setSeed(
                                         String(
-                                            Math.floor(
-                                                Math.random() * 2147483647,
-                                            ) + 1,
+                                            Math.floor(Math.random() * 2147483647) + 1,
                                         ),
                                     )
                                 }
@@ -176,34 +184,6 @@ export default function GenerationForm({
                     </label>
                 </div>
             )}
-        </form>
-    );
-}
-
-/** Компактный выпадающий список. */
-function Select({ value, onChange, options }) {
-    return (
-        <div className="relative">
-            <select
-                value={value}
-                onChange={(event) => onChange(event.target.value)}
-                className="h-9 cursor-pointer appearance-none rounded-full border border-white/[0.12] bg-slate-950/70 py-0 pl-3.5 pr-8 text-[13px] text-white/75 outline-none transition hover:text-white focus:border-white/25 focus:ring-0"
-            >
-                {options.map((option) => (
-                    <option
-                        key={option.key}
-                        value={option.key}
-                        className="bg-slate-900 text-white"
-                    >
-                        {option.label}
-                    </option>
-                ))}
-            </select>
-
-            <ChevronDown
-                className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/40"
-                strokeWidth={2}
-            />
-        </div>
+        </Panel>
     );
 }

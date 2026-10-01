@@ -18,6 +18,8 @@ class StoreGenerationRequest extends FormRequest
             // Зерно задаётся вручную, когда человек хочет повторить
             // понравившийся результат с другими деталями.
             'seed' => ['nullable', 'integer', 'min:1', 'max:2147483647'],
+            // Сколько вариантов одной идеи показать за раз.
+            'variants' => ['nullable', 'integer', 'min:1', 'max:'.config('studio.max_variants')],
         ];
     }
 

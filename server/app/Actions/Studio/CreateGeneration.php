@@ -9,11 +9,9 @@ use App\Services\Studio\GenerationFailed;
 use App\Services\Studio\GenerationRequest;
 use App\Services\Studio\ImageGenerator;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 /**
- * Создаёт работу в Студии.
+ * Рисует по описанию.
  *
  * Запись появляется до обращения к провайдеру: если генерация не
  * удастся, человек увидит неудачную попытку с кнопкой повтора,
@@ -21,19 +19,28 @@ use Illuminate\Support\Str;
  */
 class CreateGeneration
 {
-    public function __construct(private readonly ImageGenerator $generator)
-    {
+    public function __construct(
+        private readonly ImageGenerator $generator,
+        private readonly StoreGenerationFile $files,
+    ) {
     }
 
     /**
      * @param  array<string, mixed>  $input
+     * @return array<int, Generation> по работе на каждый вариант
      */
-    public function handle(?User $user, ?Guest $guest, array $input): Generation
+    public function handle(?User $user, ?Guest $guest, array $input): array
     {
+        $variants = min(
+            max((int) ($input['variants'] ?? 1), 1),
+            (int) config('studio.max_variants'),
+        );
+
         $generation = Generation::create([
             'user_id' => $user?->id,
             'guest_id' => $user ? null : $guest?->id,
             'kind' => Generation::KIND_IMAGE,
+            'operation' => Generation::OP_GENERATE,
             'model_key' => $input['model'],
             'status' => Generation::STATUS_PENDING,
             'prompt' => $input['prompt'],
@@ -43,25 +50,33 @@ class CreateGeneration
             // Зерно запоминаем всегда: без него повторная генерация
             // дала бы совсем другую картинку.
             'seed' => $input['seed'] ?? random_int(1, 2_147_483_647),
+            'variants' => $variants,
         ]);
 
         return $this->run($generation);
     }
 
-    /** Повторяет генерацию по сохранённым условиям. */
-    public function run(Generation $generation): Generation
+    /**
+     * Повторяет генерацию по сохранённым условиям.
+     *
+     * @return array<int, Generation>
+     */
+    public function run(Generation $generation): array
     {
         $size = config("studio.aspect_ratios.{$generation->aspect_ratio}");
+        $variants = max((int) $generation->variants, 1);
 
         try {
-            $image = $this->generator->generate(new GenerationRequest(
+            $images = $this->generator->generate(new GenerationRequest(
                 providerModel: config("studio.models.{$generation->model_key}.provider_model"),
-                prompt: $this->fullPrompt($generation),
+                prompt: $generation->prompt,
                 negativePrompt: $generation->negative_prompt,
                 aspectRatio: $generation->aspect_ratio,
                 seed: $generation->seed,
                 width: $size['width'] ?? 1024,
                 height: $size['height'] ?? 1024,
+                variants: $variants,
+                stylePreset: config("studio.styles.{$generation->style}"),
             ));
         } catch (GenerationFailed $exception) {
             Log::warning('Генерация изображения не удалась', [
@@ -74,44 +89,28 @@ class CreateGeneration
                 'failure_reason' => $exception->getMessage(),
             ])->save();
 
-            return $generation;
+            return [$generation];
         }
 
-        $disk = config('studio.disk');
-        $path = sprintf(
-            'studio/%s/%s.%s',
-            $generation->user_id ? "u{$generation->user_id}" : "g{$generation->guest_id}",
-            Str::uuid(),
-            $image->extension(),
-        );
+        // Первый вариант занимает уже созданную запись, остальные
+        // получают свои: в ленте это отдельные работы.
+        $created = [];
 
-        Storage::disk($disk)->put($path, $image->contents);
+        foreach (array_values($images) as $index => $image) {
+            $target = $index === 0
+                ? $generation
+                : $generation->replicate(['status', 'disk', 'path', 'completed_at']);
 
-        $generation->forceFill([
-            'status' => Generation::STATUS_READY,
-            'disk' => $disk,
-            'path' => $path,
-            'width' => $image->width,
-            'height' => $image->height,
-            'failure_reason' => null,
-            'completed_at' => now(),
-        ])->save();
+            $this->files->store($target, $image->contents, $image->extension(), $image->mime);
 
-        return $generation;
-    }
+            $target->forceFill([
+                'width' => $image->width,
+                'height' => $image->height,
+            ])->save();
 
-    /**
-     * Описание вместе со стилем.
-     *
-     * Человек пишет, что хочет увидеть, а стиль добавляет то, как это
-     * должно выглядеть: держать оформление в голове он не обязан.
-     */
-    private function fullPrompt(Generation $generation): string
-    {
-        $suffix = config("studio.styles.{$generation->style}.suffix");
+            $created[] = $target;
+        }
 
-        return $suffix
-            ? $generation->prompt.', '.$suffix
-            : $generation->prompt;
+        return $created;
     }
 }

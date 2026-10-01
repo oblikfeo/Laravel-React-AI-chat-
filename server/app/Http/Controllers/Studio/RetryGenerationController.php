@@ -48,6 +48,7 @@ class RetryGenerationController extends Controller
             'negative_prompt' => $generation->negative_prompt,
             'aspect_ratio' => $generation->aspect_ratio,
             'style' => $generation->style,
+            'variants' => 1,
         ]);
 
         return back();

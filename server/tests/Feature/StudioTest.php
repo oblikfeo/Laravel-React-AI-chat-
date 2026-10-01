@@ -4,43 +4,26 @@ namespace Tests\Feature;
 
 use App\Models\Generation;
 use App\Models\User;
-use App\Services\Studio\GeneratedImage;
-use App\Services\Studio\GenerationRequest;
 use App\Services\Studio\ImageGenerator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
+use Tests\Support\FakeImageGenerator;
 use Tests\TestCase;
 
 class StudioTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** Генератор, который всегда рисует однопиксельный PNG. */
-    private function fakeGenerator(bool $available = true): void
+    private ?FakeImageGenerator $generator = null;
+
+    /** Подставляет провайдера, который рисует, не выходя в сеть. */
+    private function fakeGenerator(bool $available = true): FakeImageGenerator
     {
-        $this->app->bind(ImageGenerator::class, fn () => new class($available) implements ImageGenerator
-        {
-            public function __construct(private readonly bool $available)
-            {
-            }
+        $this->generator = new FakeImageGenerator($available);
 
-            public function isAvailable(): bool
-            {
-                return $this->available;
-            }
+        $this->app->instance(ImageGenerator::class, $this->generator);
 
-            public function generate(GenerationRequest $request): GeneratedImage
-            {
-                return new GeneratedImage(
-                    contents: base64_decode(
-                        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
-                    ),
-                    mime: 'image/png',
-                    width: 1,
-                    height: 1,
-                );
-            }
-        });
+        return $this->generator;
     }
 
     public function test_studio_page_opens(): void
@@ -65,7 +48,7 @@ class StudioTest extends TestCase
 
         $this->actingAs($user)->post('/studio', [
             'prompt' => 'A red cube',
-            'model' => 'flash',
+            'model' => 'fast',
             'aspect_ratio' => '1:1',
         ])->assertRedirect();
 
@@ -88,7 +71,7 @@ class StudioTest extends TestCase
 
         $this->actingAs(User::factory()->create())->post('/studio', [
             'prompt' => 'A blue sphere',
-            'model' => 'flash',
+            'model' => 'fast',
             'aspect_ratio' => '1:1',
         ]);
 
@@ -102,7 +85,7 @@ class StudioTest extends TestCase
 
         $this->post('/studio', [
             'prompt' => 'A guest drawing',
-            'model' => 'flash',
+            'model' => 'fast',
             'aspect_ratio' => '1:1',
         ])->assertRedirect();
 
@@ -118,7 +101,7 @@ class StudioTest extends TestCase
         $this->fakeGenerator();
         config(['studio.daily_limit_guest' => 1]);
 
-        $payload = ['prompt' => 'One', 'model' => 'flash', 'aspect_ratio' => '1:1'];
+        $payload = ['prompt' => 'One', 'model' => 'fast', 'aspect_ratio' => '1:1'];
 
         $this->post('/studio', $payload);
 
@@ -144,7 +127,7 @@ class StudioTest extends TestCase
         $this->actingAs(User::factory()->create())
             ->post('/studio', [
                 'prompt' => 'Anything',
-                'model' => 'flash',
+                'model' => 'fast',
                 'aspect_ratio' => '1:1',
             ])
             ->assertSessionHas('error');
@@ -157,7 +140,7 @@ class StudioTest extends TestCase
         $this->fakeGenerator();
 
         $this->actingAs(User::factory()->create())
-            ->post('/studio', ['model' => 'flash', 'aspect_ratio' => '1:1'])
+            ->post('/studio', ['model' => 'fast', 'aspect_ratio' => '1:1'])
             ->assertSessionHasErrors('prompt');
     }
 
@@ -182,7 +165,7 @@ class StudioTest extends TestCase
         $owner = User::factory()->create();
         $this->actingAs($owner)->post('/studio', [
             'prompt' => 'Private',
-            'model' => 'flash',
+            'model' => 'fast',
             'aspect_ratio' => '1:1',
         ]);
 
@@ -201,7 +184,7 @@ class StudioTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user)->post('/studio', [
             'prompt' => 'To delete',
-            'model' => 'flash',
+            'model' => 'fast',
             'aspect_ratio' => '1:1',
         ]);
 
@@ -226,7 +209,7 @@ class StudioTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user)->post('/studio', [
             'prompt' => 'Test',
-            'model' => 'flash',
+            'model' => 'fast',
             'aspect_ratio' => '1:1',
         ]);
 

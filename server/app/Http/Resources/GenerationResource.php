@@ -11,16 +11,21 @@ class GenerationResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'kind' => $this->kind,
+            'operation' => $this->operation,
             'status' => $this->status,
             'prompt' => $this->prompt,
             'negativePrompt' => $this->negative_prompt,
             'aspectRatio' => $this->aspect_ratio,
             'style' => $this->style,
             'seed' => $this->seed,
+            'variants' => $this->variants,
+            'mime' => $this->mime,
             'width' => $this->width,
             'height' => $this->height,
             // Название модели у провайдера наружу не отдаём, только ярлык.
-            'model' => config("studio.models.{$this->model_key}.label"),
+            'model' => config("studio.models.{$this->model_key}.label")
+                ?? config("studio.speech.models.{$this->model_key}.label"),
             'modelKey' => $this->model_key,
             'url' => $this->isReady()
                 ? route('studio.file', $this->resource)
