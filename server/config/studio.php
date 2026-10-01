@@ -15,7 +15,7 @@ return [
     'base_url' => env('VENICE_BASE_URL', 'https://api.venice.ai/api/v1'),
     'api_key' => env('VENICE_API_KEY'),
 
-    'default_model' => env('STUDIO_DEFAULT_MODEL', 'standard'),
+    'default_model' => env('STUDIO_DEFAULT_MODEL', 'fast'),
 
     /*
     |--------------------------------------------------------------------------
@@ -34,21 +34,23 @@ return [
             'description' => 'Drafts in seconds',
             'provider_model' => 'z-image-turbo',
             'kind' => 'image',
+            'cost' => 0.01,
         ],
 
         'standard' => [
             'label' => 'Standard',
             'description' => 'Balanced quality and speed',
-            'provider_model' => 'qwen-image-3',
+            'provider_model' => 'venice-sd35',
             'kind' => 'image',
+            'cost' => 0.01,
         ],
 
-        'pro' => [
-            'label' => 'Pro',
-            'description' => 'Highest detail, slower',
-            'provider_model' => 'flux-2-pro',
+        'anime' => [
+            'label' => 'Anime',
+            'description' => 'Illustration and character art',
+            'provider_model' => 'wai-Illustrious',
             'kind' => 'image',
-            'paid' => true,
+            'cost' => 0.01,
         ],
 
         'uncensored' => [
@@ -57,7 +59,16 @@ return [
             'provider_model' => 'lustify-v8',
             'kind' => 'image',
             'signature' => true,
+            'cost' => 0.01,
+        ],
+
+        'pro' => [
+            'label' => 'Pro',
+            'description' => 'Highest detail, slower',
+            'provider_model' => 'flux-2-pro',
+            'kind' => 'image',
             'paid' => true,
+            'cost' => 0.03,
         ],
     ],
 
@@ -155,6 +166,9 @@ return [
     'daily_limit_free' => (int) env('STUDIO_FREE_DAILY', 15),
 
     'max_variants' => 4,
+
+    // Ниже этого остатка на счёте провайдера пишем предупреждение в лог.
+    'low_balance' => (float) env('STUDIO_LOW_BALANCE', 1.0),
 
     'disk' => env('STUDIO_DISK', 'local'),
 

@@ -90,6 +90,30 @@ class VeniceClient
         return $response->json() ?? [];
     }
 
+    /**
+     * Запоминает остаток на счёте провайдера.
+     *
+     * Он приходит заголовком при каждой генерации, поэтому отдельный
+     * запрос к биллингу не нужен — тем более что ключу с правами
+     * только на генерацию он и недоступен.
+     */
+    private function rememberBalance(Response $response): void
+    {
+        $balance = $response->header('x-venice-balance-usd');
+
+        if ($balance === '') {
+            return;
+        }
+
+        cache()->put('studio.balance', (float) $balance, now()->addDay());
+
+        if ((float) $balance < (float) config('studio.low_balance')) {
+            Log::warning('Студия: на счёте провайдера мало средств', [
+                'balance' => $balance,
+            ]);
+        }
+    }
+
     private function request(): PendingRequest
     {
         return Http::withToken($this->apiKey)
@@ -109,6 +133,8 @@ class VeniceClient
      */
     private function guard(Response $response, string $path): void
     {
+        $this->rememberBalance($response);
+
         if ($response->successful()) {
             return;
         }
