@@ -140,9 +140,9 @@ export default function Dropdown({
                     ref={listRef}
                     role="listbox"
                     style={position(box, width, up, align)}
-                    className={`fixed z-[60] ${
+                    className={`scrollbar-thin fixed z-[60] ${
                         detailed ? 'w-[280px]' : 'w-[200px]'
-                    } overflow-hidden rounded-2xl border border-white/10 bg-slate-950/95 p-1.5 shadow-2xl shadow-black/60`}
+                    } overflow-y-auto overscroll-contain rounded-2xl border border-white/10 bg-slate-950/95 p-1.5 shadow-2xl shadow-black/60`}
                 >
                     {options.map((option) => (
                         <button
@@ -221,12 +221,20 @@ export default function Dropdown({
  */
 function position(box, width, up, align) {
     const margin = 8;
-    const openUp = up || box.bottom + 260 > window.innerHeight;
+
+    // Куда больше места, туда и раскрываем: список бывает длинным, и
+    // упираться в край экрана он не должен.
+    const below = window.innerHeight - box.bottom - margin * 2;
+    const above = box.top - margin * 2;
+    const openUp = up || (below < 280 && above > below);
 
     let left = align === 'right' ? box.right - width : box.left;
     left = Math.max(margin, Math.min(left, window.innerWidth - width - margin));
 
+    // Высоту ограничиваем доступным местом, дальше работает прокрутка.
+    const maxHeight = Math.max(160, Math.min(openUp ? above : below, 420));
+
     return openUp
-        ? { left, bottom: window.innerHeight - box.top + margin }
-        : { left, top: box.bottom + margin };
+        ? { left, bottom: window.innerHeight - box.top + margin, maxHeight }
+        : { left, top: box.bottom + margin, maxHeight };
 }

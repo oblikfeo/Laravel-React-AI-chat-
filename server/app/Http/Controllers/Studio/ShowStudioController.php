@@ -44,6 +44,7 @@ class ShowStudioController extends Controller
             'defaultModel' => config('studio.default_model'),
             'defaultSpeechModel' => config('studio.speech.default_model'),
             'maxVariants' => (int) config('studio.max_variants'),
+            'maxSeed' => (int) config('studio.max_seed'),
             'upscaleScales' => config('studio.edit.scales'),
             'maxCombine' => (int) config('studio.edit.max_combine'),
 

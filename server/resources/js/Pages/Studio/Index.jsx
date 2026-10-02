@@ -31,6 +31,7 @@ export default function StudioIndex({
     defaultModel,
     defaultSpeechModel,
     maxVariants,
+    maxSeed,
     upscaleScales,
     maxCombine,
     studioReady,
@@ -99,6 +100,7 @@ export default function StudioIndex({
                                 styles={styles}
                                 defaultModel={defaultModel}
                                 maxVariants={maxVariants}
+                                maxSeed={maxSeed}
                                 preset={preset}
                                 onSubmit={submitImage}
                             />

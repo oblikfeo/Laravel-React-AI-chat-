@@ -51,7 +51,7 @@ class CreateGeneration
             'style' => $input['style'] ?? null,
             // Зерно запоминаем всегда: без него повторная генерация
             // дала бы совсем другую картинку.
-            'seed' => $input['seed'] ?? random_int(1, 2_147_483_647),
+            'seed' => $input['seed'] ?? random_int(1, config('studio.max_seed')),
             'variants' => $variants,
         ]);
 

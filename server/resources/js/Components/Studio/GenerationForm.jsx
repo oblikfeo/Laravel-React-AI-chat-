@@ -26,6 +26,7 @@ export default function GenerationForm({
     styles,
     defaultModel,
     maxVariants = 4,
+    maxSeed = 999999999,
     available,
     busy,
     limit,
@@ -224,7 +225,7 @@ export default function GenerationForm({
                                 onClick={() =>
                                     setSeed(
                                         String(
-                                            Math.floor(Math.random() * 2147483647) + 1,
+                                            Math.floor(Math.random() * maxSeed) + 1,
                                         ),
                                     )
                                 }

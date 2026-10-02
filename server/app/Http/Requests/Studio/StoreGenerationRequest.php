@@ -17,7 +17,7 @@ class StoreGenerationRequest extends FormRequest
             'style' => ['nullable', Rule::in(array_keys(config('studio.styles')))],
             // Зерно задаётся вручную, когда человек хочет повторить
             // понравившийся результат с другими деталями.
-            'seed' => ['nullable', 'integer', 'min:1', 'max:2147483647'],
+            'seed' => ['nullable', 'integer', 'min:1', 'max:'.config('studio.max_seed')],
             // Сколько вариантов одной идеи показать за раз.
             'variants' => ['nullable', 'integer', 'min:1', 'max:'.config('studio.max_variants')],
         ];

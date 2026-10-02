@@ -288,4 +288,40 @@ class StudioToolsTest extends TestCase
         $this->assertTrue($request->supportsAspectRatio);
         $this->assertSame('16:9', $request->aspectRatio);
     }
+
+    /**
+     * Зерно не должно превышать предел провайдера: он отвечает
+     * отказом, и генерация срывается на ровном месте.
+     */
+    public function test_generated_seed_fits_the_provider_limit(): void
+    {
+        $max = (int) config('studio.max_seed');
+
+        for ($attempt = 0; $attempt < 20; $attempt++) {
+            Generation::query()->delete();
+
+            $this->actingAs(User::factory()->create())->post('/studio', [
+                'prompt' => 'A seed check',
+                'model' => 'fast',
+                'aspect_ratio' => '1:1',
+            ]);
+
+            $seed = Generation::first()->seed;
+
+            $this->assertGreaterThan(0, $seed);
+            $this->assertLessThanOrEqual($max, $seed);
+        }
+    }
+
+    public function test_seed_above_the_limit_is_rejected(): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->post('/studio', [
+                'prompt' => 'Too big',
+                'model' => 'fast',
+                'aspect_ratio' => '1:1',
+                'seed' => (int) config('studio.max_seed') + 1,
+            ])
+            ->assertSessionHasErrors('seed');
+    }
 }
