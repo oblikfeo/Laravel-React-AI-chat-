@@ -9,6 +9,7 @@ use App\Services\Studio\EditRequest;
 use App\Services\Studio\GeneratedImage;
 use App\Services\Studio\GenerationFailed;
 use App\Services\Studio\ImageGenerator;
+use App\Services\Studio\PromptTranslator;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -23,6 +24,7 @@ class EditImage
     public function __construct(
         private readonly ImageGenerator $generator,
         private readonly StoreGenerationFile $files,
+        private readonly PromptTranslator $translator,
     ) {
     }
 
@@ -79,17 +81,22 @@ class EditImage
     {
         $first = $sources[0] ?? throw new GenerationFailed('Нет исходного изображения.');
 
+        // Описание уходит на английском: на нём модели и обучены.
+        $prompt = isset($input['prompt'])
+            ? $this->translator->translate($input['prompt'])
+            : '';
+
         return match ($operation) {
             Generation::OP_EDIT => $this->generator->edit(new EditRequest(
                 image: $first,
-                prompt: $input['prompt'],
+                prompt: $prompt,
                 providerModel: config('studio.edit.model'),
                 aspectRatio: $input['aspect_ratio'] ?? null,
             )),
 
             Generation::OP_COMBINE => $this->generator->combine(
                 images: $sources,
-                prompt: $input['prompt'],
+                prompt: $prompt,
                 aspectRatio: $input['aspect_ratio'] ?? null,
             ),
 

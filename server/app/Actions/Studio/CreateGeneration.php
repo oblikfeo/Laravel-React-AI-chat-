@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Services\Studio\GenerationFailed;
 use App\Services\Studio\GenerationRequest;
 use App\Services\Studio\ImageGenerator;
+use App\Services\Studio\PromptTranslator;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -22,6 +23,7 @@ class CreateGeneration
     public function __construct(
         private readonly ImageGenerator $generator,
         private readonly StoreGenerationFile $files,
+        private readonly PromptTranslator $translator,
     ) {
     }
 
@@ -70,8 +72,12 @@ class CreateGeneration
         try {
             $images = $this->generator->generate(new GenerationRequest(
                 providerModel: $model['provider_model'],
-                prompt: $generation->prompt,
-                negativePrompt: $generation->negative_prompt,
+                // Описание уходит на английском: на нём модели
+                // рисования и обучены.
+                prompt: $this->translator->translate($generation->prompt),
+                negativePrompt: $generation->negative_prompt
+                    ? $this->translator->translate($generation->negative_prompt)
+                    : null,
                 aspectRatio: $generation->aspect_ratio,
                 seed: $generation->seed,
                 width: $size['width'] ?? 1024,
