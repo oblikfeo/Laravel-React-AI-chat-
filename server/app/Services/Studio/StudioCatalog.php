@@ -2,6 +2,8 @@
 
 namespace App\Services\Studio;
 
+use App\Models\User;
+
 /**
  * Данные Студии для интерфейса.
  *
@@ -11,7 +13,7 @@ namespace App\Services\Studio;
 class StudioCatalog
 {
     /** @return array<int, array<string, mixed>> */
-    public static function models(): array
+    public static function models(?User $user = null): array
     {
         return collect(config('studio.models'))
             ->map(fn (array $model, string $key) => [
@@ -20,6 +22,11 @@ class StudioCatalog
                 'description' => $model['description'],
                 'paid' => (bool) ($model['paid'] ?? false),
                 'signature' => (bool) ($model['signature'] ?? false),
+                'badge' => ($model['paid'] ?? false) ? 'Pro' : null,
+                // Платные модели видны всем, но без подписки недоступны:
+                // скрывать их бессмысленно — человек должен понимать,
+                // что получит.
+                'locked' => ($model['paid'] ?? false) && ! self::isPaid($user),
             ])
             ->values()
             ->all();
@@ -70,7 +77,7 @@ class StudioCatalog
     }
 
     /** @return array<int, array<string, mixed>> */
-    public static function speechModels(): array
+    public static function speechModels(?User $user = null): array
     {
         return collect(config('studio.speech.models'))
             ->map(fn (array $model, string $key) => [
@@ -78,9 +85,18 @@ class StudioCatalog
                 'label' => $model['label'],
                 'description' => $model['description'],
                 'paid' => (bool) ($model['paid'] ?? false),
+                'badge' => ($model['paid'] ?? false) ? 'Pro' : null,
+                'locked' => ($model['paid'] ?? false) && ! self::isPaid($user),
             ])
             ->values()
             ->all();
+    }
+
+    /** Есть ли у человека платный тариф. */
+    private static function isPaid(?User $user): bool
+    {
+        return $user !== null
+            && ! in_array($user->plan, config('plans.promoted'), true);
     }
 
     public static function has(string $key): bool

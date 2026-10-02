@@ -37,10 +37,10 @@ class ShowStudioController extends Controller
                     ->get()
             ),
 
-            'models' => StudioCatalog::models(),
+            'models' => StudioCatalog::models($user),
             'aspectRatios' => StudioCatalog::aspectRatios(),
             'styles' => StudioCatalog::styles(),
-            'speechModels' => StudioCatalog::speechModels(),
+            'speechModels' => StudioCatalog::speechModels($user),
             'defaultModel' => config('studio.default_model'),
             'defaultSpeechModel' => config('studio.speech.default_model'),
             'maxVariants' => (int) config('studio.max_variants'),

@@ -1,6 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
-import { Sparkles, ChevronDown, Dices, Images } from 'lucide-react';
-import { Select, Panel, NotReady, Remaining } from '@/Components/Studio/Controls';
+import {
+    Sparkles,
+    ChevronDown,
+    Dices,
+    Images,
+    Cpu,
+    Crop,
+    Palette,
+    Copy,
+} from 'lucide-react';
+import { Panel, NotReady, Remaining } from '@/Components/Studio/Controls';
+import Dropdown from '@/Components/Studio/Dropdown';
 
 /**
  * Создание изображения по описанию.
@@ -72,6 +82,7 @@ export default function GenerationForm({
     const variantOptions = Array.from({ length: maxVariants }, (_, index) => ({
         key: String(index + 1),
         label: index === 0 ? '1 image' : `${index + 1} images`,
+        description: index === 0 ? 'One result' : 'Pick from several at once',
     }));
 
     return (
@@ -88,17 +99,38 @@ export default function GenerationForm({
             />
 
             <div className="mt-4 flex flex-wrap items-center gap-2">
-                <Select value={model} onChange={setModel} options={models} title="Model" />
-                <Select value={ratio} onChange={setRatio} options={aspectRatios} title="Aspect ratio" />
-                <Select value={style} onChange={setStyle} options={styles} title="Style" />
+                <Dropdown
+                    value={model}
+                    onChange={setModel}
+                    options={models}
+                    label="Model"
+                    icon={Cpu}
+                />
+
+                <Dropdown
+                    value={ratio}
+                    onChange={setRatio}
+                    options={aspectRatios}
+                    label="Size"
+                    icon={Crop}
+                />
+
+                <Dropdown
+                    value={style}
+                    onChange={setStyle}
+                    options={styles}
+                    label="Style"
+                    icon={Palette}
+                />
 
                 {/* Несколько вариантов одной идеи: выбрать из набора
                     проще, чем нажимать «ещё раз». */}
-                <Select
+                <Dropdown
                     value={String(variants)}
-                    onChange={(value) => setVariants(Number(value))}
+                    onChange={(next) => setVariants(Number(next))}
                     options={variantOptions}
-                    title="How many images"
+                    label="Count"
+                    icon={Copy}
                 />
 
                 <button

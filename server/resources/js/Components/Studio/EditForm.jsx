@@ -6,8 +6,10 @@ import {
     Scissors,
     Upload,
     FolderOpen,
+    Crop,
 } from 'lucide-react';
-import { Select, Panel, NotReady, Remaining, Thumbnails } from '@/Components/Studio/Controls';
+import { Panel, NotReady, Remaining, Thumbnails } from '@/Components/Studio/Controls';
+import Dropdown from '@/Components/Studio/Dropdown';
 
 /** Инструменты правки — те же, что в панели под полем ввода у Venice. */
 const TOOLS = [
@@ -216,23 +218,29 @@ export default function EditForm({
                     </button>
 
                     {tool === 'upscale' && (
-                        <Select
+                        <Dropdown
                             value={scale}
                             onChange={setScale}
-                            title="Scale"
+                            label="Scale"
+                            icon={Maximize2}
                             options={upscaleScales.map((value) => ({
                                 key: String(value),
                                 label: `${value}x`,
+                                description:
+                                    value === 2
+                                        ? 'Twice the resolution'
+                                        : 'Four times, slower',
                             }))}
                         />
                     )}
 
                     {(tool === 'edit' || tool === 'combine') && (
-                        <Select
+                        <Dropdown
                             value={ratio}
                             onChange={setRatio}
                             options={aspectRatios}
-                            title="Aspect ratio"
+                            label="Size"
+                            icon={Crop}
                         />
                     )}
 

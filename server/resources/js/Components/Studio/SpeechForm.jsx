@@ -1,13 +1,14 @@
 import { useState } from 'react';
-import { Volume2 } from 'lucide-react';
-import { Select, Panel, NotReady, Remaining } from '@/Components/Studio/Controls';
+import { Volume2, Mic, Gauge } from 'lucide-react';
+import { Panel, NotReady, Remaining } from '@/Components/Studio/Controls';
+import Dropdown from '@/Components/Studio/Dropdown';
 
 /** Скорость чтения: крайние значения звучат неестественно. */
 const SPEEDS = [
-    { key: '0.75', label: 'Slow' },
-    { key: '1', label: 'Normal' },
-    { key: '1.25', label: 'Fast' },
-    { key: '1.5', label: 'Faster' },
+    { key: '0.75', label: 'Slow', description: 'Calm, easy to follow' },
+    { key: '1', label: 'Normal', description: 'Natural pace' },
+    { key: '1.25', label: 'Fast', description: 'Brisk delivery' },
+    { key: '1.5', label: 'Faster', description: 'For quick listening' },
 ];
 
 /**
@@ -68,8 +69,21 @@ export default function SpeechForm({
             </div>
 
             <div className="mt-3 flex flex-wrap items-center gap-2">
-                <Select value={model} onChange={setModel} options={models} title="Voice model" />
-                <Select value={speed} onChange={setSpeed} options={SPEEDS} title="Speed" />
+                <Dropdown
+                    value={model}
+                    onChange={setModel}
+                    options={models}
+                    label="Voice"
+                    icon={Mic}
+                />
+
+                <Dropdown
+                    value={speed}
+                    onChange={setSpeed}
+                    options={SPEEDS}
+                    label="Speed"
+                    icon={Gauge}
+                />
 
                 <div className="ml-auto flex items-center gap-3">
                     <Remaining limit={limit} />

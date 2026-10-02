@@ -1,33 +1,4 @@
-import { ChevronDown, X } from 'lucide-react';
-
-/** Компактный выпадающий список. */
-export function Select({ value, onChange, options, title }) {
-    return (
-        <div className="relative">
-            <select
-                value={value}
-                onChange={(event) => onChange(event.target.value)}
-                title={title}
-                className="h-9 cursor-pointer appearance-none rounded-full border border-white/[0.12] bg-slate-950/70 py-0 pl-3.5 pr-8 text-[13px] text-white/75 outline-none transition hover:text-white focus:border-white/25 focus:ring-0"
-            >
-                {options.map((option) => (
-                    <option
-                        key={option.key}
-                        value={option.key}
-                        className="bg-slate-900 text-white"
-                    >
-                        {option.label}
-                    </option>
-                ))}
-            </select>
-
-            <ChevronDown
-                className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/40"
-                strokeWidth={2}
-            />
-        </div>
-    );
-}
+import { X } from 'lucide-react';
 
 /**
  * Панель формы.
