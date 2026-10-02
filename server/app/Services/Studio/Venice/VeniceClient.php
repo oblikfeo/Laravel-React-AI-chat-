@@ -150,6 +150,12 @@ class VeniceClient
             'path' => $path,
             'status' => $response->status(),
             'message' => mb_substr((string) $message, 0, 500),
+            // Подробности отказа: без них «неверные параметры» не
+            // говорит, какой именно параметр лишний.
+            'details' => mb_substr(json_encode(
+                $body['details'] ?? $body['issues'] ?? $body,
+                JSON_UNESCAPED_UNICODE,
+            ) ?: '', 0, 500),
         ]);
 
         throw new GenerationFailed(

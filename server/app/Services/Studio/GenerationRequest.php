@@ -27,6 +27,15 @@ class GenerationRequest
         public readonly array $styleReferences = [],
         /** Фильтр провайдера: наше предложение — модели без цензуры. */
         public readonly bool $safeMode = false,
+        /**
+         * Понимает ли модель соотношение сторон.
+         *
+         * Большинство требует ширину и высоту, и лишний параметр они
+         * не игнорируют, а отвечают отказом.
+         */
+        public readonly bool $supportsAspectRatio = false,
+        /** Кратность размеров, которую требует модель. */
+        public readonly int $divisor = 8,
     ) {
     }
 }

@@ -254,4 +254,38 @@ class StudioToolsTest extends TestCase
             ->assertOk()
             ->assertDontSee('tts-kokoro');
     }
+
+    /**
+     * Соотношение сторон понимает не всякая модель: остальные
+     * отвечают отказом на лишний параметр и ждут размеры.
+     */
+    public function test_models_without_aspect_ratio_get_sizes(): void
+    {
+        $this->actingAs(User::factory()->create())->post('/studio', [
+            'prompt' => 'A tall tower',
+            'model' => 'fast',
+            'aspect_ratio' => '9:16',
+        ]);
+
+        $request = $this->generator->lastGeneration;
+
+        $this->assertFalse($request->supportsAspectRatio);
+        $this->assertSame(720, $request->width);
+        $this->assertSame(1280, $request->height);
+    }
+
+    /** Модель, которая умеет соотношение, получает именно его. */
+    public function test_model_with_aspect_ratio_keeps_it(): void
+    {
+        $this->actingAs(User::factory()->create())->post('/studio', [
+            'prompt' => 'A wide landscape',
+            'model' => 'pro',
+            'aspect_ratio' => '16:9',
+        ]);
+
+        $request = $this->generator->lastGeneration;
+
+        $this->assertTrue($request->supportsAspectRatio);
+        $this->assertSame('16:9', $request->aspectRatio);
+    }
 }

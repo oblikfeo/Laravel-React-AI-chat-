@@ -35,6 +35,10 @@ return [
             'provider_model' => 'z-image-turbo',
             'kind' => 'image',
             'cost' => 0.01,
+            // Соотношение сторон принимает не всякая модель: остальным
+            // отправляем ширину и высоту, см. VeniceGenerator.
+            'aspect_ratio' => false,
+            'divisor' => 8,
         ],
 
         'standard' => [
@@ -43,6 +47,8 @@ return [
             'provider_model' => 'venice-sd35',
             'kind' => 'image',
             'cost' => 0.01,
+            'aspect_ratio' => false,
+            'divisor' => 16,
         ],
 
         'anime' => [
@@ -51,6 +57,8 @@ return [
             'provider_model' => 'wai-Illustrious',
             'kind' => 'image',
             'cost' => 0.01,
+            'aspect_ratio' => false,
+            'divisor' => 16,
         ],
 
         'uncensored' => [
@@ -60,6 +68,8 @@ return [
             'kind' => 'image',
             'signature' => true,
             'cost' => 0.01,
+            'aspect_ratio' => false,
+            'divisor' => 8,
         ],
 
         'pro' => [
@@ -69,6 +79,7 @@ return [
             'kind' => 'image',
             'paid' => true,
             'cost' => 0.03,
+            'aspect_ratio' => true,
         ],
     ],
 

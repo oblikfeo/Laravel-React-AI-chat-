@@ -64,11 +64,12 @@ class CreateGeneration
     public function run(Generation $generation): array
     {
         $size = config("studio.aspect_ratios.{$generation->aspect_ratio}");
+        $model = config("studio.models.{$generation->model_key}");
         $variants = max((int) $generation->variants, 1);
 
         try {
             $images = $this->generator->generate(new GenerationRequest(
-                providerModel: config("studio.models.{$generation->model_key}.provider_model"),
+                providerModel: $model['provider_model'],
                 prompt: $generation->prompt,
                 negativePrompt: $generation->negative_prompt,
                 aspectRatio: $generation->aspect_ratio,
@@ -77,6 +78,8 @@ class CreateGeneration
                 height: $size['height'] ?? 1024,
                 variants: $variants,
                 stylePreset: config("studio.styles.{$generation->style}"),
+                supportsAspectRatio: (bool) ($model['aspect_ratio'] ?? false),
+                divisor: (int) ($model['divisor'] ?? 8),
             ));
         } catch (GenerationFailed $exception) {
             Log::warning('Генерация изображения не удалась', [

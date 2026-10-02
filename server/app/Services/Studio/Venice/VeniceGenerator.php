@@ -40,7 +40,6 @@ class VeniceGenerator implements ImageGenerator
             'model' => $request->providerModel,
             'prompt' => $request->prompt,
             'negative_prompt' => $request->negativePrompt,
-            'aspect_ratio' => $request->aspectRatio,
             'style_preset' => $request->stylePreset,
             'variants' => $request->variants > 1 ? $request->variants : null,
             // Ноль у провайдера означает «выбери сам», поэтому своё
@@ -54,6 +53,15 @@ class VeniceGenerator implements ImageGenerator
         // safe_mode=false отфильтровался бы как пустое значение, а он
         // смысловой: наше предложение — модели без цензуры.
         $payload['safe_mode'] = $request->safeMode;
+
+        // Соотношение сторон понимает не всякая модель: остальные
+        // отвечают отказом на лишний параметр и ждут размеры.
+        if ($request->supportsAspectRatio) {
+            $payload['aspect_ratio'] = $request->aspectRatio;
+        } else {
+            $payload['width'] = $this->round($request->width, $request->divisor);
+            $payload['height'] = $this->round($request->height, $request->divisor);
+        }
 
         if ($request->styleReferences) {
             $payload['style_references'] = array_map(
@@ -73,6 +81,22 @@ class VeniceGenerator implements ImageGenerator
                 mime: 'image/png',
             ),
             $images,
+        );
+    }
+
+    /**
+     * Размер под требования модели.
+     *
+     * Провайдер принимает только кратные значения и до 1280 точек по
+     * стороне, иначе отвечает отказом.
+     */
+    private function round(int $size, int $divisor): int
+    {
+        $divisor = max($divisor, 1);
+
+        return (int) max(
+            $divisor,
+            min(1280, intdiv($size, $divisor) * $divisor),
         );
     }
 
