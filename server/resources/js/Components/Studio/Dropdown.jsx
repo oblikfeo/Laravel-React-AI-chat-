@@ -121,6 +121,12 @@ export default function Dropdown({
 
                 <span className="font-medium">{active.label}</span>
 
+                {/* Пропорция рядом с названием: по одному «Square»
+                    не понять, какой получится кадр. */}
+                {active.badge && (
+                    <span className="text-white/45">{active.badge}</span>
+                )}
+
                 <ChevronDown
                     className={`h-3.5 w-3.5 shrink-0 text-white/40 transition ${
                         open ? 'rotate-180' : ''

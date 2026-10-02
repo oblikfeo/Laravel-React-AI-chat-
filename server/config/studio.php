@@ -94,13 +94,48 @@ return [
     */
 
     'aspect_ratios' => [
-        '1:1' => ['label' => 'Square', 'width' => 1024, 'height' => 1024],
-        '3:2' => ['label' => 'Landscape', 'width' => 1216, 'height' => 832],
-        '16:9' => ['label' => 'Cinema', 'width' => 1280, 'height' => 720],
-        '21:9' => ['label' => 'Widescreen', 'width' => 1280, 'height' => 544],
-        '9:16' => ['label' => 'Tall', 'width' => 720, 'height' => 1280],
-        '2:3' => ['label' => 'Portrait', 'width' => 832, 'height' => 1216],
-        '3:4' => ['label' => 'Instagram', 'width' => 896, 'height' => 1152],
+        '1:1' => [
+            'label' => 'Square',
+            'hint' => 'Avatars and posts',
+            'width' => 1024,
+            'height' => 1024,
+        ],
+        '3:2' => [
+            'label' => 'Landscape',
+            'hint' => 'Classic photo',
+            'width' => 1216,
+            'height' => 832,
+        ],
+        '16:9' => [
+            'label' => 'Cinema',
+            'hint' => 'Video and covers',
+            'width' => 1280,
+            'height' => 720,
+        ],
+        '21:9' => [
+            'label' => 'Widescreen',
+            'hint' => 'Panorama',
+            'width' => 1280,
+            'height' => 544,
+        ],
+        '9:16' => [
+            'label' => 'Tall',
+            'hint' => 'Stories and reels',
+            'width' => 720,
+            'height' => 1280,
+        ],
+        '2:3' => [
+            'label' => 'Portrait',
+            'hint' => 'Posters and prints',
+            'width' => 832,
+            'height' => 1216,
+        ],
+        '3:4' => [
+            'label' => 'Instagram',
+            'hint' => 'Feed posts',
+            'width' => 896,
+            'height' => 1152,
+        ],
     ],
 
     /*

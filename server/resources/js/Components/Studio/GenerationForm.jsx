@@ -8,6 +8,7 @@ import {
     Crop,
     Palette,
     Copy,
+    SlidersHorizontal,
 } from 'lucide-react';
 import { Panel, NotReady, Remaining } from '@/Components/Studio/Controls';
 import Dropdown from '@/Components/Studio/Dropdown';
@@ -79,10 +80,15 @@ export default function GenerationForm({
         });
     };
 
+    // Каждый вариант — отдельная работа и отдельное списание, поэтому
+    // человек должен понимать, за что платит.
     const variantOptions = Array.from({ length: maxVariants }, (_, index) => ({
         key: String(index + 1),
         label: index === 0 ? '1 image' : `${index + 1} images`,
-        description: index === 0 ? 'One result' : 'Pick from several at once',
+        description:
+            index === 0
+                ? 'One result'
+                : `${index + 1} takes on the same prompt, one request`,
     }));
 
     return (
@@ -136,9 +142,18 @@ export default function GenerationForm({
                 <button
                     type="button"
                     onClick={() => setAdvanced((value) => !value)}
-                    className="flex h-9 items-center gap-1.5 rounded-full border border-white/[0.12] px-3.5 text-[13px] text-white/60 transition hover:bg-white/10 hover:text-white"
+                    title="Exclusions and seed"
+                    className={`flex h-9 items-center gap-1.5 rounded-full border px-3.5 text-[13px] transition ${
+                        advanced
+                            ? 'border-white/30 bg-white/10 text-white'
+                            : 'border-white/[0.12] text-white/60 hover:bg-white/10 hover:text-white'
+                    }`}
                 >
-                    Advanced
+                    <SlidersHorizontal
+                        className="h-4 w-4 shrink-0 text-white/50"
+                        strokeWidth={1.75}
+                    />
+                    More settings
                     <ChevronDown
                         className={`h-3.5 w-3.5 transition ${advanced ? 'rotate-180' : ''}`}
                         strokeWidth={2}
@@ -172,6 +187,9 @@ export default function GenerationForm({
                     <label className="block">
                         <span className="mb-1.5 block text-[13px] text-white/55">
                             What to avoid
+                            <span className="ml-2 text-white/30">
+                                things that should not appear
+                            </span>
                         </span>
                         <input
                             value={negative}
@@ -184,6 +202,9 @@ export default function GenerationForm({
                     <label className="block">
                         <span className="mb-1.5 block text-[13px] text-white/55">
                             Seed
+                            <span className="ml-2 text-white/30">
+                                same number, same picture
+                            </span>
                         </span>
                         <div className="flex gap-2">
                             <input

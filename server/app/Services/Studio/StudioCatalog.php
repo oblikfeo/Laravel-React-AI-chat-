@@ -39,6 +39,15 @@ class StudioCatalog
             ->map(fn (array $ratio, string $key) => [
                 'key' => $key,
                 'label' => $ratio['label'],
+                // Пропорция и размер: по одному названию не понять,
+                // что получишь.
+                'badge' => $key,
+                'description' => sprintf(
+                    '%s · %d×%d',
+                    $ratio['hint'],
+                    $ratio['width'],
+                    $ratio['height'],
+                ),
             ])
             ->values()
             ->all();
@@ -55,22 +64,23 @@ class StudioCatalog
     public static function styles(): array
     {
         $labels = [
-            'none' => 'None',
-            'photo' => 'Photo',
-            'cinematic' => 'Cinematic',
-            'anime' => 'Anime',
-            'art' => 'Digital art',
-            'render' => '3D render',
-            'comic' => 'Comic',
-            'neon' => 'Neon punk',
-            'pixel' => 'Pixel art',
-            'minimal' => 'Line art',
+            'none' => ['None', 'Follow the prompt only'],
+            'photo' => ['Photo', 'Realistic, natural light'],
+            'cinematic' => ['Cinematic', 'Film look, dramatic light'],
+            'anime' => ['Anime', 'Japanese animation'],
+            'art' => ['Digital art', 'Painted, rich colour'],
+            'render' => ['3D render', 'Modelled and lit in 3D'],
+            'comic' => ['Comic', 'Bold ink and halftones'],
+            'neon' => ['Neon punk', 'Night city, glowing signs'],
+            'pixel' => ['Pixel art', 'Retro game sprites'],
+            'minimal' => ['Line art', 'Clean outlines, no fill'],
         ];
 
         return collect(config('studio.styles'))
             ->map(fn (?string $preset, string $key) => [
                 'key' => $key,
-                'label' => $labels[$key] ?? ucfirst($key),
+                'label' => $labels[$key][0] ?? ucfirst($key),
+                'description' => $labels[$key][1] ?? null,
             ])
             ->values()
             ->all();
