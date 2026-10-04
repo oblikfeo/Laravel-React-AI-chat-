@@ -93,6 +93,12 @@ export default function StudioIndex({
 
     const shared = { available: studioReady, busy, limit };
 
+    // На каждой вкладке своя галерея: записи и картинки смешивать
+    // незачем, человек пришёл за чем-то одним.
+    const shown = generations.filter((item) =>
+        tab === 'audio' ? item.kind === 'audio' : item.kind !== 'audio',
+    );
+
     return (
         <>
             <Head title="Studio — Uncensia" />
@@ -179,7 +185,8 @@ export default function StudioIndex({
 
                     {tab !== 'video' && (
                         <GenerationGrid
-                            items={generations}
+                            items={shown}
+                            kind={tab === 'audio' ? 'audio' : 'image'}
                             highlight={fresh}
                             onReuse={(item) => {
                                 setPreset(item);

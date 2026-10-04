@@ -21,7 +21,13 @@ import {
  * работы и занимают весь экран. В заголовке видно, сколько их всего,
  * и свежий результат разворачивает галерею сам.
  */
-export default function GenerationGrid({ items, onReuse, onEdit, highlight }) {
+export default function GenerationGrid({
+    items,
+    onReuse,
+    onEdit,
+    highlight,
+    kind = 'image',
+}) {
     const [open, setOpen] = useState(false);
     const [preview, setPreview] = useState(null);
     const seen = useRef(null);
@@ -39,6 +45,7 @@ export default function GenerationGrid({ items, onReuse, onEdit, highlight }) {
     }, [items]);
 
     const ready = items.filter((item) => item.status === 'ready').length;
+    const audio = kind === 'audio';
 
     return (
         <div className="mt-6">
@@ -48,16 +55,28 @@ export default function GenerationGrid({ items, onReuse, onEdit, highlight }) {
                 className="flex w-full items-center gap-3 rounded-2xl border border-white/[0.09] bg-slate-950/45 px-4 py-3 text-left transition hover:border-white/20 hover:bg-slate-950/60"
             >
                 <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.07] text-white/60">
-                    <Images className="h-[18px] w-[18px]" strokeWidth={1.75} />
+                    {audio ? (
+                        <Volume2 className="h-[18px] w-[18px]" strokeWidth={1.75} />
+                    ) : (
+                        <Images className="h-[18px] w-[18px]" strokeWidth={1.75} />
+                    )}
                 </span>
 
                 <span className="min-w-0 flex-1">
                     <span className="block text-[14px] font-medium text-white">
-                        Gallery
+                        {audio ? 'Recordings' : 'Gallery'}
                     </span>
                     <span className="mt-0.5 block text-[12px] text-white/40">
                         {ready
-                            ? `${ready} ${ready === 1 ? 'work' : 'works'} saved`
+                            ? `${ready} ${
+                                  audio
+                                      ? ready === 1
+                                          ? 'recording'
+                                          : 'recordings'
+                                      : ready === 1
+                                        ? 'work'
+                                        : 'works'
+                              } saved`
                             : 'Nothing saved yet'}
                     </span>
                 </span>
@@ -73,11 +92,16 @@ export default function GenerationGrid({ items, onReuse, onEdit, highlight }) {
             {open && (
                 <div className="mt-3">
                     {items.length ? (
-                        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                        <div
+                            className={`grid gap-3 ${
+                                audio ? '' : 'sm:grid-cols-2 xl:grid-cols-3'
+                            }`}
+                        >
                             {items.map((item) => (
                                 <Card
                                     key={item.id}
                                     item={item}
+                                    audio={audio}
                                     fresh={item.id === highlight}
                                     onReuse={onReuse}
                                     onEdit={onEdit}
@@ -91,15 +115,24 @@ export default function GenerationGrid({ items, onReuse, onEdit, highlight }) {
                         </div>
                     ) : (
                         <div className="rounded-2xl border border-white/[0.07] bg-slate-950/40 px-6 py-12 text-center">
-                            <Wand2
-                                className="mx-auto h-7 w-7 text-white/20"
-                                strokeWidth={1.5}
-                            />
+                            {audio ? (
+                                <Volume2
+                                    className="mx-auto h-7 w-7 text-white/20"
+                                    strokeWidth={1.5}
+                                />
+                            ) : (
+                                <Wand2
+                                    className="mx-auto h-7 w-7 text-white/20"
+                                    strokeWidth={1.5}
+                                />
+                            )}
                             <p className="mt-3 text-[15px] text-white/60">
                                 Nothing here yet
                             </p>
                             <p className="mt-1 text-sm text-white/35">
-                                Your finished work will appear here.
+                                {audio
+                                    ? 'Your recordings will appear here.'
+                                    : 'Your finished work will appear here.'}
                             </p>
                         </div>
                     )}
@@ -119,7 +152,7 @@ export default function GenerationGrid({ items, onReuse, onEdit, highlight }) {
  * Кнопки поверх картинки прятали её и появлялись только при
  * наведении — на ощупь. Здесь они всегда на виду.
  */
-function Card({ item, fresh, onReuse, onEdit, onOpen }) {
+function Card({ item, fresh, audio, onReuse, onEdit, onOpen }) {
     const failed = item.status === 'failed';
     const isAudio = item.kind === 'audio';
 
@@ -146,14 +179,18 @@ function Card({ item, fresh, onReuse, onEdit, onOpen }) {
                     : 'border-white/[0.08]'
             }`}
         >
-            {/* Картинка занимает карточку: ради неё сюда и смотрят. */}
-            <div className="aspect-square min-w-0 flex-1 shrink overflow-hidden rounded-xl bg-black/40">
+            {/* Картинка занимает карточку: ради неё сюда и смотрят.
+                Записи хватает строки — показывать нечего. */}
+            <div
+                className={`min-w-0 flex-1 shrink overflow-hidden rounded-xl bg-black/40 ${
+                    audio ? '' : 'aspect-square'
+                }`}
+            >
                 {isAudio && item.url ? (
-                    <div className="flex h-full w-full flex-col items-center justify-center gap-3 px-4">
-                        <Volume2
-                            className="h-8 w-8 text-white/35"
-                            strokeWidth={1.5}
-                        />
+                    <div className="flex h-full w-full flex-col justify-center gap-2 px-4 py-3">
+                        <p className="line-clamp-2 text-[13px] leading-snug text-white/75">
+                            {item.prompt}
+                        </p>
                         <audio controls src={item.url} className="w-full" />
                     </div>
                 ) : item.url ? (
