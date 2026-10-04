@@ -73,7 +73,7 @@ export default function GenerationGrid({ items, onReuse, onEdit, highlight }) {
             {open && (
                 <div className="mt-3">
                     {items.length ? (
-                        <div className="grid gap-3 sm:grid-cols-2">
+                        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                             {items.map((item) => (
                                 <Card
                                     key={item.id}
@@ -147,7 +147,7 @@ function Card({ item, fresh, onReuse, onEdit, onOpen }) {
             }`}
         >
             {/* Картинка занимает карточку: ради неё сюда и смотрят. */}
-            <div className="aspect-square min-w-0 flex-1 overflow-hidden rounded-xl bg-black/40">
+            <div className="aspect-square min-w-0 flex-1 shrink overflow-hidden rounded-xl bg-black/40">
                 {isAudio && item.url ? (
                     <div className="flex h-full w-full flex-col items-center justify-center gap-3 px-4">
                         <Volume2
@@ -196,25 +196,26 @@ function Card({ item, fresh, onReuse, onEdit, onOpen }) {
                 )}
             </div>
 
-            {/* Действия столбиком сбоку: на виду и не закрывают работу. */}
-            <div className="flex shrink-0 flex-col gap-1.5">
+            {/* Действия столбиком во всю высоту картинки: у каждой
+                кнопки значок и подпись, иначе их приходится угадывать. */}
+            <div className="flex w-[106px] shrink-0 flex-col gap-1">
                 {item.url && (
                     <Action
-                        title="Download"
+                        label="Download"
                         href={`${item.url}?download=1`}
                         icon={Download}
                     />
                 )}
 
                 <Action
-                    title={failed ? 'Try again' : 'Create another'}
+                    label={failed ? 'Try again' : 'Again'}
                     onClick={retry}
                     icon={RotateCw}
                 />
 
                 {!isAudio && (
                     <Action
-                        title="Use these settings"
+                        label="Settings"
                         onClick={() => onReuse(item)}
                         icon={Wand2}
                     />
@@ -222,29 +223,41 @@ function Card({ item, fresh, onReuse, onEdit, onOpen }) {
 
                 {!isAudio && item.url && onEdit && (
                     <Action
-                        title="Edit this image"
+                        label="Edit"
                         onClick={() => onEdit(item)}
                         icon={Pencil}
                     />
                 )}
 
-                <Action title="Delete" onClick={remove} icon={Trash2} danger />
+                <Action
+                    label="Delete"
+                    onClick={remove}
+                    icon={Trash2}
+                    danger
+                />
             </div>
         </div>
     );
 }
 
-function Action({ title, icon: Icon, onClick, href, danger }) {
-    const className = `flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.1] bg-white/[0.03] transition hover:bg-white/12 ${
+function Action({ label, icon: Icon, onClick, href, danger }) {
+    const className = `flex h-9 items-center gap-2 rounded-lg border border-white/[0.1] bg-white/[0.03] px-2.5 text-[12px] transition hover:bg-white/[0.12] ${
         danger
-            ? 'text-white/55 hover:text-rose-300'
+            ? 'text-white/55 hover:border-rose-300/30 hover:text-rose-300'
             : 'text-white/70 hover:text-white'
     }`;
 
+    const inner = (
+        <>
+            <Icon className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} />
+            <span className="truncate">{label}</span>
+        </>
+    );
+
     if (href) {
         return (
-            <a href={href} title={title} aria-label={title} className={className}>
-                <Icon className="h-3.5 w-3.5" strokeWidth={1.75} />
+            <a href={href} aria-label={label} className={className}>
+                {inner}
             </a>
         );
     }
@@ -253,11 +266,10 @@ function Action({ title, icon: Icon, onClick, href, danger }) {
         <button
             type="button"
             onClick={onClick}
-            title={title}
-            aria-label={title}
+            aria-label={label}
             className={className}
         >
-            <Icon className="h-3.5 w-3.5" strokeWidth={1.75} />
+            {inner}
         </button>
     );
 }
