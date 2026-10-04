@@ -44,5 +44,9 @@ interface AudioStudio
      *
      * @throws GenerationFailed
      */
-    public function retrieve(string $queueId, bool $voiceChange = false): QueueResult;
+    public function retrieve(
+        string $queueId,
+        string $providerModel,
+        bool $voiceChange = false,
+    ): QueueResult;
 }

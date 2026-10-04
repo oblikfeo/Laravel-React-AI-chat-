@@ -67,9 +67,15 @@ class FakeAudioStudio implements AudioStudio
         return $this->job();
     }
 
-    public function retrieve(string $queueId, bool $voiceChange = false): QueueResult
-    {
+    public ?string $lastRetrieveModel = null;
+
+    public function retrieve(
+        string $queueId,
+        string $providerModel,
+        bool $voiceChange = false,
+    ): QueueResult {
         $this->lastVoiceChangeFlag = $voiceChange;
+        $this->lastRetrieveModel = $providerModel;
 
         return $this->ready
             ? QueueResult::ready(contents: 'fake-audio', mime: 'audio/mpeg')

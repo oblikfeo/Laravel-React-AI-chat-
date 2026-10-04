@@ -32,20 +32,28 @@ export default function GenerationGrid({
     const [open, setOpen] = useState(false);
     const [preview, setPreview] = useState(null);
     const seen = useRef(null);
+    const ready = useRef(null);
 
-    // Новая работа должна быть видна сразу: иначе человек нажимает
-    // кнопку и не понимает, что получилось.
+    // Галерея открывается сама и когда появилась новая работа, и
+    // когда дождались готовой: человек нажал кнопку и должен увидеть
+    // результат, а не гадать, что произошло.
     useEffect(() => {
         const newest = items[0]?.id ?? null;
+        const done = items.filter((item) => item.status === 'ready').length;
 
-        if (newest !== null && seen.current !== null && newest !== seen.current) {
+        const appeared =
+            newest !== null && seen.current !== null && newest !== seen.current;
+        const finished = ready.current !== null && done > ready.current;
+
+        if (appeared || finished) {
             setOpen(true);
         }
 
         seen.current = newest;
+        ready.current = done;
     }, [items]);
 
-    const ready = items.filter((item) => item.status === 'ready').length;
+    const readyCount = items.filter((item) => item.status === 'ready').length;
     const audio = kind === 'audio';
 
     return (
@@ -68,13 +76,13 @@ export default function GenerationGrid({
                         {audio ? 'Recordings' : 'Gallery'}
                     </span>
                     <span className="mt-0.5 block text-[12px] text-white/40">
-                        {ready
-                            ? `${ready} ${
+                        {readyCount
+                            ? `${readyCount} ${
                                   audio
-                                      ? ready === 1
+                                      ? readyCount === 1
                                           ? 'recording'
                                           : 'recordings'
-                                      : ready === 1
+                                      : readyCount === 1
                                         ? 'work'
                                         : 'works'
                               } saved`

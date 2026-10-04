@@ -122,7 +122,24 @@ export default function StudioIndex({
             router.post(
                 '/studio/collect',
                 {},
-                { preserveScroll: true, preserveState: true, showProgress: false },
+                {
+                    preserveScroll: true,
+                    preserveState: true,
+                    showProgress: false,
+                    // Готовую работу подсвечиваем: человек мог уйти с
+                    // вкладки и вернуться к полной галерее.
+                    onSuccess: (page) => {
+                        const done = (page.props.generations ?? []).find(
+                            (item) =>
+                                item.kind === 'audio' &&
+                                item.status === 'ready',
+                        );
+
+                        if (done) {
+                            setFresh(done.id);
+                        }
+                    },
+                },
             );
         }, 5000);
 

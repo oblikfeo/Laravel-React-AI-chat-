@@ -62,8 +62,11 @@ class VeniceAudioStudio implements AudioStudio
         );
     }
 
-    public function retrieve(string $queueId, bool $voiceChange = false): QueueResult
-    {
-        return $this->queue->retrieve($queueId, $voiceChange);
+    public function retrieve(
+        string $queueId,
+        string $providerModel,
+        bool $voiceChange = false,
+    ): QueueResult {
+        return $this->queue->retrieve($queueId, $providerModel, $voiceChange);
     }
 }

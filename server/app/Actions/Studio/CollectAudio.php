@@ -35,6 +35,7 @@ class CollectAudio
         try {
             $result = $this->studio->retrieve(
                 $generation->queue_id,
+                $this->providerModel($generation),
                 $generation->operation === Generation::OP_VOICE_CHANGE,
             );
         } catch (GenerationFailed $exception) {
@@ -61,6 +62,21 @@ class CollectAudio
             $result->extension(),
             $result->mime ?? 'audio/mpeg',
         );
+    }
+
+    /**
+     * Какой моделью считается задача.
+     *
+     * Провайдер спрашивает её вместе с номером: по одному номеру он
+     * задачу не находит.
+     */
+    private function providerModel(Generation $generation): string
+    {
+        return match ($generation->operation) {
+            Generation::OP_MUSIC => config("studio.music.models.{$generation->model_key}.provider_model"),
+            Generation::OP_EFFECT => config("studio.effects.models.{$generation->model_key}.provider_model"),
+            default => config('studio.voice_changer.provider_model'),
+        };
     }
 
     private function expired(Generation $generation): bool

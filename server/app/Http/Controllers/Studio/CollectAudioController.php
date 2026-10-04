@@ -31,10 +31,20 @@ class CollectAudioController extends Controller
             ->where('status', Generation::STATUS_QUEUED)
             ->get();
 
+        $finished = 0;
+
         foreach ($waiting as $generation) {
-            $action->handle($generation);
+            if ($action->handle($generation)->isReady()) {
+                $finished++;
+            }
         }
 
-        return back();
+        if ($finished === 0) {
+            return back();
+        }
+
+        return back()->with('success', $finished === 1
+            ? 'Done. Saved to your gallery.'
+            : "{$finished} tracks are done. Saved to your gallery.");
     }
 }

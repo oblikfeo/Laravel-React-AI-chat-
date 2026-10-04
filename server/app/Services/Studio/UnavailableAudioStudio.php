@@ -31,8 +31,11 @@ class UnavailableAudioStudio implements AudioStudio
         throw $this->fail();
     }
 
-    public function retrieve(string $queueId, bool $voiceChange = false): QueueResult
-    {
+    public function retrieve(
+        string $queueId,
+        string $providerModel,
+        bool $voiceChange = false,
+    ): QueueResult {
         throw $this->fail();
     }
 

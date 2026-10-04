@@ -226,4 +226,25 @@ class StudioAudioTest extends TestCase
             ->assertDontSee('ace-step')
             ->assertDontSee('af_heart');
     }
+
+    /**
+     * Провайдер ищет задачу по номеру вместе с моделью: по одному
+     * номеру он отвечает отказом.
+     */
+    public function test_model_is_sent_when_collecting(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->post('/studio/effect', [
+            'prompt' => 'Thunder rolling in the distance',
+            'model' => 'quick',
+        ]);
+
+        $this->actingAs($user)->post('/studio/collect');
+
+        $this->assertSame(
+            config('studio.effects.models.quick.provider_model'),
+            $this->studio->lastRetrieveModel,
+        );
+    }
 }

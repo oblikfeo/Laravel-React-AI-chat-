@@ -58,13 +58,21 @@ class VeniceAudioQueue
      * Пока задача считается, провайдер отвечает состоянием; когда
      * готова — самим файлом.
      */
-    public function retrieve(string $queueId, bool $voiceChange = false): QueueResult
-    {
+    public function retrieve(
+        string $queueId,
+        string $providerModel,
+        bool $voiceChange = false,
+    ): QueueResult {
         $path = $voiceChange
             ? '/audio/voice-changer/retrieve'
             : '/audio/retrieve';
 
-        $response = $this->request()->get($path, ['queue_id' => $queueId]);
+        // Это POST с телом, а не запрос с параметром в адресе, и
+        // провайдеру нужна ещё модель, которой задача считается.
+        $response = $this->request()->asJson()->post($path, [
+            'queue_id' => $queueId,
+            'model' => $providerModel,
+        ]);
 
         $this->guard($response, $path);
 
