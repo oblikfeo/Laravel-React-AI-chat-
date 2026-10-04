@@ -47,6 +47,9 @@ export default function StudioIndex({
     // Исходник для правки: работа из ленты.
     const [source, setSource] = useState(null);
 
+    // Открыт ли выбор из своих работ.
+    const [browsing, setBrowsing] = useState(false);
+
     const finish = { preserveScroll: true, showProgress: false, onFinish: () => setBusy(false) };
 
     const submitImage = (values) => {
@@ -112,8 +115,9 @@ export default function StudioIndex({
                                 aspectRatios={aspectRatios}
                                 upscaleScales={upscaleScales}
                                 maxCombine={maxCombine}
-                                source={source && source !== 'browse' ? source : null}
+                                source={source}
                                 onPickSource={setSource}
+                                onBrowse={() => setBrowsing(true)}
                                 onSubmit={submitEdit}
                             />
                         )}
@@ -130,11 +134,14 @@ export default function StudioIndex({
                         {tab === 'video' && <ComingSoon />}
                     </div>
 
-                    {source === 'browse' && (
+                    {browsing && (
                         <AssetPicker
                             items={generations}
-                            onPick={setSource}
-                            onClose={() => setSource(null)}
+                            onPick={(item) => {
+                                setSource(item);
+                                setBrowsing(false);
+                            }}
+                            onClose={() => setBrowsing(false)}
                         />
                     )}
 

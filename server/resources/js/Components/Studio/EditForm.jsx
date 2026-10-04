@@ -5,30 +5,59 @@ import {
     Maximize2,
     Scissors,
     Upload,
-    FolderOpen,
+    Images,
+    X,
     Crop,
 } from 'lucide-react';
-import { Panel, NotReady, Remaining, Thumbnails } from '@/Components/Studio/Controls';
+import { Panel, NotReady, Remaining } from '@/Components/Studio/Controls';
 import Dropdown from '@/Components/Studio/Dropdown';
 
-/** Инструменты правки — те же, что в панели под полем ввода у Venice. */
+/**
+ * Инструменты правки.
+ *
+ * Каждый берёт готовую картинку и делает с ней одно понятное
+ * действие, поэтому они стоят крупно: это главное на вкладке.
+ */
 const TOOLS = [
-    { key: 'edit', label: 'Edit Image', icon: Wand2, needsPrompt: true },
-    { key: 'combine', label: 'Combine', icon: Layers, needsPrompt: true },
-    { key: 'upscale', label: 'Upscale', icon: Maximize2, needsPrompt: false },
+    {
+        key: 'edit',
+        label: 'Edit Image',
+        hint: 'Change it by description',
+        icon: Wand2,
+        needsPrompt: true,
+        minimum: 1,
+    },
+    {
+        key: 'combine',
+        label: 'Combine',
+        hint: 'Merge several into one',
+        icon: Layers,
+        needsPrompt: true,
+        minimum: 2,
+    },
+    {
+        key: 'upscale',
+        label: 'Upscale',
+        hint: 'More resolution, same picture',
+        icon: Maximize2,
+        needsPrompt: false,
+        minimum: 1,
+    },
     {
         key: 'background_remove',
         label: 'Remove Background',
+        hint: 'Cut the subject out',
         icon: Scissors,
         needsPrompt: false,
+        minimum: 1,
     },
 ];
 
 /**
  * Правка готового изображения.
  *
- * Исходник берётся либо из своих работ, либо с диска: человек правит
- * и то, что нарисовал здесь, и то, что принёс с собой.
+ * Выбор картинки и настройки живут в одной форме: два отдельных блока
+ * дублировали загрузку и оставляли непонятным, где именно выбирать.
  */
 export default function EditForm({
     aspectRatios,
@@ -39,6 +68,7 @@ export default function EditForm({
     limit,
     source,
     onPickSource,
+    onBrowse,
     onSubmit,
 }) {
     const [tool, setTool] = useState('edit');
@@ -50,15 +80,15 @@ export default function EditForm({
 
     const current = TOOLS.find((item) => item.key === tool) ?? TOOLS[0];
 
-    // Объединение требует нескольких картинок, остальные инструменты —
-    // одной: своей работы или загруженного файла.
-    const minimum = tool === 'combine' ? 2 : 1;
-    const total = files.length + (source ? 1 : 0);
-    const enoughImages = total >= minimum;
+    const picked = [
+        ...(source ? [{ kind: 'asset', item: source }] : []),
+        ...files.map((file, index) => ({ kind: 'file', file, index })),
+    ];
 
+    const enough = picked.length >= current.minimum;
     const exhausted = limit?.remaining === 0;
     const canSubmit =
-        enoughImages &&
+        enough &&
         (!current.needsPrompt || prompt.trim().length > 0) &&
         !busy &&
         available &&
@@ -82,82 +112,49 @@ export default function EditForm({
             prompt: current.needsPrompt ? prompt.trim() : null,
             source_generation_id: source?.id ?? null,
             images: files,
-            aspect_ratio: tool === 'upscale' || tool === 'background_remove' ? null : ratio,
+            aspect_ratio:
+                tool === 'upscale' || tool === 'background_remove' ? null : ratio,
             scale: tool === 'upscale' ? Number(scale) : null,
         });
     };
 
     return (
         <div>
-            {/* Выбор исходника стоит над формой: пока картинки нет,
-                править нечего. */}
-            <div className="mb-4 rounded-3xl border border-white/[0.08] bg-slate-950/40 p-5 text-center backdrop-blur-xl">
-                {source ? (
-                    <div className="flex flex-col items-center gap-3">
-                        <img
-                            src={source.url}
-                            alt=""
-                            className="max-h-44 rounded-xl border border-white/[0.12] object-contain"
-                        />
-                        <button
-                            type="button"
-                            onClick={() => onPickSource(null)}
-                            className="text-[13px] text-white/50 transition hover:text-white"
-                        >
-                            Choose another
-                        </button>
-                    </div>
-                ) : (
-                    <>
-                        <Wand2
-                            className="mx-auto h-7 w-7 text-white/25"
-                            strokeWidth={1.5}
-                        />
-                        <p className="mt-3 text-[15px] font-medium text-white">
-                            Edit Studio
-                        </p>
-                        <p className="mt-1 text-sm text-white/45">
-                            Select an image to start editing
-                        </p>
-
-                        <div className="mt-4 flex flex-wrap justify-center gap-2">
-                            <button
-                                type="button"
-                                onClick={() => fileRef.current?.click()}
-                                className="flex h-9 items-center gap-2 rounded-full bg-white px-4 text-[13px] font-semibold text-black transition hover:bg-white/90"
-                            >
-                                <Upload className="h-4 w-4" strokeWidth={2} />
-                                Upload New
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() => onPickSource('browse')}
-                                className="flex h-9 items-center gap-2 rounded-full border border-white/[0.12] px-4 text-[13px] text-white/70 transition hover:bg-white/10 hover:text-white"
-                            >
-                                <FolderOpen className="h-4 w-4" strokeWidth={1.75} />
-                                Select Asset
-                            </button>
-                        </div>
-                    </>
-                )}
-            </div>
-
-            {/* Инструменты: кнопки, а не список — так видно все сразу. */}
-            <div className="mb-3 flex flex-wrap justify-center gap-2">
-                {TOOLS.map(({ key, label, icon: Icon }) => (
+            {/* Инструменты крупно: ради них на вкладку и заходят. */}
+            <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {TOOLS.map(({ key, label, hint, icon: Icon }) => (
                     <button
                         key={key}
                         type="button"
                         onClick={() => setTool(key)}
-                        className={`flex h-9 items-center gap-2 rounded-full px-4 text-[13px] transition ${
+                        className={`flex flex-col items-start gap-2 rounded-2xl border p-3.5 text-left transition ${
                             tool === key
-                                ? 'bg-white font-semibold text-black'
-                                : 'border border-white/[0.12] text-white/65 hover:bg-white/10 hover:text-white'
+                                ? 'border-white/30 bg-white/[0.09] shadow-lg shadow-black/30'
+                                : 'border-white/[0.09] bg-slate-950/40 hover:border-white/20 hover:bg-white/[0.05]'
                         }`}
                     >
-                        <Icon className="h-4 w-4" strokeWidth={1.75} />
-                        {label}
+                        <span
+                            className={`flex h-9 w-9 items-center justify-center rounded-xl transition ${
+                                tool === key
+                                    ? 'bg-white text-black'
+                                    : 'bg-white/[0.07] text-white/60'
+                            }`}
+                        >
+                            <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
+                        </span>
+
+                        <span className="min-w-0">
+                            <span
+                                className={`block text-[13px] font-medium ${
+                                    tool === key ? 'text-white' : 'text-white/75'
+                                }`}
+                            >
+                                {label}
+                            </span>
+                            <span className="mt-0.5 block text-[11px] leading-snug text-white/35">
+                                {hint}
+                            </span>
+                        </span>
                     </button>
                 ))}
             </div>
@@ -168,7 +165,7 @@ export default function EditForm({
                 <input
                     ref={fileRef}
                     type="file"
-                    multiple={tool === 'combine'}
+                    multiple={current.minimum > 1}
                     accept="image/*"
                     className="hidden"
                     onChange={(event) => {
@@ -179,12 +176,74 @@ export default function EditForm({
                     }}
                 />
 
-                <Thumbnails
-                    files={files}
-                    onRemove={(index) =>
-                        setFiles(files.filter((_, position) => position !== index))
-                    }
-                />
+                {/* Что правим. Пока ничего не выбрано — приглашение,
+                    дальше миниатюры выбранного. */}
+                {picked.length ? (
+                    <div className="mb-4 flex flex-wrap gap-2">
+                        {picked.map((entry) =>
+                            entry.kind === 'asset' ? (
+                                <Thumb
+                                    key="asset"
+                                    src={entry.item.url}
+                                    caption="From your work"
+                                    onRemove={() => onPickSource(null)}
+                                />
+                            ) : (
+                                <Thumb
+                                    key={`file-${entry.index}`}
+                                    src={URL.createObjectURL(entry.file)}
+                                    caption="Uploaded"
+                                    onRemove={() =>
+                                        setFiles(
+                                            files.filter(
+                                                (_, position) =>
+                                                    position !== entry.index,
+                                            ),
+                                        )
+                                    }
+                                />
+                            ),
+                        )}
+
+                        {picked.length < maxCombine && (
+                            <button
+                                type="button"
+                                onClick={() => fileRef.current?.click()}
+                                aria-label="Add another image"
+                                className="flex h-[84px] w-[84px] shrink-0 flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-white/20 text-white/45 transition hover:border-white/40 hover:text-white"
+                            >
+                                <Upload className="h-4 w-4" strokeWidth={1.75} />
+                                <span className="text-[11px]">Add</span>
+                            </button>
+                        )}
+                    </div>
+                ) : (
+                    <div className="mb-4 flex flex-wrap items-center gap-2.5 rounded-2xl border border-dashed border-white/[0.14] px-4 py-3.5">
+                        <span className="mr-auto text-[13px] text-white/50">
+                            {current.minimum > 1
+                                ? 'Pick at least two images'
+                                : 'Pick an image to work with'}
+                        </span>
+
+                        <button
+                            type="button"
+                            onClick={() => fileRef.current?.click()}
+                            className="flex h-9 items-center gap-2 rounded-full bg-white px-4 text-[13px] font-semibold text-black transition hover:bg-white/90"
+                        >
+                            <Upload className="h-4 w-4" strokeWidth={2} />
+                            Upload
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={onBrowse}
+                            className="flex h-9 items-center gap-2 rounded-full border border-white/[0.14] px-4 text-[13px] text-white/75 transition hover:bg-white/10 hover:text-white"
+                        >
+                            <Images className="h-4 w-4" strokeWidth={1.75} />
+                            From my work
+                        </button>
+                    </div>
+                )}
 
                 {current.needsPrompt ? (
                     <textarea
@@ -199,24 +258,12 @@ export default function EditForm({
                         className="w-full resize-none border-0 bg-transparent p-0 text-[16px] leading-relaxed text-white placeholder:text-white/40 focus:outline-none focus:ring-0"
                     />
                 ) : (
-                    <p className="py-1 text-[15px] text-white/50">
-                        {tool === 'upscale'
-                            ? 'Increase resolution without losing detail.'
-                            : 'Cut the subject out of its background.'}
+                    <p className="py-1 text-[15px] text-white/45">
+                        {current.hint}. No description needed.
                     </p>
                 )}
 
                 <div className="mt-4 flex flex-wrap items-center gap-2">
-                    <button
-                        type="button"
-                        onClick={() => fileRef.current?.click()}
-                        disabled={files.length >= maxCombine}
-                        className="flex h-9 items-center gap-2 rounded-full border border-white/[0.12] px-3.5 text-[13px] text-white/60 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                        <Upload className="h-4 w-4" strokeWidth={1.75} />
-                        {tool === 'combine' ? 'Add images' : 'Upload'}
-                    </button>
-
                     {tool === 'upscale' && (
                         <Dropdown
                             value={scale}
@@ -261,15 +308,29 @@ export default function EditForm({
                         </button>
                     </div>
                 </div>
-
-                {!enoughImages && (
-                    <p className="mt-3 text-[13px] text-white/40">
-                        {tool === 'combine'
-                            ? 'Add at least two images to combine.'
-                            : 'Choose an image first.'}
-                    </p>
-                )}
             </Panel>
+        </div>
+    );
+}
+
+/** Выбранная картинка: видно, что именно пойдёт в работу. */
+function Thumb({ src, caption, onRemove }) {
+    return (
+        <div className="group relative h-[84px] w-[84px] shrink-0 overflow-hidden rounded-xl border border-white/25">
+            <img src={src} alt="" className="h-full w-full object-cover" />
+
+            <span className="absolute inset-x-0 bottom-0 bg-black/70 px-1 py-0.5 text-center text-[9px] uppercase tracking-wide text-white/65">
+                {caption}
+            </span>
+
+            <button
+                type="button"
+                onClick={onRemove}
+                aria-label="Remove"
+                className="absolute inset-0 flex items-center justify-center bg-black/65 opacity-0 transition group-hover:opacity-100"
+            >
+                <X className="h-4 w-4 text-white" strokeWidth={2} />
+            </button>
         </div>
     );
 }
