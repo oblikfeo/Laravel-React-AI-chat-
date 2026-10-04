@@ -95,4 +95,18 @@ class Generation extends Model
         // Ничей запрос не должен вернуть чужие работы.
         return $query->whereRaw('1 = 0');
     }
+
+    /**
+     * Что показывать в ленте.
+     *
+     * Неудачная попытка нужна недолго: человек должен понять, что
+     * запрос был и его можно повторить. Старые висят пустыми
+     * квадратами, поэтому через час их не показываем.
+     */
+    public function scopeVisible(Builder $query): Builder
+    {
+        return $query->where(fn (Builder $q) => $q
+            ->where('status', '!=', self::STATUS_FAILED)
+            ->orWhere('created_at', '>', now()->subHour()));
+    }
 }

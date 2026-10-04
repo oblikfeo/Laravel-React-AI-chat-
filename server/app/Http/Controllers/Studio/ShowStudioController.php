@@ -32,6 +32,7 @@ class ShowStudioController extends Controller
             'generations' => GenerationResource::collection(
                 Generation::query()
                     ->ownedBy($user, $guest)
+                    ->visible()
                     ->latest('id')
                     ->limit(60)
                     ->get()

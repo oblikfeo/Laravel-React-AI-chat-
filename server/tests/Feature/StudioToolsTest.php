@@ -324,4 +324,39 @@ class StudioToolsTest extends TestCase
             ])
             ->assertSessionHasErrors('seed');
     }
+
+    /**
+     * Неудачная попытка нужна недолго: человек должен понять, что
+     * запрос был. Старые висят в ленте пустыми квадратами.
+     */
+    public function test_old_failures_leave_the_feed(): void
+    {
+        $user = User::factory()->create();
+
+        $fresh = Generation::create([
+            'user_id' => $user->id,
+            'model_key' => 'fast',
+            'status' => Generation::STATUS_FAILED,
+            'prompt' => 'Только что',
+            'aspect_ratio' => '1:1',
+        ]);
+
+        $old = Generation::create([
+            'user_id' => $user->id,
+            'model_key' => 'fast',
+            'status' => Generation::STATUS_FAILED,
+            'prompt' => 'Давно',
+            'aspect_ratio' => '1:1',
+        ]);
+
+        $old->forceFill(['created_at' => now()->subHours(2)])->save();
+
+        $this->actingAs($user)
+            ->get('/studio')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->where(
+                'generations',
+                fn ($items) => collect($items)->pluck('id')->all() === [$fresh->id],
+            ));
+    }
 }

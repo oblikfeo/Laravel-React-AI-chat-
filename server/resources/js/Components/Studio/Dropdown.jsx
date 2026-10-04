@@ -47,20 +47,29 @@ export default function Dropdown({
             }
         };
 
-        // Список привязан к кнопке, поэтому при прокрутке и смене
-        // размера окна его проще закрыть, чем пересчитывать.
         const close = () => setOpen(false);
+
+        // Список привязан к кнопке, поэтому при прокрутке страницы он
+        // уехал бы от неё. Прокрутку внутри самого списка пропускаем:
+        // иначе длинный список невозможно пролистать.
+        const onScroll = (event) => {
+            if (listRef.current?.contains(event.target)) {
+                return;
+            }
+
+            close();
+        };
 
         document.addEventListener('mousedown', onPointerDown);
         document.addEventListener('keydown', onKeyDown);
         window.addEventListener('resize', close);
-        window.addEventListener('scroll', close, true);
+        window.addEventListener('scroll', onScroll, true);
 
         return () => {
             document.removeEventListener('mousedown', onPointerDown);
             document.removeEventListener('keydown', onKeyDown);
             window.removeEventListener('resize', close);
-            window.removeEventListener('scroll', close, true);
+            window.removeEventListener('scroll', onScroll, true);
         };
     }, [open]);
 
@@ -139,6 +148,14 @@ export default function Dropdown({
                 <div
                     ref={listRef}
                     role="listbox"
+                    onWheel={(event) => {
+                        const node = event.currentTarget;
+                        const scrollable = node.scrollHeight > node.clientHeight;
+
+                        if (!scrollable) {
+                            event.preventDefault();
+                        }
+                    }}
                     style={position(box, width, up, align)}
                     className={`scrollbar-thin fixed z-[60] ${
                         detailed ? 'w-[280px]' : 'w-[200px]'
