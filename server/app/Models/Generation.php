@@ -15,6 +15,9 @@ class Generation extends Model
     use HasFactory;
 
     public const STATUS_PENDING = 'pending';
+
+    /** Задача принята провайдером и ещё считается. */
+    public const STATUS_QUEUED = 'queued';
     public const STATUS_READY = 'ready';
     public const STATUS_FAILED = 'failed';
 
@@ -30,6 +33,8 @@ class Generation extends Model
     public const OP_BACKGROUND = 'background_remove';
     public const OP_SPEECH = 'speech';
     public const OP_MUSIC = 'music';
+    public const OP_EFFECT = 'effect';
+    public const OP_VOICE_CHANGE = 'voice_change';
 
     protected $fillable = [
         'user_id',
@@ -40,12 +45,16 @@ class Generation extends Model
         'source_path',
         'model_key',
         'status',
+        'queue_id',
+        'expected_ms',
         'prompt',
+        'lyrics',
         'negative_prompt',
         'aspect_ratio',
         'style',
         'seed',
         'variants',
+        'duration',
         'disk',
         'path',
         'mime',
@@ -60,6 +69,8 @@ class Generation extends Model
         return [
             'seed' => 'integer',
             'variants' => 'integer',
+            'duration' => 'integer',
+            'expected_ms' => 'integer',
             'width' => 'integer',
             'height' => 'integer',
             'completed_at' => 'datetime',
@@ -94,6 +105,12 @@ class Generation extends Model
 
         // Ничей запрос не должен вернуть чужие работы.
         return $query->whereRaw('1 = 0');
+    }
+
+    /** Ждёт результата от провайдера. */
+    public function isQueued(): bool
+    {
+        return $this->status === self::STATUS_QUEUED;
     }
 
     /**

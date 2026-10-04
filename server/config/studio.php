@@ -188,18 +188,169 @@ return [
         'models' => [
             'standard' => [
                 'label' => 'Standard',
-                'description' => 'Natural voice, fast',
+                'description' => 'Natural voice, 54 voices',
                 'provider_model' => 'tts-kokoro',
+                'voice' => 'af_heart',
+                'cost' => 0.0001,
             ],
             'premium' => [
                 'label' => 'Premium',
                 'description' => 'Most lifelike',
                 'provider_model' => 'tts-elevenlabs-turbo-v2-5',
+                'voice' => 'Aria',
                 'paid' => true,
+                'cost' => 0.002,
             ],
         ],
 
         'max_characters' => 4000,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Голоса
+    |--------------------------------------------------------------------------
+    |
+    | У провайдера названия служебные: af_heart, am_adam. Первая буква
+    | означает язык, вторая — пол. Показываем понятные имена и берём
+    | разные по звучанию, а не весь список из полусотни.
+    |
+    */
+
+    'voices' => [
+        'warm' => ['label' => 'Warm', 'description' => 'Female, soft', 'provider' => 'af_heart'],
+        'clear' => ['label' => 'Clear', 'description' => 'Female, neutral', 'provider' => 'af_nova'],
+        'bright' => ['label' => 'Bright', 'description' => 'Female, lively', 'provider' => 'af_bella'],
+        'calm' => ['label' => 'Calm', 'description' => 'Male, steady', 'provider' => 'am_adam'],
+        'deep' => ['label' => 'Deep', 'description' => 'Male, low', 'provider' => 'am_onyx'],
+        'british_f' => ['label' => 'British', 'description' => 'Female, UK accent', 'provider' => 'bf_emma'],
+        'british_m' => ['label' => 'British male', 'description' => 'Male, UK accent', 'provider' => 'bm_george'],
+    ],
+
+    'default_voice' => env('STUDIO_VOICE', 'warm'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Музыка
+    |--------------------------------------------------------------------------
+    |
+    | Генерация долгая, поэтому идёт через очередь провайдера: запрос
+    | ставится в работу, результат забирается отдельно.
+    |
+    | Дорогие модели намеренно не подключены: ElevenLabs Music стоит
+    | $0.69 за минуту — одна песня дороже семидесяти картинок.
+    |
+    */
+
+    'music' => [
+        'default_model' => env('STUDIO_MUSIC_MODEL', 'instrumental'),
+
+        'models' => [
+            'instrumental' => [
+                'label' => 'Instrumental',
+                'description' => 'Music without vocals, up to 10 min',
+                'provider_model' => 'sonilo-v1-1-music',
+                'cost' => 0.003,
+                'lyrics' => false,
+                'min_duration' => 10,
+                'max_duration' => 600,
+                'default_duration' => 60,
+            ],
+            'song' => [
+                'label' => 'Song',
+                'description' => 'Your own lyrics, sung',
+                'provider_model' => 'ace-step-15',
+                'cost' => 0.03,
+                'lyrics' => true,
+                'lyrics_required' => false,
+                // Модель принимает только эти длительности.
+                'durations' => [60, 90, 120, 150, 180, 210],
+                'default_duration' => 60,
+            ],
+            'vocal' => [
+                'label' => 'Vocal',
+                'description' => 'Full song with singing',
+                'provider_model' => 'minimax-music-v2',
+                'cost' => 0.04,
+                'lyrics' => true,
+                'lyrics_required' => true,
+                'paid' => true,
+            ],
+        ],
+
+        'max_prompt' => 300,
+        'max_lyrics' => 3000,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Звуковые эффекты
+    |--------------------------------------------------------------------------
+    */
+
+    'effects' => [
+        'default_model' => 'quick',
+
+        'models' => [
+            'quick' => [
+                'label' => 'Quick',
+                'description' => 'Short effects, up to 30 s',
+                'provider_model' => 'mmaudio-v2-text-to-audio',
+                'cost' => 0.001,
+                'min_duration' => 1,
+                'max_duration' => 30,
+                'default_duration' => 5,
+            ],
+            'long' => [
+                'label' => 'Extended',
+                'description' => 'Up to 3 minutes',
+                'provider_model' => 'sonilo-v1-1-sound-effects',
+                'cost' => 0.002,
+                'min_duration' => 1,
+                'max_duration' => 180,
+                'default_duration' => 8,
+            ],
+            'loop' => [
+                'label' => 'Seamless',
+                'description' => 'Loops without a gap',
+                'provider_model' => 'elevenlabs-sound-effects-v2',
+                'cost' => 0.002,
+                'min_duration' => 1,
+                'max_duration' => 22,
+                'default_duration' => 7,
+                'loop' => true,
+            ],
+        ],
+
+        'max_prompt' => 450,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Смена голоса
+    |--------------------------------------------------------------------------
+    |
+    | Берёт готовую запись и читает её другим голосом. Результат
+    | забирается своим эндпоинтом, не общим для звука.
+    |
+    */
+
+    'voice_changer' => [
+        'provider_model' => env('STUDIO_VOICE_CHANGER_MODEL', 'elevenlabs-voice-changer'),
+        'cost' => 0.01,
+        'max_upload' => 25600,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Очередь провайдера
+    |--------------------------------------------------------------------------
+    */
+
+    'queue' => [
+        // Как часто спрашивать готовность и сколько ждать.
+        'poll_seconds' => 5,
+        'timeout_seconds' => (int) env('STUDIO_QUEUE_TIMEOUT', 600),
     ],
 
     /*

@@ -51,7 +51,8 @@ class CreateSpeech
             $audio = $this->generator->speech(new SpeechRequest(
                 text: $input['text'],
                 providerModel: config("studio.speech.models.{$modelKey}.provider_model"),
-                voice: $input['voice'] ?? null,
+                voice: config('studio.voices.'.($input['voice'] ?? config('studio.default_voice')).'.provider')
+                    ?? config("studio.speech.models.{$modelKey}.voice"),
                 speed: (float) ($input['speed'] ?? 1.0),
             ));
         } catch (GenerationFailed $exception) {

@@ -12,7 +12,7 @@ class StoreSpeechRequest extends FormRequest
         return [
             'text' => ['required', 'string', 'max:'.config('studio.speech.max_characters')],
             'model' => ['nullable', Rule::in(array_keys(config('studio.speech.models')))],
-            'voice' => ['nullable', 'string', 'max:100'],
+            'voice' => ['nullable', Rule::in(array_keys(config('studio.voices')))],
             'speed' => ['nullable', 'numeric', 'min:0.25', 'max:4'],
         ];
     }

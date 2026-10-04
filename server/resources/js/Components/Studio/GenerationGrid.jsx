@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { router } from '@inertiajs/react';
+import AudioCard from '@/Components/Studio/AudioCard';
 import {
     Download,
     RotateCw,
@@ -97,7 +98,14 @@ export default function GenerationGrid({
                                 audio ? '' : 'sm:grid-cols-2 xl:grid-cols-3'
                             }`}
                         >
-                            {items.map((item) => (
+                            {items.map((item) =>
+                                item.kind === 'audio' ? (
+                                    <AudioCard
+                                        key={item.id}
+                                        item={item}
+                                        fresh={item.id === highlight}
+                                    />
+                                ) : (
                                 <Card
                                     key={item.id}
                                     item={item}
@@ -105,13 +113,10 @@ export default function GenerationGrid({
                                     fresh={item.id === highlight}
                                     onReuse={onReuse}
                                     onEdit={onEdit}
-                                    onOpen={() =>
-                                        item.url &&
-                                        item.kind !== 'audio' &&
-                                        setPreview(item)
-                                    }
+                                    onOpen={() => item.url && setPreview(item)}
                                 />
-                            ))}
+                                ),
+                            )}
                         </div>
                     ) : (
                         <div className="rounded-2xl border border-white/[0.07] bg-slate-950/40 px-6 py-12 text-center">

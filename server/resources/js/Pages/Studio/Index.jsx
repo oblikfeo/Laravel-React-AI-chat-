@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Head, router } from '@inertiajs/react';
 import { Image as ImageIcon, Wand2, Music, Video } from 'lucide-react';
 import MainLayout from '@/Layouts/MainLayout';
 import GenerationForm from '@/Components/Studio/GenerationForm';
 import EditForm from '@/Components/Studio/EditForm';
-import SpeechForm from '@/Components/Studio/SpeechForm';
+import AudioStudio from '@/Components/Studio/AudioStudio';
 import GenerationGrid from '@/Components/Studio/GenerationGrid';
 import AssetPicker from '@/Components/Studio/AssetPicker';
 
@@ -28,8 +28,15 @@ export default function StudioIndex({
     aspectRatios,
     styles,
     speechModels,
+    musicModels,
+    effectModels,
+    voices,
     defaultModel,
     defaultSpeechModel,
+    defaultMusicModel,
+    defaultEffectModel,
+    defaultVoice,
+    maxLyrics,
     maxVariants,
     maxSeed,
     upscaleScales,
@@ -81,9 +88,18 @@ export default function StudioIndex({
         });
     };
 
-    const submitSpeech = (values) => {
+    /**
+     * Отправка звука.
+     *
+     * Смена голоса уходит файлом, остальное обычным запросом.
+     */
+    const submitAudio = (kind, values) => {
         setBusy(true);
-        router.post('/studio/speech', values, finish);
+
+        router.post(`/studio/${kind}`, values, {
+            ...finish,
+            forceFormData: kind === 'voice-change',
+        });
     };
 
     const startEditing = (item) => {
@@ -92,6 +108,26 @@ export default function StudioIndex({
     };
 
     const shared = { available: studioReady, busy, limit };
+
+    // Музыка и эффекты считаются у провайдера: пока есть незаконченные
+    // работы, спрашиваем готовность, и результат появляется сам.
+    const waiting = generations.some((item) => item.status === 'queued');
+
+    useEffect(() => {
+        if (!waiting) {
+            return;
+        }
+
+        const timer = setInterval(() => {
+            router.post(
+                '/studio/collect',
+                {},
+                { preserveScroll: true, preserveState: true, showProgress: false },
+            );
+        }, 5000);
+
+        return () => clearInterval(timer);
+    }, [waiting]);
 
     // На каждой вкладке своя галерея: записи и картинки смешивать
     // незачем, человек пришёл за чем-то одним.
@@ -146,11 +182,18 @@ export default function StudioIndex({
                         )}
 
                         {tab === 'audio' && (
-                            <SpeechForm
+                            <AudioStudio
                                 {...shared}
-                                models={speechModels}
-                                defaultModel={defaultSpeechModel}
-                                onSubmit={submitSpeech}
+                                speechModels={speechModels}
+                                musicModels={musicModels}
+                                effectModels={effectModels}
+                                voices={voices}
+                                defaultSpeechModel={defaultSpeechModel}
+                                defaultMusicModel={defaultMusicModel}
+                                defaultEffectModel={defaultEffectModel}
+                                defaultVoice={defaultVoice}
+                                maxLyrics={maxLyrics}
+                                onSubmit={submitAudio}
                             />
                         )}
 

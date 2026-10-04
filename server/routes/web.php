@@ -20,6 +20,10 @@ use App\Http\Controllers\Studio\RetryGenerationController;
 use App\Http\Controllers\Studio\ShowGenerationFileController;
 use App\Http\Controllers\Studio\ShowStudioController;
 use App\Http\Controllers\Studio\StoreGenerationController;
+use App\Http\Controllers\Studio\CollectAudioController;
+use App\Http\Controllers\Studio\StoreEffectController;
+use App\Http\Controllers\Studio\StoreMusicController;
+use App\Http\Controllers\Studio\StoreVoiceChangeController;
 use App\Http\Controllers\Studio\StoreSpeechController;
 use App\Http\Controllers\Settings\UpdateProfileController;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
@@ -59,6 +63,16 @@ Route::group([], function () {
         ->name('studio.edit');
     Route::post('studio/speech', StoreSpeechController::class)
         ->name('studio.speech');
+    Route::post('studio/music', StoreMusicController::class)
+        ->name('studio.music');
+    Route::post('studio/effect', StoreEffectController::class)
+        ->name('studio.effect');
+    Route::post('studio/voice-change', StoreVoiceChangeController::class)
+        ->name('studio.voice-change');
+    // Звук считается долго: страница спрашивает готовность, пока
+    // работа не появится в галерее.
+    Route::post('studio/collect', CollectAudioController::class)
+        ->name('studio.collect');
     Route::post('studio/{generation}/retry', RetryGenerationController::class)
         ->name('studio.retry');
     Route::delete('studio/{generation}', DestroyGenerationController::class)

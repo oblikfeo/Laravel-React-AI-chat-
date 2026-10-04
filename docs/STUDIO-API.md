@@ -85,3 +85,55 @@ STUDIO_PROVIDER=venice
 VENICE_API_KEY=<ключ>
 STUDIO_ENABLED=true
 ```
+
+## Звук: четыре режима
+
+Разобрано 05.10 по каталогу провайдера.
+
+### 1. Музыка — `POST /audio/queue` → `/audio/retrieve`
+
+Долгая операция: запрос ставится в очередь, ответ приходит с
+`queue_id`, по нему забирается результат. `/audio/retrieve` отвечает
+либо `PROCESSING` с оценкой времени (`average_execution_time`, мс),
+либо готовым файлом.
+
+Цены различаются в сотни раз, выбирать надо осознанно:
+
+| Модель | Цена | Чем интересна |
+|---|---|---|
+| `sonilo-v1-1-music` | $0.003 | до 10 минут, лицензия для коммерции, без вокала |
+| `ace-step-15` | $0.03 за минуту | свои слова песни, 60–210 с, flac |
+| `minimax-music-v2` | $0.04 | полная песня с вокалом, слова обязательны |
+| `elevenlabs-music` | **$0.69 за минуту** | дорого, в 200 раз дороже Sonilo |
+
+Параметры: `prompt` (описание), `lyrics_prompt` (слова),
+`duration_seconds`, `force_instrumental`, `loop` — поддержка у каждой
+модели своя, она объявлена в `/models` полями `supports_lyrics`,
+`lyrics_required`, `min_duration`, `max_duration`, `duration_options`.
+
+### 2. Озвучка — `POST /audio/speech`
+
+Уже работает. Цена за миллион символов, то есть за реплику — копейки:
+Kokoro $3.50/млн (54 голоса), ElevenLabs Turbo $62.50/млн (21 голос).
+Голоса перечислены в описании модели полем `voices`.
+
+### 3. Смена голоса — `POST /audio/voice-changer/queue`
+
+Загружается запись (`file` как multipart или `audio_url`), выбирается
+целевой `voice`, есть `remove_background_noise` и `seed`. Модель —
+`elevenlabs-voice-changer`; в открытом каталоге она не числится, тип
+`voice_changer` в `/models` не принимается. Результат забирается через
+`/audio/voice-changer/retrieve`, не через общий `/audio/retrieve`.
+
+### 4. Звуковые эффекты — тот же `/audio/queue`
+
+| Модель | Цена | Длительность |
+|---|---|---|
+| `mmaudio-v2-text-to-audio` | $0.0009 | 1–30 с |
+| `sonilo-v1-1-sound-effects` | $0.002 | 1–180 с |
+| `elevenlabs-sound-effects-v2` | $0.002 | 1–22 с, умеет зацикливание |
+
+### Цена заранее
+
+`POST /audio/quote` считает стоимость до запуска — можно показывать
+её человеку, не тратя деньги вслепую. То же есть у видео.

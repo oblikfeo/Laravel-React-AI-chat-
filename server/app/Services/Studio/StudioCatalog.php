@@ -109,6 +109,77 @@ class StudioCatalog
             && ! in_array($user->plan, config('plans.promoted'), true);
     }
 
+    /**
+     * Модели музыки.
+     *
+     * Возможности у них разные: одна поёт по своим словам, другая их
+     * требует, третья играет без вокала. Интерфейс подстраивается.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public static function musicModels(?User $user = null): array
+    {
+        return self::audioGroup('music', $user, fn (array $model) => [
+            'lyrics' => (bool) ($model['lyrics'] ?? false),
+            'lyricsRequired' => (bool) ($model['lyrics_required'] ?? false),
+            'durations' => $model['durations'] ?? null,
+            'minDuration' => $model['min_duration'] ?? null,
+            'maxDuration' => $model['max_duration'] ?? null,
+            'defaultDuration' => $model['default_duration'] ?? null,
+        ]);
+    }
+
+    /** @return array<int, array<string, mixed>> */
+    public static function effectModels(?User $user = null): array
+    {
+        return self::audioGroup('effects', $user, fn (array $model) => [
+            'minDuration' => $model['min_duration'] ?? null,
+            'maxDuration' => $model['max_duration'] ?? null,
+            'defaultDuration' => $model['default_duration'] ?? null,
+        ]);
+    }
+
+    /**
+     * Общая часть звуковых списков.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private static function audioGroup(string $group, ?User $user, callable $extra): array
+    {
+        return collect(config("studio.{$group}.models"))
+            ->map(fn (array $model, string $key) => [
+                'key' => $key,
+                'label' => $model['label'],
+                'description' => $model['description'],
+                'paid' => (bool) ($model['paid'] ?? false),
+                'badge' => ($model['paid'] ?? false) ? 'Pro' : null,
+                'locked' => ($model['paid'] ?? false) && ! self::isPaid($user),
+                ...$extra($model),
+            ])
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Голоса озвучки.
+     *
+     * Названия у провайдера служебные (af_heart, Aria), поэтому
+     * показываем свои понятные.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public static function voices(): array
+    {
+        return collect(config('studio.voices'))
+            ->map(fn (array $voice, string $key) => [
+                'key' => $key,
+                'label' => $voice['label'],
+                'description' => $voice['description'] ?? null,
+            ])
+            ->values()
+            ->all();
+    }
+
     public static function has(string $key): bool
     {
         return (bool) config("studio.models.{$key}");

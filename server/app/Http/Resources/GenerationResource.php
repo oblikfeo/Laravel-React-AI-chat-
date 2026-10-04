@@ -19,13 +19,19 @@ class GenerationResource extends JsonResource
             'aspectRatio' => $this->aspect_ratio,
             'style' => $this->style,
             'seed' => $this->seed,
+            'duration' => $this->duration,
+            // Сколько примерно ждать: без оценки остаётся только
+            // бесконечная крутилка.
+            'expectedMs' => $this->expected_ms,
             'variants' => $this->variants,
             'mime' => $this->mime,
             'width' => $this->width,
             'height' => $this->height,
             // Название модели у провайдера наружу не отдаём, только ярлык.
             'model' => config("studio.models.{$this->model_key}.label")
-                ?? config("studio.speech.models.{$this->model_key}.label"),
+                ?? config("studio.speech.models.{$this->model_key}.label")
+                ?? config("studio.music.models.{$this->model_key}.label")
+                ?? config("studio.effects.models.{$this->model_key}.label"),
             'modelKey' => $this->model_key,
             'url' => $this->isReady()
                 ? route('studio.file', $this->resource)
