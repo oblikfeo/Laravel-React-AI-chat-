@@ -20,6 +20,8 @@ use App\Http\Controllers\Studio\RetryGenerationController;
 use App\Http\Controllers\Studio\ShowGenerationFileController;
 use App\Http\Controllers\Studio\ShowStudioController;
 use App\Http\Controllers\Studio\StoreGenerationController;
+use App\Http\Controllers\Feed\ShowFeedController;
+use App\Http\Controllers\Feed\StoreChatFromFeedController;
 use App\Http\Controllers\Studio\CollectAudioController;
 use App\Http\Controllers\Studio\StoreEffectController;
 use App\Http\Controllers\Studio\StoreMusicController;
@@ -53,6 +55,12 @@ Route::group([], function () {
 
     Route::get('attachments/{attachment}', ShowAttachmentController::class)
         ->name('attachments.show');
+
+    // Общая лента: что люди согласились показать.
+    Route::get('feed', ShowFeedController::class)->name('feed');
+    // Работу из ленты можно обсудить: заводим диалог с ней.
+    Route::post('chats/from-feed', StoreChatFromFeedController::class)
+        ->name('chats.from-feed');
 
     // Студия открыта и гостю: попробовать до регистрации, с малым
     // дневным лимитом, см. config/studio.php.

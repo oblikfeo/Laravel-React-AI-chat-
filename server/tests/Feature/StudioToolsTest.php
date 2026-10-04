@@ -45,13 +45,19 @@ class StudioToolsTest extends TestCase
         );
     }
 
-    /** Готовая работа в ленте. */
+    /**
+     * Готовая работа в галерее.
+     *
+     * Скрытая: в этих тестах проверяется доступ к чужому, а работу
+     * из общей ленты брать как раз можно.
+     */
     private function existingImage(User $user): Generation
     {
         $this->actingAs($user)->post('/studio', [
             'prompt' => 'A cube',
             'model' => 'fast',
             'aspect_ratio' => '1:1',
+            'is_public' => false,
         ]);
 
         return Generation::first();

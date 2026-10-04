@@ -114,6 +114,8 @@ class QueueAudio
             'guest_id' => $user ? null : $guest?->id,
             'kind' => Generation::KIND_AUDIO,
             'status' => Generation::STATUS_PENDING,
+            // Звук в общую ленту не попадает.
+            'is_public' => false,
             ...$attributes,
         ]);
     }

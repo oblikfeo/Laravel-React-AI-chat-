@@ -44,6 +44,7 @@ class CreateSpeech
             'operation' => Generation::OP_SPEECH,
             'model_key' => $modelKey,
             'status' => Generation::STATUS_PENDING,
+            'is_public' => false,
             'prompt' => $input['text'],
         ]);
 

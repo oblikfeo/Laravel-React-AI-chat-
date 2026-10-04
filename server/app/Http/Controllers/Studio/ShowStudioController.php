@@ -28,7 +28,19 @@ class ShowStudioController extends Controller
 
         $remaining = $limiter->remaining($user, $guest);
 
+        // Работа, принесённая из общей ленты: открываем Студию сразу
+        // с ней и на вкладке правки.
+        $fromFeed = $request->integer('from_feed')
+            ? Generation::query()
+                ->inFeed()
+                ->whereKey($request->integer('from_feed'))
+                ->first()
+            : null;
+
         return Inertia::render('Studio/Index', [
+            'fromFeed' => $fromFeed
+                ? new GenerationResource($fromFeed)
+                : null,
             'generations' => GenerationResource::collection(
                 Generation::query()
                     ->ownedBy($user, $guest)

@@ -34,7 +34,7 @@ export const navigationItems = [
         ready: false,
     },
     { key: 'studio', label: 'Studio', icon: Video, href: '/studio', ready: true },
-    { key: 'feed', label: 'Feed', icon: Table2, ready: false },
+    { key: 'feed', label: 'Feed', icon: Table2, href: '/feed', ready: true },
     { key: 'characters', label: 'Characters', icon: Users, ready: false },
     { key: 'stories', label: 'Stories', icon: BookOpen, ready: false },
     { key: 'personas', label: 'Personas', icon: Fingerprint, ready: false },

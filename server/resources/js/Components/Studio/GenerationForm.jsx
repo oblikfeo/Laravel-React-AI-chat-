@@ -10,7 +10,12 @@ import {
     Copy,
     SlidersHorizontal,
 } from 'lucide-react';
-import { Panel, NotReady, Remaining } from '@/Components/Studio/Controls';
+import {
+    Panel,
+    NotReady,
+    Remaining,
+    Visibility,
+} from '@/Components/Studio/Controls';
 import Dropdown from '@/Components/Studio/Dropdown';
 
 /**
@@ -41,6 +46,7 @@ export default function GenerationForm({
     const [seed, setSeed] = useState('');
     const [variants, setVariants] = useState(1);
     const [advanced, setAdvanced] = useState(false);
+    const [isPublic, setIsPublic] = useState(true);
     const textareaRef = useRef(null);
 
     // Повтор работы подставляет её условия: человек чаще хочет
@@ -78,6 +84,7 @@ export default function GenerationForm({
             style: style === 'none' ? null : style,
             seed: seed ? Number(seed) : null,
             variants,
+            is_public: isPublic,
         });
     };
 
@@ -160,6 +167,8 @@ export default function GenerationForm({
                         strokeWidth={2}
                     />
                 </button>
+
+                <Visibility value={isPublic} onChange={setIsPublic} />
 
                 <div className="ml-auto flex items-center gap-3">
                     <Remaining limit={limit} />

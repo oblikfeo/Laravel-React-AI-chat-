@@ -62,10 +62,11 @@ class EditGenerationController extends Controller
     }
 
     /**
-     * Исходники: своя готовая работа и/или загруженные файлы.
+     * Исходники: готовая работа и/или загруженные файлы.
      *
-     * Чужую работу взять нельзя — проверяем владельца, как и при
-     * открытии файла.
+     * Работа берётся своя или та, что показана в общей ленте: взять
+     * за основу чужую картинку из ленты — обычный сценарий. Скрытая
+     * чужая работа недоступна, как и при открытии файла.
      *
      * @return array<int, string>
      */
@@ -77,9 +78,11 @@ class EditGenerationController extends Controller
 
         if ($ids) {
             $generations = Generation::query()
-                ->ownedBy($user, $guest)
                 ->whereKey($ids)
                 ->whereNotNull('path')
+                ->where(fn ($query) => $query
+                    ->where(fn ($own) => $own->ownedBy($user, $guest))
+                    ->orWhere(fn ($shared) => $shared->inFeed()))
                 ->get();
 
             foreach ($generations as $generation) {

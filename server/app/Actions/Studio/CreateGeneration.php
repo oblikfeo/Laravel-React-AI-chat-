@@ -45,6 +45,9 @@ class CreateGeneration
             'operation' => Generation::OP_GENERATE,
             'model_key' => $input['model'],
             'status' => Generation::STATUS_PENDING,
+            // По умолчанию показываем: лента без работ никому не
+            // интересна, а скрыть можно одним переключателем.
+            'is_public' => (bool) ($input['is_public'] ?? true),
             'prompt' => $input['prompt'],
             'negative_prompt' => $input['negative_prompt'] ?? null,
             'aspect_ratio' => $input['aspect_ratio'],

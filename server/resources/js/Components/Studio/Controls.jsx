@@ -1,4 +1,4 @@
-import { X } from 'lucide-react';
+import { X, Globe, Lock } from 'lucide-react';
 
 /**
  * Панель формы.
@@ -24,6 +24,38 @@ export function NotReady() {
             Studio is coming soon. Everything is ready and will start working
             as soon as it opens.
         </p>
+    );
+}
+
+/**
+ * Показывать ли работу в общей ленте.
+ *
+ * По умолчанию показываем — лента без работ никому не интересна, —
+ * но человек должен видеть этот выбор до того, как нажмёт кнопку.
+ */
+export function Visibility({ value, onChange }) {
+    return (
+        <button
+            type="button"
+            onClick={() => onChange(!value)}
+            title={
+                value
+                    ? 'Visible in the public feed'
+                    : 'Only you can see this'
+            }
+            className={`flex h-9 items-center gap-2 rounded-full border px-3.5 text-[13px] transition ${
+                value
+                    ? 'border-white/[0.12] text-white/70 hover:bg-white/10 hover:text-white'
+                    : 'border-amber-300/25 bg-amber-300/[0.07] text-amber-100/80 hover:bg-amber-300/[0.12]'
+            }`}
+        >
+            {value ? (
+                <Globe className="h-4 w-4 shrink-0" strokeWidth={1.75} />
+            ) : (
+                <Lock className="h-4 w-4 shrink-0" strokeWidth={1.75} />
+            )}
+            {value ? 'Public' : 'Private'}
+        </button>
     );
 }
 

@@ -157,6 +157,12 @@ class StudioTest extends TestCase
             ->assertSessionHasErrors('model');
     }
 
+    /**
+     * Скрытая работа закрыта для чужих.
+     *
+     * Работа, показанная в общей ленте, доступна намеренно — это
+     * проверяется в FeedTest.
+     */
     public function test_another_users_image_is_not_served(): void
     {
         Storage::fake('local');
@@ -167,6 +173,7 @@ class StudioTest extends TestCase
             'prompt' => 'Private',
             'model' => 'fast',
             'aspect_ratio' => '1:1',
+            'is_public' => false,
         ]);
 
         $generation = Generation::first();

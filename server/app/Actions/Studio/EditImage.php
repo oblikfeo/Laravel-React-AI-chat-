@@ -44,6 +44,7 @@ class EditImage
             'source_generation_id' => $input['source_ids'][0] ?? null,
             'model_key' => $input['model'] ?? 'standard',
             'status' => Generation::STATUS_PENDING,
+            'is_public' => (bool) ($input['is_public'] ?? true),
             'prompt' => $input['prompt'] ?? $this->titleFor($operation),
             'aspect_ratio' => $input['aspect_ratio'] ?? '1:1',
         ]);

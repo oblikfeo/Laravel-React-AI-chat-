@@ -10,6 +10,8 @@ class StoreGenerationRequest extends FormRequest
     public function rules(): array
     {
         return [
+            // Человек решает, показывать работу в общей ленте.
+            'is_public' => ['nullable', 'boolean'],
             'prompt' => ['required', 'string', 'max:2000'],
             'negative_prompt' => ['nullable', 'string', 'max:1000'],
             'model' => ['required', Rule::in(array_keys(config('studio.models')))],

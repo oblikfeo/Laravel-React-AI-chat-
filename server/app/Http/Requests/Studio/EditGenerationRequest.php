@@ -24,6 +24,8 @@ class EditGenerationRequest extends FormRequest
         ];
 
         return [
+            // Человек решает, показывать работу в общей ленте.
+            'is_public' => ['nullable', 'boolean'],
             'operation' => ['required', Rule::in($operations)],
 
             // Описание нужно там, где человек говорит, что изменить.

@@ -35,7 +35,9 @@ function MainLayoutInner({ children }) {
         ? 'chat'
         : url.startsWith('/studio')
           ? 'studio'
-          : null;
+          : url.startsWith('/feed')
+            ? 'feed'
+            : null;
     const activeChatId = Number(url.match(/^\/chats\/(\d+)/)?.[1]) || null;
 
     // Переход на другую страницу закрывает мобильное меню: иначе

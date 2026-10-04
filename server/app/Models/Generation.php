@@ -45,6 +45,7 @@ class Generation extends Model
         'source_path',
         'model_key',
         'status',
+        'is_public',
         'queue_id',
         'expected_ms',
         'prompt',
@@ -69,6 +70,7 @@ class Generation extends Model
     {
         return [
             'seed' => 'integer',
+            'is_public' => 'boolean',
             'variants' => 'integer',
             'duration' => 'integer',
             'expected_ms' => 'integer',
@@ -106,6 +108,28 @@ class Generation extends Model
 
         // Ничей запрос не должен вернуть чужие работы.
         return $query->whereRaw('1 = 0');
+    }
+
+    /**
+     * Работы для общей ленты.
+     *
+     * Показываем только готовые картинки, которые человек не скрыл.
+     * Безцензурные модели в ленту не идут: их работы человек создаёт
+     * для себя, а не для чужих глаз.
+     */
+    public function scopeInFeed(Builder $query): Builder
+    {
+        $hidden = collect(config('studio.models'))
+            ->filter(fn (array $model) => $model['signature'] ?? false)
+            ->keys()
+            ->all();
+
+        return $query
+            ->where('is_public', true)
+            ->where('kind', self::KIND_IMAGE)
+            ->where('status', self::STATUS_READY)
+            ->whereNotNull('path')
+            ->when($hidden, fn (Builder $q) => $q->whereNotIn('model_key', $hidden));
     }
 
     /** Ждёт результата от провайдера. */

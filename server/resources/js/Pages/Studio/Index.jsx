@@ -43,11 +43,22 @@ export default function StudioIndex({
     maxCombine,
     studioReady,
     limit,
+    fromFeed,
 }) {
     const [tab, setTab] = useState('image');
 
     // Режим звука: у каждого своя галерея, смешивать их незачем.
     const [audioMode, setAudioMode] = useState('music');
+
+    // Работа, принесённая из общей ленты: открываем правку с ней.
+    useEffect(() => {
+        if (!fromFeed) {
+            return;
+        }
+
+        setSources([fromFeed]);
+        setTab('edit');
+    }, [fromFeed]);
     const [busy, setBusy] = useState(false);
 
     // Повтор подставляет условия готовой работы в форму, а не создаёт

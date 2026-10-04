@@ -9,7 +9,12 @@ import {
     X,
     Crop,
 } from 'lucide-react';
-import { Panel, NotReady, Remaining } from '@/Components/Studio/Controls';
+import {
+    Panel,
+    NotReady,
+    Remaining,
+    Visibility,
+} from '@/Components/Studio/Controls';
 import Dropdown from '@/Components/Studio/Dropdown';
 
 /**
@@ -76,6 +81,7 @@ export default function EditForm({
     const [ratio, setRatio] = useState('1:1');
     const [scale, setScale] = useState(String(upscaleScales[0] ?? 2));
     const [files, setFiles] = useState([]);
+    const [isPublic, setIsPublic] = useState(true);
     const fileRef = useRef(null);
 
     const current = TOOLS.find((item) => item.key === tool) ?? TOOLS[0];
@@ -115,6 +121,7 @@ export default function EditForm({
             aspect_ratio:
                 tool === 'upscale' || tool === 'background_remove' ? null : ratio,
             scale: tool === 'upscale' ? Number(scale) : null,
+            is_public: isPublic,
         });
     };
 
@@ -304,6 +311,8 @@ export default function EditForm({
                             icon={Crop}
                         />
                     )}
+
+                    <Visibility value={isPublic} onChange={setIsPublic} />
 
                     <div className="ml-auto flex items-center gap-3">
                         <Remaining limit={limit} />

@@ -20,7 +20,13 @@ class ShowGenerationFileController extends Controller
      */
     public function __invoke(Request $request, Generation $generation): StreamedResponse
     {
-        if (! $this->owns($generation, $request) || ! $generation->isReady()) {
+        if (! $generation->isReady()) {
+            throw new AccessDeniedHttpException();
+        }
+
+        // Работу видит владелец, а чужую — только если её показали в
+        // общей ленте. Скрытая остаётся закрытой для всех остальных.
+        if (! $this->owns($generation, $request) && ! $this->inFeed($generation)) {
             throw new AccessDeniedHttpException();
         }
 
@@ -43,6 +49,20 @@ class ShowGenerationFileController extends Controller
                 // её у себя и не спрашивать заново.
                 'Cache-Control' => 'private, max-age=604800',
             ]);
+    }
+
+    /**
+     * Показана ли работа в общей ленте.
+     *
+     * Условия те же, что у самой ленты: иначе по прямой ссылке
+     * открылось бы то, чего в ленте нет.
+     */
+    private function inFeed(Generation $generation): bool
+    {
+        return Generation::query()
+            ->inFeed()
+            ->whereKey($generation->id)
+            ->exists();
     }
 
     private function owns(Generation $generation, Request $request): bool
