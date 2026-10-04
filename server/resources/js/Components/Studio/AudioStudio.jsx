@@ -16,12 +16,37 @@ import {
 import { Panel, NotReady, Remaining } from '@/Components/Studio/Controls';
 import Dropdown from '@/Components/Studio/Dropdown';
 
-/** Режимы звука — как в макете. */
+/**
+ * Режимы звука.
+ *
+ * Стоят крупными плитками, как инструменты правки: это главное на
+ * вкладке, и по одному названию не всегда понятно, что внутри.
+ */
 const MODES = [
-    { key: 'music', label: 'Music', icon: Music },
-    { key: 'speech', label: 'Voice', icon: Mic },
-    { key: 'changer', label: 'Voice Changer', icon: Repeat },
-    { key: 'effect', label: 'Sound Effect', icon: AudioWaveform },
+    {
+        key: 'music',
+        label: 'Music',
+        hint: 'Songs and instrumentals',
+        icon: Music,
+    },
+    {
+        key: 'speech',
+        label: 'Voice',
+        hint: 'Read any text aloud',
+        icon: Mic,
+    },
+    {
+        key: 'changer',
+        label: 'Voice Changer',
+        hint: 'Your recording, new voice',
+        icon: Repeat,
+    },
+    {
+        key: 'effect',
+        label: 'Sound Effect',
+        hint: 'Short sounds for video',
+        icon: AudioWaveform,
+    },
 ];
 
 /** Скорость чтения: крайние значения звучат неестественно. */
@@ -59,20 +84,40 @@ export default function AudioStudio({
 
     return (
         <div>
-            <div className="mb-3 flex flex-wrap justify-center gap-2">
-                {MODES.map(({ key, label, icon: Icon }) => (
+            <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {MODES.map(({ key, label, hint, icon: Icon }) => (
                     <button
                         key={key}
                         type="button"
                         onClick={() => onModeChange(key)}
-                        className={`flex h-9 items-center gap-2 rounded-full px-4 text-[13px] transition ${
+                        className={`flex flex-col items-start gap-2 rounded-2xl border p-3.5 text-left transition ${
                             mode === key
-                                ? 'bg-white font-semibold text-black'
-                                : 'border border-white/[0.12] text-white/65 hover:bg-white/10 hover:text-white'
+                                ? 'border-white/30 bg-white/[0.09] shadow-lg shadow-black/30'
+                                : 'border-white/[0.09] bg-slate-950/40 hover:border-white/20 hover:bg-white/[0.05]'
                         }`}
                     >
-                        <Icon className="h-4 w-4" strokeWidth={1.75} />
-                        {label}
+                        <span
+                            className={`flex h-9 w-9 items-center justify-center rounded-xl transition ${
+                                mode === key
+                                    ? 'bg-white text-black'
+                                    : 'bg-white/[0.07] text-white/60'
+                            }`}
+                        >
+                            <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
+                        </span>
+
+                        <span className="min-w-0">
+                            <span
+                                className={`block text-[13px] font-medium ${
+                                    mode === key ? 'text-white' : 'text-white/75'
+                                }`}
+                            >
+                                {label}
+                            </span>
+                            <span className="mt-0.5 block text-[11px] leading-snug text-white/35">
+                                {hint}
+                            </span>
+                        </span>
                     </button>
                 ))}
             </div>
