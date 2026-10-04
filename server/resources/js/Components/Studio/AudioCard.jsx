@@ -100,13 +100,23 @@ export default function AudioCard({ item, fresh }) {
 
     return (
         <div
-            className={`rounded-2xl border bg-slate-950/55 p-3 transition ${
+            className={`relative overflow-hidden rounded-2xl border bg-slate-950/55 p-3 transition ${
                 fresh
                     ? 'border-sky-300/50 ring-1 ring-sky-300/25'
-                    : 'border-white/[0.08]'
+                    : queued
+                      ? 'border-sky-300/25'
+                      : 'border-white/[0.08]'
             }`}
         >
-            <div className="flex gap-3">
+            {queued && (
+                <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-white/[0.07] to-transparent"
+                    style={{ animation: 'work-sheen 2.2s ease-in-out infinite' }}
+                />
+            )}
+
+            <div className="relative flex gap-3">
                 <div className="flex h-[88px] w-[88px] shrink-0 items-center justify-center rounded-xl bg-white/[0.06]">
                     {failed ? (
                         <AlertCircle
@@ -115,10 +125,18 @@ export default function AudioCard({ item, fresh }) {
                         />
                     ) : (
                         <AudioWaveform
-                            className={`h-8 w-8 text-white/45 ${
-                                queued ? 'animate-pulse' : ''
+                            className={`h-8 w-8 ${
+                                queued ? 'text-sky-300/60' : 'text-white/45'
                             }`}
                             strokeWidth={1.5}
+                            style={
+                                queued
+                                    ? {
+                                          animation:
+                                              'work-pulse 1.8s ease-in-out infinite',
+                                      }
+                                    : undefined
+                            }
                         />
                     )}
                 </div>
@@ -134,7 +152,7 @@ export default function AudioCard({ item, fresh }) {
                     </p>
 
                     {queued ? (
-                        <Waiting expectedMs={item.expectedMs} />
+                        <Waiting />
                     ) : item.url ? (
                         <div className="mt-auto flex items-center gap-3 pt-2">
                             <button
@@ -222,37 +240,41 @@ export default function AudioCard({ item, fresh }) {
 /**
  * Ожидание готовности.
  *
- * Полоса идёт по оценке провайдера и не доходит до конца: обещать
- * точное время нельзя, а ползущая полоса показывает, что работа идёт.
+ * Без полосы прогресса: провайдер не сообщает, как далеко
+ * продвинулся, и полоса либо врёт, либо замирает у края. Вместо неё
+ * бегущие полоски и счётчик времени — ничего не обещают, но видно,
+ * что работа идёт.
  */
-function Waiting({ expectedMs }) {
+function Waiting() {
     const [elapsed, setElapsed] = useState(0);
 
     useEffect(() => {
         const started = Date.now();
-        const timer = setInterval(
-            () => setElapsed(Date.now() - started),
-            500,
-        );
+        const timer = setInterval(() => setElapsed(Date.now() - started), 500);
 
         return () => clearInterval(timer);
     }, []);
 
-    const expected = expectedMs || 45000;
-    const part = Math.min(95, (elapsed / expected) * 100);
-
     return (
-        <div className="mt-auto pt-3">
-            <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
-                <div
-                    className="h-full rounded-full bg-sky-300/70 transition-[width] duration-500"
-                    style={{ width: `${part}%` }}
-                />
-            </div>
+        <div className="mt-auto flex items-center gap-2.5 pt-3">
+            <span className="flex items-end gap-[3px]">
+                {[0, 1, 2, 3, 4].map((index) => (
+                    <span
+                        key={index}
+                        className="w-[3px] rounded-full bg-sky-300/70"
+                        style={{
+                            height: `${8 + (index % 3) * 5}px`,
+                            animation: `work-pulse 1.1s ease-in-out ${
+                                index * 0.13
+                            }s infinite`,
+                        }}
+                    />
+                ))}
+            </span>
 
-            <p className="mt-1.5 text-[11px] text-white/35">
+            <span className="text-[12px] text-white/45">
                 Working on it… {clock(elapsed / 1000)}
-            </p>
+            </span>
         </div>
     );
 }
