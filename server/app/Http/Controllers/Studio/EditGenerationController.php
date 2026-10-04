@@ -42,8 +42,18 @@ class EditGenerationController extends Controller
 
         $sources = $this->sources($request, $user, $guest);
 
-        if (! $sources) {
-            return back()->with('error', 'Choose an image to edit.');
+        // Объединению нужны две картинки, остальным хватает одной.
+        // Чужая работа до сюда не доходит, поэтому список может
+        // оказаться короче, чем прислал человек.
+        $needed = $request->input('operation') === Generation::OP_COMBINE ? 2 : 1;
+
+        if (count($sources) < $needed) {
+            return back()->with(
+                'error',
+                $needed > 1
+                    ? 'Choose at least two images to combine.'
+                    : 'Choose an image to edit.',
+            );
         }
 
         $action->handle($user, $guest, $sources, $request->validated());
@@ -63,14 +73,16 @@ class EditGenerationController extends Controller
     {
         $sources = [];
 
-        if ($id = $request->integer('source_generation_id')) {
-            $generation = Generation::query()
-                ->ownedBy($user, $guest)
-                ->whereKey($id)
-                ->whereNotNull('path')
-                ->first();
+        $ids = array_filter((array) $request->input('source_ids', []));
 
-            if ($generation) {
+        if ($ids) {
+            $generations = Generation::query()
+                ->ownedBy($user, $guest)
+                ->whereKey($ids)
+                ->whereNotNull('path')
+                ->get();
+
+            foreach ($generations as $generation) {
                 $sources[] = Storage::disk($generation->disk)->get($generation->path);
             }
         }

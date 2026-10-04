@@ -44,8 +44,8 @@ export default function StudioIndex({
     // копию молча: человек чаще хочет что-то поменять.
     const [preset, setPreset] = useState(null);
 
-    // Исходник для правки: работа из ленты.
-    const [source, setSource] = useState(null);
+    // Исходники для правки: объединение берёт несколько работ.
+    const [sources, setSources] = useState([]);
 
     // Открыт ли выбор из своих работ.
     const [browsing, setBrowsing] = useState(false);
@@ -64,7 +64,7 @@ export default function StudioIndex({
         router.post('/studio/edit', values, {
             ...finish,
             forceFormData: true,
-            onSuccess: () => setSource(null),
+            onSuccess: () => setSources([]),
         });
     };
 
@@ -74,7 +74,7 @@ export default function StudioIndex({
     };
 
     const startEditing = (item) => {
-        setSource(item);
+        setSources([item]);
         setTab('edit');
     };
 
@@ -115,8 +115,12 @@ export default function StudioIndex({
                                 aspectRatios={aspectRatios}
                                 upscaleScales={upscaleScales}
                                 maxCombine={maxCombine}
-                                source={source}
-                                onPickSource={setSource}
+                                sources={sources}
+                                onRemoveSource={(id) =>
+                                    setSources((previous) =>
+                                        previous.filter((item) => item.id !== id),
+                                    )
+                                }
                                 onBrowse={() => setBrowsing(true)}
                                 onSubmit={submitEdit}
                             />
@@ -137,15 +141,30 @@ export default function StudioIndex({
                     {browsing && (
                         <AssetPicker
                             items={generations}
-                            onPick={(item) => {
-                                setSource(item);
+                            onPick={(items) => {
+                                // Выбранное добавляется к уже
+                                // отмеченному, а не заменяет его.
+                                setSources((previous) => {
+                                    const known = new Set(
+                                        previous.map((item) => item.id),
+                                    );
+
+                                    return [
+                                        ...previous,
+                                        ...items.filter(
+                                            (item) => !known.has(item.id),
+                                        ),
+                                    ].slice(0, maxCombine);
+                                });
                                 setBrowsing(false);
                             }}
+                            multiple={maxCombine > 1}
+                            chosenIds={sources.map((item) => item.id)}
                             onClose={() => setBrowsing(false)}
                         />
                     )}
 
-                    {tab !== 'video' && (
+                    {tab !== 'video' && tab !== 'edit' && (
                         <GenerationGrid
                             items={generations}
                             onReuse={(item) => {

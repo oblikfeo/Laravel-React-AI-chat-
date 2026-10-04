@@ -8,11 +8,33 @@ import { X, Check, Maximize2 } from 'lucide-react';
  * экран можно отдельной кнопкой. Иначе выбор и просмотр спорят друг
  * с другом — непонятно, что произойдёт по нажатию.
  */
-export default function AssetPicker({ items, onPick, onClose }) {
+export default function AssetPicker({
+    items,
+    onPick,
+    onClose,
+    multiple = false,
+    chosenIds = [],
+}) {
     const [preview, setPreview] = useState(null);
-    const [chosen, setChosen] = useState(null);
+    const [chosen, setChosen] = useState([]);
 
-    const images = items.filter((item) => item.url && item.kind !== 'audio');
+    // Уже взятые в работу выбирать повторно незачем.
+    const images = items.filter(
+        (item) =>
+            item.url && item.kind !== 'audio' && !chosenIds.includes(item.id),
+    );
+
+    const toggle = (item) => {
+        setChosen((previous) => {
+            if (previous.some((entry) => entry.id === item.id)) {
+                return previous.filter((entry) => entry.id !== item.id);
+            }
+
+            return multiple ? [...previous, item] : [item];
+        });
+    };
+
+    const isChosen = (item) => chosen.some((entry) => entry.id === item.id);
 
     return (
         <div
@@ -31,7 +53,9 @@ export default function AssetPicker({ items, onPick, onClose }) {
                             Your work
                         </h2>
                         <p className="mt-0.5 text-[12px] text-white/40">
-                            Pick the image you want to edit
+                            {multiple
+                                ? 'Pick one or more images'
+                                : 'Pick the image you want to edit'}
                         </p>
                     </div>
 
@@ -52,14 +76,14 @@ export default function AssetPicker({ items, onPick, onClose }) {
                                 <div
                                     key={item.id}
                                     className={`group relative aspect-square overflow-hidden rounded-xl border transition ${
-                                        chosen?.id === item.id
+                                        isChosen(item)
                                             ? 'border-sky-300/80 ring-2 ring-sky-300/40'
                                             : 'border-white/[0.1] hover:border-white/35'
                                     }`}
                                 >
                                     <button
                                         type="button"
-                                        onClick={() => setChosen(item)}
+                                        onClick={() => toggle(item)}
                                         className="h-full w-full"
                                         aria-label="Choose this image"
                                     >
@@ -85,7 +109,7 @@ export default function AssetPicker({ items, onPick, onClose }) {
                                         />
                                     </button>
 
-                                    {chosen?.id === item.id && (
+                                    {isChosen(item) && (
                                         <span className="absolute left-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-sky-400 text-black">
                                             <Check
                                                 className="h-3.5 w-3.5"
@@ -107,7 +131,9 @@ export default function AssetPicker({ items, onPick, onClose }) {
                 {images.length > 0 && (
                     <div className="flex items-center justify-between gap-3 border-t border-white/[0.08] px-5 py-3.5">
                         <span className="text-[13px] text-white/40">
-                            {chosen ? 'Image selected' : 'Nothing selected yet'}
+                            {chosen.length
+                                ? `${chosen.length} selected`
+                                : 'Nothing selected yet'}
                         </span>
 
                         <div className="flex items-center gap-2">
@@ -121,15 +147,17 @@ export default function AssetPicker({ items, onPick, onClose }) {
 
                             <button
                                 type="button"
-                                disabled={!chosen}
+                                disabled={!chosen.length}
                                 onClick={() => onPick(chosen)}
                                 className={`h-9 rounded-full px-5 text-[13px] font-semibold transition ${
-                                    chosen
+                                    chosen.length
                                         ? 'bg-white text-black hover:bg-white/90'
                                         : 'cursor-not-allowed border border-white/[0.12] text-white/35'
                                 }`}
                             >
-                                Use this image
+                                {chosen.length > 1
+                                    ? `Use ${chosen.length} images`
+                                    : 'Use this image'}
                             </button>
                         </div>
                     </div>

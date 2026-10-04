@@ -66,8 +66,8 @@ export default function EditForm({
     available,
     busy,
     limit,
-    source,
-    onPickSource,
+    sources = [],
+    onRemoveSource,
     onBrowse,
     onSubmit,
 }) {
@@ -81,7 +81,7 @@ export default function EditForm({
     const current = TOOLS.find((item) => item.key === tool) ?? TOOLS[0];
 
     const picked = [
-        ...(source ? [{ kind: 'asset', item: source }] : []),
+        ...sources.map((item) => ({ kind: 'asset', item })),
         ...files.map((file, index) => ({ kind: 'file', file, index })),
     ];
 
@@ -110,7 +110,7 @@ export default function EditForm({
         onSubmit({
             operation: tool,
             prompt: current.needsPrompt ? prompt.trim() : null,
-            source_generation_id: source?.id ?? null,
+            source_ids: sources.map((item) => item.id),
             images: files,
             aspect_ratio:
                 tool === 'upscale' || tool === 'background_remove' ? null : ratio,
@@ -183,10 +183,10 @@ export default function EditForm({
                         {picked.map((entry) =>
                             entry.kind === 'asset' ? (
                                 <Thumb
-                                    key="asset"
+                                    key={`asset-${entry.item.id}`}
                                     src={entry.item.url}
                                     caption="From your work"
-                                    onRemove={() => onPickSource(null)}
+                                    onRemove={() => onRemoveSource(entry.item.id)}
                                 />
                             ) : (
                                 <Thumb
@@ -206,15 +206,29 @@ export default function EditForm({
                         )}
 
                         {picked.length < maxCombine && (
-                            <button
-                                type="button"
-                                onClick={() => fileRef.current?.click()}
-                                aria-label="Add another image"
-                                className="flex h-[84px] w-[84px] shrink-0 flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-white/20 text-white/45 transition hover:border-white/40 hover:text-white"
-                            >
-                                <Upload className="h-4 w-4" strokeWidth={1.75} />
-                                <span className="text-[11px]">Add</span>
-                            </button>
+                            <>
+                                <button
+                                    type="button"
+                                    onClick={() => fileRef.current?.click()}
+                                    title="Upload from your device"
+                                    className="flex h-[84px] w-[84px] shrink-0 flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-white/20 text-white/45 transition hover:border-white/40 hover:text-white"
+                                >
+                                    <Upload className="h-4 w-4" strokeWidth={1.75} />
+                                    <span className="text-[11px]">Upload</span>
+                                </button>
+
+                                {/* Вторую картинку тоже можно взять из
+                                    своих работ, а не только с диска. */}
+                                <button
+                                    type="button"
+                                    onClick={onBrowse}
+                                    title="Pick from your work"
+                                    className="flex h-[84px] w-[84px] shrink-0 flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-white/20 text-white/45 transition hover:border-white/40 hover:text-white"
+                                >
+                                    <Images className="h-4 w-4" strokeWidth={1.75} />
+                                    <span className="text-[11px]">My work</span>
+                                </button>
+                            </>
                         )}
                     </div>
                 ) : (

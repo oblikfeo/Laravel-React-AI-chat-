@@ -87,7 +87,7 @@ class StudioToolsTest extends TestCase
             ->post('/studio/edit', [
                 'operation' => 'edit',
                 'prompt' => 'Add a shadow',
-                'source_generation_id' => $source->id,
+                'source_ids' => [$source->id],
             ])
             ->assertRedirect();
 
@@ -109,7 +109,7 @@ class StudioToolsTest extends TestCase
             ->post('/studio/edit', [
                 'operation' => 'edit',
                 'prompt' => 'Steal this',
-                'source_generation_id' => $source->id,
+                'source_ids' => [$source->id],
             ])
             ->assertSessionHas('error');
 
@@ -358,5 +358,57 @@ class StudioToolsTest extends TestCase
                 'generations',
                 fn ($items) => collect($items)->pluck('id')->all() === [$fresh->id],
             ));
+    }
+
+    /**
+     * Объединять можно и свои готовые работы, не загружая их заново.
+     */
+    public function test_several_own_works_can_be_combined(): void
+    {
+        $user = User::factory()->create();
+
+        $first = $this->existingImage($user);
+
+        $this->actingAs($user)->post('/studio', [
+            'prompt' => 'A second one',
+            'model' => 'fast',
+            'aspect_ratio' => '1:1',
+        ]);
+
+        $second = Generation::where('operation', Generation::OP_GENERATE)
+            ->latest('id')
+            ->first();
+
+        $this->actingAs($user)
+            ->post('/studio/edit', [
+                'operation' => 'combine',
+                'prompt' => 'Side by side',
+                'source_ids' => [$first->id, $second->id],
+            ])
+            ->assertRedirect();
+
+        $this->assertCount(2, $this->generator->lastCombine);
+        $this->assertSame(
+            Generation::STATUS_READY,
+            Generation::where('operation', 'combine')->first()->status,
+        );
+    }
+
+    /** Чужие работы в список исходников не попадают. */
+    public function test_foreign_works_are_skipped_in_a_list(): void
+    {
+        $user = User::factory()->create();
+        $mine = $this->existingImage($user);
+        $foreign = $this->existingImage(User::factory()->create());
+
+        $this->actingAs($user)
+            ->post('/studio/edit', [
+                'operation' => 'combine',
+                'prompt' => 'Try to mix',
+                'source_ids' => [$mine->id, $foreign->id],
+            ]);
+
+        // Осталась одна своя картинка, а двух для объединения мало.
+        $this->assertNull($this->generator->lastCombine);
     }
 }

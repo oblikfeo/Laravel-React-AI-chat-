@@ -38,7 +38,10 @@ class EditGenerationRequest extends FormRequest
                 'max:2000',
             ],
 
-            'source_generation_id' => ['nullable', 'integer', 'exists:generations,id'],
+            // Объединение берёт несколько работ, остальные инструменты
+            // одну: список подходит обоим случаям.
+            'source_ids' => ['nullable', 'array', 'max:'.config('studio.edit.max_combine')],
+            'source_ids.*' => ['integer', 'exists:generations,id'],
 
             'images' => ['nullable', 'array', 'max:'.config('studio.edit.max_combine')],
             'images.*' => ['file', 'image', 'max:10240'],

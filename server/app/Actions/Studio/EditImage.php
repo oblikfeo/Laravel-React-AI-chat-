@@ -41,7 +41,7 @@ class EditImage
             'guest_id' => $user ? null : $guest?->id,
             'kind' => Generation::KIND_IMAGE,
             'operation' => $operation,
-            'source_generation_id' => $input['source_generation_id'] ?? null,
+            'source_generation_id' => $input['source_ids'][0] ?? null,
             'model_key' => $input['model'] ?? 'standard',
             'status' => Generation::STATUS_PENDING,
             'prompt' => $input['prompt'] ?? $this->titleFor($operation),
