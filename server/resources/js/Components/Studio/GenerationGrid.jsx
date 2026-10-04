@@ -8,12 +8,59 @@ import {
     Wand2,
     AlertCircle,
     Pencil,
-    Volume2,
     Images,
+    Music,
+    Mic,
+    Repeat,
+    AudioWaveform,
     ChevronDown,
     Maximize2,
     X,
 } from 'lucide-react';
+
+/**
+ * Как подписана галерея.
+ *
+ * У каждого режима звука свой материал, поэтому и галерея своя:
+ * песни, озвучка, изменённые записи и эффекты не смешиваются.
+ */
+const LOOKS = {
+    image: {
+        icon: Images,
+        title: 'Gallery',
+        one: 'work',
+        many: 'works',
+        empty: 'Your finished work will appear here.',
+    },
+    music: {
+        icon: Music,
+        title: 'Tracks',
+        one: 'track',
+        many: 'tracks',
+        empty: 'Music you create will appear here.',
+    },
+    speech: {
+        icon: Mic,
+        title: 'Voiceovers',
+        one: 'voiceover',
+        many: 'voiceovers',
+        empty: 'Your voiceovers will appear here.',
+    },
+    changer: {
+        icon: Repeat,
+        title: 'Converted',
+        one: 'recording',
+        many: 'recordings',
+        empty: 'Recordings in a new voice will appear here.',
+    },
+    effect: {
+        icon: AudioWaveform,
+        title: 'Effects',
+        one: 'effect',
+        many: 'effects',
+        empty: 'Sound effects you create will appear here.',
+    },
+};
 
 /**
  * Галерея работ.
@@ -54,7 +101,8 @@ export default function GenerationGrid({
     }, [items]);
 
     const readyCount = items.filter((item) => item.status === 'ready').length;
-    const audio = kind === 'audio';
+    const look = LOOKS[kind] ?? LOOKS.image;
+    const audio = kind !== 'image';
 
     return (
         <div className="mt-6">
@@ -64,27 +112,17 @@ export default function GenerationGrid({
                 className="flex w-full items-center gap-3 rounded-2xl border border-white/[0.09] bg-slate-950/45 px-4 py-3 text-left transition hover:border-white/20 hover:bg-slate-950/60"
             >
                 <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.07] text-white/60">
-                    {audio ? (
-                        <Volume2 className="h-[18px] w-[18px]" strokeWidth={1.75} />
-                    ) : (
-                        <Images className="h-[18px] w-[18px]" strokeWidth={1.75} />
-                    )}
+                    <look.icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
                 </span>
 
                 <span className="min-w-0 flex-1">
                     <span className="block text-[14px] font-medium text-white">
-                        {audio ? 'Recordings' : 'Gallery'}
+                        {look.title}
                     </span>
                     <span className="mt-0.5 block text-[12px] text-white/40">
                         {readyCount
                             ? `${readyCount} ${
-                                  audio
-                                      ? readyCount === 1
-                                          ? 'recording'
-                                          : 'recordings'
-                                      : readyCount === 1
-                                        ? 'work'
-                                        : 'works'
+                                  readyCount === 1 ? look.one : look.many
                               } saved`
                             : 'Nothing saved yet'}
                     </span>
@@ -128,24 +166,15 @@ export default function GenerationGrid({
                         </div>
                     ) : (
                         <div className="rounded-2xl border border-white/[0.07] bg-slate-950/40 px-6 py-12 text-center">
-                            {audio ? (
-                                <Volume2
-                                    className="mx-auto h-7 w-7 text-white/20"
-                                    strokeWidth={1.5}
-                                />
-                            ) : (
-                                <Wand2
-                                    className="mx-auto h-7 w-7 text-white/20"
-                                    strokeWidth={1.5}
-                                />
-                            )}
+                            <look.icon
+                                className="mx-auto h-7 w-7 text-white/20"
+                                strokeWidth={1.5}
+                            />
                             <p className="mt-3 text-[15px] text-white/60">
                                 Nothing here yet
                             </p>
                             <p className="mt-1 text-sm text-white/35">
-                                {audio
-                                    ? 'Your recordings will appear here.'
-                                    : 'Your finished work will appear here.'}
+                                {look.empty}
                             </p>
                         </div>
                     )}

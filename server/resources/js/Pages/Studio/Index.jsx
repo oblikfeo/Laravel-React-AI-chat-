@@ -45,6 +45,9 @@ export default function StudioIndex({
     limit,
 }) {
     const [tab, setTab] = useState('image');
+
+    // Режим звука: у каждого своя галерея, смешивать их незачем.
+    const [audioMode, setAudioMode] = useState('music');
     const [busy, setBusy] = useState(false);
 
     // Повтор подставляет условия готовой работы в форму, а не создаёт
@@ -146,10 +149,25 @@ export default function StudioIndex({
         return () => clearInterval(timer);
     }, [waiting]);
 
-    // На каждой вкладке своя галерея: записи и картинки смешивать
-    // незачем, человек пришёл за чем-то одним.
+    // Какой операции работы показывать в галерее звука.
+    const AUDIO_OPERATIONS = {
+        music: 'music',
+        speech: 'speech',
+        changer: 'voice_change',
+        effect: 'effect',
+    };
+
+    /*
+     * Галерея своя у каждого режима: музыка, озвучка, смена голоса и
+     * эффекты — разный материал, и человек пришёл за чем-то одним.
+     * Картинки и правка работают с общим набором, поэтому у них
+     * галерея общая.
+     */
     const shown = generations.filter((item) =>
-        tab === 'audio' ? item.kind === 'audio' : item.kind !== 'audio',
+        tab === 'audio'
+            ? item.kind === 'audio' &&
+              item.operation === AUDIO_OPERATIONS[audioMode]
+            : item.kind !== 'audio',
     );
 
     return (
@@ -210,6 +228,8 @@ export default function StudioIndex({
                                 defaultEffectModel={defaultEffectModel}
                                 defaultVoice={defaultVoice}
                                 maxLyrics={maxLyrics}
+                                mode={audioMode}
+                                onModeChange={setAudioMode}
                                 onSubmit={submitAudio}
                             />
                         )}
@@ -246,7 +266,7 @@ export default function StudioIndex({
                     {tab !== 'video' && (
                         <GenerationGrid
                             items={shown}
-                            kind={tab === 'audio' ? 'audio' : 'image'}
+                            kind={tab === 'audio' ? audioMode : 'image'}
                             highlight={fresh}
                             onReuse={(item) => {
                                 setPreset(item);

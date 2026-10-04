@@ -52,9 +52,10 @@ export default function AudioStudio({
     available,
     busy,
     limit,
+    mode,
+    onModeChange,
     onSubmit,
 }) {
-    const [mode, setMode] = useState('music');
 
     return (
         <div>
@@ -63,7 +64,7 @@ export default function AudioStudio({
                     <button
                         key={key}
                         type="button"
-                        onClick={() => setMode(key)}
+                        onClick={() => onModeChange(key)}
                         className={`flex h-9 items-center gap-2 rounded-full px-4 text-[13px] transition ${
                             mode === key
                                 ? 'bg-white font-semibold text-black'
