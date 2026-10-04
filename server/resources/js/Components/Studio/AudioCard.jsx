@@ -100,24 +100,20 @@ export default function AudioCard({ item, fresh }) {
 
     return (
         <div
-            className={`relative overflow-hidden rounded-2xl border bg-slate-950/55 p-3 transition ${
+            className={`relative rounded-2xl border bg-slate-950/55 p-3 transition ${
+                queued ? 'work-border border-white/[0.06]' : ''
+            } ${
                 fresh
                     ? 'border-sky-300/50 ring-1 ring-sky-300/25'
                     : queued
-                      ? 'border-sky-300/25'
+                      ? ''
                       : 'border-white/[0.08]'
             }`}
         >
-            {queued && (
-                <span
-                    aria-hidden="true"
-                    className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-white/[0.07] to-transparent"
-                    style={{ animation: 'work-sheen 2.2s ease-in-out infinite' }}
-                />
-            )}
-
             <div className="relative flex gap-3">
-                <div className="flex h-[88px] w-[88px] shrink-0 items-center justify-center rounded-xl bg-white/[0.06]">
+                <div className="relative flex h-[88px] w-[88px] shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white/[0.06]">
+                    {queued && <Stars />}
+
                     {failed ? (
                         <AlertCircle
                             className="h-7 w-7 text-rose-300/70"
@@ -238,12 +234,49 @@ export default function AudioCard({ item, fresh }) {
 }
 
 /**
+ * Звёзды на обложке.
+ *
+ * Положение задано заранее, а не случайно при каждой отрисовке:
+ * иначе звёзды прыгали бы с места на место при каждом обновлении.
+ */
+const STARS = [
+    { top: '18%', left: '22%', size: 3, delay: 0 },
+    { top: '32%', left: '68%', size: 2, delay: 0.4 },
+    { top: '55%', left: '14%', size: 2, delay: 0.9 },
+    { top: '70%', left: '52%', size: 3, delay: 0.2 },
+    { top: '26%', left: '44%', size: 2, delay: 1.3 },
+    { top: '78%', left: '78%', size: 2, delay: 0.7 },
+    { top: '46%', left: '86%', size: 3, delay: 1.1 },
+    { top: '62%', left: '34%', size: 2, delay: 1.6 },
+];
+
+function Stars() {
+    return (
+        <span aria-hidden="true" className="pointer-events-none absolute inset-0">
+            {STARS.map((star, index) => (
+                <span
+                    key={index}
+                    className="absolute rounded-full bg-sky-200"
+                    style={{
+                        top: star.top,
+                        left: star.left,
+                        width: `${star.size}px`,
+                        height: `${star.size}px`,
+                        boxShadow: '0 0 6px 1px rgb(125 211 252 / 0.8)',
+                        animation: `work-twinkle 2.4s ease-in-out ${star.delay}s infinite`,
+                    }}
+                />
+            ))}
+        </span>
+    );
+}
+
+/**
  * Ожидание готовности.
  *
  * Без полосы прогресса: провайдер не сообщает, как далеко
- * продвинулся, и полоса либо врёт, либо замирает у края. Вместо неё
- * бегущие полоски и счётчик времени — ничего не обещают, но видно,
- * что работа идёт.
+ * продвинулся, и полоса либо врёт, либо замирает у края. Остаётся
+ * честный счётчик времени.
  */
 function Waiting() {
     const [elapsed, setElapsed] = useState(0);
@@ -256,24 +289,12 @@ function Waiting() {
     }, []);
 
     return (
-        <div className="mt-auto flex items-center gap-2.5 pt-3">
-            <span className="flex items-end gap-[3px]">
-                {[0, 1, 2, 3, 4].map((index) => (
-                    <span
-                        key={index}
-                        className="w-[3px] rounded-full bg-sky-300/70"
-                        style={{
-                            height: `${8 + (index % 3) * 5}px`,
-                            animation: `work-pulse 1.1s ease-in-out ${
-                                index * 0.13
-                            }s infinite`,
-                        }}
-                    />
-                ))}
+        <div className="mt-auto flex items-center gap-2 pt-3">
+            <span className="text-[12px] text-sky-200/70">
+                Working on it…
             </span>
-
-            <span className="text-[12px] text-white/45">
-                Working on it… {clock(elapsed / 1000)}
+            <span className="text-[12px] tabular-nums text-white/35">
+                {clock(elapsed / 1000)}
             </span>
         </div>
     );

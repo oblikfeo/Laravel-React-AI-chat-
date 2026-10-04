@@ -2,6 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Угол свечения в рамке работающей карточки.
+ *
+ * Объявлен снаружи слоёв: внутри @layer регистрация свойства не
+ * действует, и угол не анимируется.
+ */
+@property --work-angle {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+}
+
 @layer base {
     html {
         color-scheme: dark;
@@ -206,12 +218,33 @@
     }
 
     /*
-     * Карточка дышит, пока идёт генерация.
+     * Карточка в работе.
      *
      * Полоса прогресса здесь не годится: провайдер не сообщает, как
-     * далеко продвинулся, и полоса либо врёт, либо замирает у края.
-     * Мерцание ничего не обещает, но видно, что работа идёт.
+     * далеко продвинулся. Вместо неё по рамке бежит светящийся луч,
+     * а внутри мерцают звёзды — наша тема.
      */
+    @keyframes work-orbit {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    @keyframes work-twinkle {
+        0%,
+        100% {
+            opacity: 0.15;
+            transform: scale(0.7);
+        }
+        50% {
+            opacity: 1;
+            transform: scale(1.15);
+        }
+    }
+
     @keyframes work-pulse {
         0%,
         100% {
@@ -222,13 +255,56 @@
         }
     }
 
-    /* Блик пробегает по карточке — как по загружающейся строке. */
-    @keyframes work-sheen {
-        0% {
-            transform: translateX(-100%);
-        }
-        100% {
-            transform: translateX(200%);
+    /*
+     * Луч по периметру.
+     *
+     * Вращается конический градиент, а маска оставляет от него только
+     * рамку: иначе свечение залило бы всю карточку.
+     */
+    .work-border {
+        position: relative;
+    }
+
+    .work-border::before {
+        content: '';
+        position: absolute;
+        inset: -1px;
+        border-radius: inherit;
+        padding: 1px;
+        background: conic-gradient(
+            from var(--work-angle, 0deg),
+            transparent 0deg,
+            transparent 240deg,
+            rgb(125 211 252 / 0.15) 290deg,
+            rgb(125 211 252 / 0.95) 340deg,
+            rgb(224 242 254) 355deg,
+            rgb(125 211 252 / 0.15) 360deg
+        );
+        -webkit-mask:
+            linear-gradient(#000 0 0) content-box,
+            linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor;
+        mask:
+            linear-gradient(#000 0 0) content-box,
+            linear-gradient(#000 0 0);
+        mask-composite: exclude;
+        animation: work-angle 2.6s linear infinite;
+        pointer-events: none;
+    }
+
+    /* Свечение под лучом: рамка не выглядит нарисованной. */
+    .work-border::after {
+        content: '';
+        position: absolute;
+        inset: -1px;
+        border-radius: inherit;
+        box-shadow: 0 0 22px -6px rgb(125 211 252 / 0.5);
+        pointer-events: none;
+    }
+
+    @keyframes work-angle {
+        to {
+            --work-angle: 360deg;
         }
     }
 
