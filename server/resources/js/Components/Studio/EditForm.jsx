@@ -184,7 +184,7 @@ export default function EditForm({
                             entry.kind === 'asset' ? (
                                 <Thumb
                                     key={`asset-${entry.item.id}`}
-                                    src={entry.item.url}
+                                    src={entry.item.thumbnail ?? entry.item.url}
                                     caption="From your work"
                                     onRemove={() => onRemoveSource(entry.item.id)}
                                 />

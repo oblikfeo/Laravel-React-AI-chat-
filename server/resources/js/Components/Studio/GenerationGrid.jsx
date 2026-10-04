@@ -214,9 +214,10 @@ function Card({ item, fresh, audio, onReuse, onEdit, onOpen }) {
                         aria-label="View full size"
                     >
                         <img
-                            src={item.url}
+                            src={item.thumbnail ?? item.url}
                             alt={item.prompt}
                             loading="lazy"
+                            decoding="async"
                             className="h-full w-full object-cover"
                         />
 

@@ -57,6 +57,7 @@ class Generation extends Model
         'duration',
         'disk',
         'path',
+        'thumbnail_path',
         'mime',
         'width',
         'height',

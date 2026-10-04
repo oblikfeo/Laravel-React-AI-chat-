@@ -411,4 +411,25 @@ class StudioToolsTest extends TestCase
         // Осталась одна своя картинка, а двух для объединения мало.
         $this->assertNull($this->generator->lastCombine);
     }
+
+    /**
+     * Повтор работы с моделью, которой больше нет в линейке, не
+     * должен ронять запрос: работы живут дольше настроек.
+     */
+    public function test_missing_model_does_not_break_a_retry(): void
+    {
+        $user = User::factory()->create();
+        $generation = $this->existingImage($user);
+
+        $generation->forceFill(['model_key' => 'gone'])->save();
+
+        $this->actingAs($user)
+            ->post("/studio/{$generation->id}/retry")
+            ->assertRedirect();
+
+        $this->assertSame(
+            Generation::STATUS_FAILED,
+            Generation::latest('id')->first()->status,
+        );
+    }
 }

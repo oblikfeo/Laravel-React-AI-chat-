@@ -88,9 +88,10 @@ export default function AssetPicker({
                                         aria-label="Choose this image"
                                     >
                                         <img
-                                            src={item.url}
+                                            src={item.thumbnail ?? item.url}
                                             alt={item.prompt}
                                             loading="lazy"
+                                            decoding="async"
                                             className="h-full w-full object-cover"
                                         />
                                     </button>

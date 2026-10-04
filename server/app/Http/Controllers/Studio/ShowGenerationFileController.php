@@ -25,13 +25,24 @@ class ShowGenerationFileController extends Controller
         }
 
         $download = $request->boolean('download');
-        $name = 'uncensia-'.$generation->id.'.'.pathinfo($generation->path, PATHINFO_EXTENSION);
+
+        // В ленте показываем уменьшенную копию: полный файл весит
+        // мегабайты, а квадрат в ленте — двести точек.
+        $path = $request->boolean('small') && $generation->thumbnail_path
+            ? $generation->thumbnail_path
+            : $generation->path;
+
+        $name = 'uncensia-'.$generation->id.'.'.pathinfo($path, PATHINFO_EXTENSION);
 
         $disk = Storage::disk($generation->disk);
 
         return $download
-            ? $disk->download($generation->path, $name)
-            : $disk->response($generation->path, $name);
+            ? $disk->download($generation->path, 'uncensia-'.$generation->id.'.'.pathinfo($generation->path, PATHINFO_EXTENSION))
+            : $disk->response($path, $name, [
+                // Работа не меняется, поэтому браузер может держать
+                // её у себя и не спрашивать заново.
+                'Cache-Control' => 'private, max-age=604800',
+            ]);
     }
 
     private function owns(Generation $generation, Request $request): bool

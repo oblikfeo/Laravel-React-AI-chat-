@@ -69,6 +69,22 @@ class CreateGeneration
         $model = config("studio.models.{$generation->model_key}");
         $variants = max((int) $generation->variants, 1);
 
+        // Линейка моделей со временем меняется, а работы остаются:
+        // повтор старой не должен ронять запрос.
+        if (! $model) {
+            Log::warning('Студия: модель работы больше не существует', [
+                'generation_id' => $generation->id,
+                'model_key' => $generation->model_key,
+            ]);
+
+            $generation->forceFill([
+                'status' => Generation::STATUS_FAILED,
+                'failure_reason' => "Модель {$generation->model_key} больше не доступна.",
+            ])->save();
+
+            return [$generation];
+        }
+
         try {
             $images = $this->generator->generate(new GenerationRequest(
                 providerModel: $model['provider_model'],

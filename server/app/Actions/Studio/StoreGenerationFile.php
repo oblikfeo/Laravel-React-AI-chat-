@@ -3,6 +3,7 @@
 namespace App\Actions\Studio;
 
 use App\Models\Generation;
+use App\Services\Studio\Thumbnailer;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -14,6 +15,10 @@ use Illuminate\Support\Str;
  */
 class StoreGenerationFile
 {
+    public function __construct(private readonly Thumbnailer $thumbnailer)
+    {
+    }
+
     public function store(
         Generation $generation,
         string $contents,
@@ -30,10 +35,24 @@ class StoreGenerationFile
 
         Storage::disk($disk)->put($path, $contents);
 
+        // Уменьшенная копия для ленты: полные файлы весят мегабайты.
+        $thumbnail = str_starts_with($mime, 'image/')
+            ? $this->thumbnailer->make($contents)
+            : null;
+
+        $thumbnailPath = null;
+
+        if ($thumbnail) {
+            $thumbnailPath = sprintf('studio/%s/%s-small.png', $owner, Str::uuid());
+
+            Storage::disk($disk)->put($thumbnailPath, $thumbnail);
+        }
+
         $generation->forceFill([
             'status' => Generation::STATUS_READY,
             'disk' => $disk,
             'path' => $path,
+            'thumbnail_path' => $thumbnailPath,
             'mime' => $mime,
             'failure_reason' => null,
             'completed_at' => now(),

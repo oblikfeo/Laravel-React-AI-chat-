@@ -36,6 +36,11 @@ class GenerationResource extends JsonResource
             'url' => $this->isReady()
                 ? route('studio.file', $this->resource)
                 : null,
+            // Для ленты: уменьшенная копия, если она есть.
+            'thumbnail' => $this->isReady()
+                ? route('studio.file', $this->resource)
+                    .($this->thumbnail_path ? '?small=1' : '')
+                : null,
             'createdAt' => $this->created_at?->toIso8601String(),
         ];
     }

@@ -247,4 +247,49 @@ class StudioAudioTest extends TestCase
             $this->studio->lastRetrieveModel,
         );
     }
+
+    /**
+     * Повтор звука должен звать звуковые инструменты.
+     *
+     * Раньше он слепо звал рисование и падал на ключе модели, которой
+     * среди картинок нет.
+     */
+    public function test_audio_can_be_repeated(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->post('/studio/effect', [
+            'prompt' => 'Thunder rolling in the distance',
+            'model' => 'quick',
+        ]);
+
+        $first = Generation::first();
+
+        $this->actingAs($user)
+            ->post("/studio/{$first->id}/retry")
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame(2, Generation::where('operation', Generation::OP_EFFECT)->count());
+    }
+
+    /**
+     * Смену голоса повторить нечем: исходной записи у нас нет.
+     */
+    public function test_voice_change_cannot_be_repeated(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->post('/studio/voice-change', [
+            'recording' => UploadedFile::fake()->createWithContent('a.mp3', 'x'),
+        ]);
+
+        $generation = Generation::first();
+
+        $this->actingAs($user)
+            ->post("/studio/{$generation->id}/retry")
+            ->assertSessionHas('error');
+
+        $this->assertSame(1, Generation::count());
+    }
 }
