@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { router } from '@inertiajs/react';
 import {
     Download,
@@ -8,57 +8,118 @@ import {
     AlertCircle,
     Pencil,
     Volume2,
+    Images,
+    ChevronDown,
+    Maximize2,
+    X,
 } from 'lucide-react';
 
 /**
- * Лента работ: свежие сверху.
+ * Галерея работ.
  *
- * Действия появляются при наведении, чтобы не перегружать сетку.
+ * Свёрнута по умолчанию: картинки, висящие под формой, отвлекают от
+ * работы и занимают весь экран. В заголовке видно, сколько их всего,
+ * и свежий результат разворачивает галерею сам.
  */
-export default function GenerationGrid({ items, onReuse, onEdit }) {
+export default function GenerationGrid({ items, onReuse, onEdit, highlight }) {
+    const [open, setOpen] = useState(false);
     const [preview, setPreview] = useState(null);
+    const seen = useRef(null);
 
-    if (!items.length) {
-        return (
-            <div className="mt-8 rounded-2xl border border-white/[0.07] bg-slate-950/40 px-6 py-14 text-center backdrop-blur-md">
-                <Wand2
-                    className="mx-auto h-7 w-7 text-white/20"
-                    strokeWidth={1.5}
-                />
-                <p className="mt-3 text-[15px] text-white/60">
-                    Nothing here yet
-                </p>
-                <p className="mt-1 text-sm text-white/35">
-                    Describe an image above and it will appear here.
-                </p>
-            </div>
-        );
-    }
+    // Новая работа должна быть видна сразу: иначе человек нажимает
+    // кнопку и не понимает, что получилось.
+    useEffect(() => {
+        const newest = items[0]?.id ?? null;
+
+        if (newest !== null && seen.current !== null && newest !== seen.current) {
+            setOpen(true);
+        }
+
+        seen.current = newest;
+    }, [items]);
+
+    const ready = items.filter((item) => item.status === 'ready').length;
 
     return (
-        <>
-            <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                {items.map((item) => (
-                    <Card
-                        key={item.id}
-                        item={item}
-                        onReuse={onReuse}
-                        onEdit={onEdit}
-                        onOpen={() =>
-                            item.url && item.kind !== 'audio' && setPreview(item)
-                        }
-                    />
-                ))}
-            </div>
+        <div className="mt-6">
+            <button
+                type="button"
+                onClick={() => setOpen((value) => !value)}
+                className="flex w-full items-center gap-3 rounded-2xl border border-white/[0.09] bg-slate-950/45 px-4 py-3 text-left transition hover:border-white/20 hover:bg-slate-950/60"
+            >
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.07] text-white/60">
+                    <Images className="h-[18px] w-[18px]" strokeWidth={1.75} />
+                </span>
+
+                <span className="min-w-0 flex-1">
+                    <span className="block text-[14px] font-medium text-white">
+                        Gallery
+                    </span>
+                    <span className="mt-0.5 block text-[12px] text-white/40">
+                        {ready
+                            ? `${ready} ${ready === 1 ? 'work' : 'works'} saved`
+                            : 'Nothing saved yet'}
+                    </span>
+                </span>
+
+                <ChevronDown
+                    className={`h-4 w-4 shrink-0 text-white/40 transition ${
+                        open ? 'rotate-180' : ''
+                    }`}
+                    strokeWidth={2}
+                />
+            </button>
+
+            {open && (
+                <div className="mt-3">
+                    {items.length ? (
+                        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                            {items.map((item) => (
+                                <Card
+                                    key={item.id}
+                                    item={item}
+                                    fresh={item.id === highlight}
+                                    onReuse={onReuse}
+                                    onEdit={onEdit}
+                                    onOpen={() =>
+                                        item.url &&
+                                        item.kind !== 'audio' &&
+                                        setPreview(item)
+                                    }
+                                />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="rounded-2xl border border-white/[0.07] bg-slate-950/40 px-6 py-12 text-center">
+                            <Wand2
+                                className="mx-auto h-7 w-7 text-white/20"
+                                strokeWidth={1.5}
+                            />
+                            <p className="mt-3 text-[15px] text-white/60">
+                                Nothing here yet
+                            </p>
+                            <p className="mt-1 text-sm text-white/35">
+                                Your finished work will appear here.
+                            </p>
+                        </div>
+                    )}
+                </div>
+            )}
 
             {preview && (
                 <Lightbox item={preview} onClose={() => setPreview(null)} />
             )}
-        </>
+        </div>
     );
 }
 
-function Card({ item, onReuse, onEdit, onOpen }) {
+/**
+ * Работа: картинка слева, действия и подпись справа.
+ *
+ * Кнопки поверх картинки прятали её и появлялись только при
+ * наведении — на ощупь. Здесь они всегда на виду.
+ */
+function Card({ item, fresh, onReuse, onEdit, onOpen }) {
     const failed = item.status === 'failed';
     const isAudio = item.kind === 'audio';
 
@@ -78,45 +139,49 @@ function Card({ item, onReuse, onEdit, onOpen }) {
     };
 
     return (
-        <div className="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-slate-950/55 backdrop-blur-xl">
-            <div className="aspect-square w-full">
+        <div
+            className={`flex gap-3 rounded-2xl border bg-slate-950/55 p-3 transition ${
+                fresh
+                    ? 'border-sky-300/50 ring-1 ring-sky-300/25'
+                    : 'border-white/[0.08]'
+            }`}
+        >
+            <div className="h-[104px] w-[104px] shrink-0 overflow-hidden rounded-xl bg-black/40">
                 {isAudio && item.url ? (
-                    <div className="flex h-full w-full flex-col items-center justify-center gap-3 px-4">
+                    <div className="flex h-full w-full items-center justify-center">
                         <Volume2
                             className="h-7 w-7 text-white/35"
                             strokeWidth={1.5}
-                        />
-                        <audio
-                            controls
-                            src={item.url}
-                            className="w-full"
                         />
                     </div>
                 ) : item.url ? (
                     <button
                         type="button"
                         onClick={onOpen}
-                        className="h-full w-full"
+                        className="group relative h-full w-full"
+                        aria-label="View full size"
                     >
                         <img
                             src={item.url}
                             alt={item.prompt}
                             loading="lazy"
-                            className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+                            className="h-full w-full object-cover"
                         />
+
+                        <span className="absolute inset-0 flex items-center justify-center bg-black/55 opacity-0 transition group-hover:opacity-100">
+                            <Maximize2
+                                className="h-4 w-4 text-white"
+                                strokeWidth={2}
+                            />
+                        </span>
                     </button>
                 ) : (
-                    <div className="flex h-full w-full flex-col items-center justify-center gap-2 px-4 text-center">
+                    <div className="flex h-full w-full items-center justify-center">
                         {failed ? (
-                            <>
-                                <AlertCircle
-                                    className="h-5 w-5 text-rose-300/70"
-                                    strokeWidth={1.75}
-                                />
-                                <span className="text-[13px] text-white/50">
-                                    Could not create this one
-                                </span>
-                            </>
+                            <AlertCircle
+                                className="h-5 w-5 text-rose-300/70"
+                                strokeWidth={1.75}
+                            />
                         ) : (
                             <span className="h-6 w-6 animate-spin rounded-full border-2 border-white/15 border-t-white/60" />
                         )}
@@ -124,29 +189,42 @@ function Card({ item, onReuse, onEdit, onOpen }) {
                 )}
             </div>
 
-            {/* Подпись и действия проявляются при наведении. */}
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/45 to-transparent p-3 opacity-0 transition group-hover:opacity-100">
-                <p className="line-clamp-2 text-[12px] leading-snug text-white/85">
-                    {item.prompt}
+            <div className="flex min-w-0 flex-1 flex-col">
+                <p
+                    className={`line-clamp-2 text-[13px] leading-snug ${
+                        failed ? 'text-white/40' : 'text-white/80'
+                    }`}
+                >
+                    {failed ? 'Could not create this one' : item.prompt}
                 </p>
 
-                <div className="pointer-events-auto mt-2 flex items-center gap-1.5">
+                <p className="mt-1 text-[11px] text-white/35">
+                    {[item.model, item.operation !== 'generate' ? label(item.operation) : null]
+                        .filter(Boolean)
+                        .join(' · ')}
+                </p>
+
+                {isAudio && item.url && (
+                    <audio controls src={item.url} className="mt-2 w-full" />
+                )}
+
+                <div className="mt-auto flex flex-wrap items-center gap-1.5 pt-2">
                     {item.url && (
-                        <IconButton
+                        <Action
                             title="Download"
                             href={`${item.url}?download=1`}
                             icon={Download}
                         />
                     )}
 
-                    <IconButton
+                    <Action
                         title={failed ? 'Try again' : 'Create another'}
                         onClick={retry}
                         icon={RotateCw}
                     />
 
                     {!isAudio && (
-                        <IconButton
+                        <Action
                             title="Use these settings"
                             onClick={() => onReuse(item)}
                             icon={Wand2}
@@ -154,14 +232,14 @@ function Card({ item, onReuse, onEdit, onOpen }) {
                     )}
 
                     {!isAudio && item.url && onEdit && (
-                        <IconButton
+                        <Action
                             title="Edit this image"
                             onClick={() => onEdit(item)}
                             icon={Pencil}
                         />
                     )}
 
-                    <IconButton
+                    <Action
                         title="Delete"
                         onClick={remove}
                         icon={Trash2}
@@ -173,9 +251,22 @@ function Card({ item, onReuse, onEdit, onOpen }) {
     );
 }
 
-function IconButton({ title, icon: Icon, onClick, href, danger }) {
-    const className = `flex h-8 w-8 items-center justify-center rounded-lg border border-white/15 bg-black/40 backdrop-blur transition hover:bg-white/15 ${
-        danger ? 'text-white/70 hover:text-rose-300' : 'text-white/80 hover:text-white'
+/** Название инструмента для подписи. */
+function label(operation) {
+    return {
+        edit: 'Edited',
+        combine: 'Combined',
+        upscale: 'Upscaled',
+        background_remove: 'Background removed',
+        speech: 'Speech',
+    }[operation] ?? null;
+}
+
+function Action({ title, icon: Icon, onClick, href, danger }) {
+    const className = `flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.1] bg-white/[0.03] transition hover:bg-white/12 ${
+        danger
+            ? 'text-white/55 hover:text-rose-300'
+            : 'text-white/70 hover:text-white'
     }`;
 
     if (href) {
@@ -203,11 +294,20 @@ function IconButton({ title, icon: Icon, onClick, href, danger }) {
 function Lightbox({ item, onClose }) {
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm"
+            className="fixed inset-0 z-[70] flex items-center justify-center bg-black/92 p-4 backdrop-blur-sm"
             onClick={onClose}
             role="dialog"
             aria-modal="true"
         >
+            <button
+                type="button"
+                onClick={onClose}
+                aria-label="Close"
+                className="absolute right-4 top-4 rounded-lg p-2 text-white/60 transition hover:bg-white/10 hover:text-white"
+            >
+                <X className="h-5 w-5" strokeWidth={1.75} />
+            </button>
+
             <div
                 className="max-h-full w-auto"
                 onClick={(event) => event.stopPropagation()}
@@ -224,7 +324,9 @@ function Lightbox({ item, onClose }) {
                     </p>
 
                     <p className="mt-2 text-[12px] text-white/35">
-                        {item.model} · {item.aspectRatio} · seed {item.seed}
+                        {[item.model, item.aspectRatio, item.seed ? `seed ${item.seed}` : null]
+                            .filter(Boolean)
+                            .join(' · ')}
                     </p>
                 </div>
             </div>

@@ -50,7 +50,17 @@ export default function StudioIndex({
     // Открыт ли выбор из своих работ.
     const [browsing, setBrowsing] = useState(false);
 
-    const finish = { preserveScroll: true, showProgress: false, onFinish: () => setBusy(false) };
+    // Свежая работа: её видно в галерее сразу после создания.
+    const [fresh, setFresh] = useState(null);
+
+    const finish = {
+        preserveScroll: true,
+        showProgress: false,
+        onFinish: () => setBusy(false),
+        // Самая свежая работа подсвечивается в галерее: иначе
+        // непонятно, что именно получилось.
+        onSuccess: (page) => setFresh(page.props.generations?.[0]?.id ?? null),
+    };
 
     const submitImage = (values) => {
         setBusy(true);
@@ -64,7 +74,10 @@ export default function StudioIndex({
         router.post('/studio/edit', values, {
             ...finish,
             forceFormData: true,
-            onSuccess: () => setSources([]),
+            onSuccess: (page) => {
+                setSources([]);
+                setFresh(page.props.generations?.[0]?.id ?? null);
+            },
         });
     };
 
@@ -164,9 +177,10 @@ export default function StudioIndex({
                         />
                     )}
 
-                    {tab !== 'video' && tab !== 'edit' && (
+                    {tab !== 'video' && (
                         <GenerationGrid
                             items={generations}
+                            highlight={fresh}
                             onReuse={(item) => {
                                 setPreset(item);
                                 setTab('image');
