@@ -73,7 +73,7 @@ export default function GenerationGrid({ items, onReuse, onEdit, highlight }) {
             {open && (
                 <div className="mt-3">
                     {items.length ? (
-                        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                        <div className="grid gap-3 sm:grid-cols-2">
                             {items.map((item) => (
                                 <Card
                                     key={item.id}
@@ -146,13 +146,15 @@ function Card({ item, fresh, onReuse, onEdit, onOpen }) {
                     : 'border-white/[0.08]'
             }`}
         >
-            <div className="h-[104px] w-[104px] shrink-0 overflow-hidden rounded-xl bg-black/40">
+            {/* Картинка занимает карточку: ради неё сюда и смотрят. */}
+            <div className="aspect-square min-w-0 flex-1 overflow-hidden rounded-xl bg-black/40">
                 {isAudio && item.url ? (
-                    <div className="flex h-full w-full items-center justify-center">
+                    <div className="flex h-full w-full flex-col items-center justify-center gap-3 px-4">
                         <Volume2
-                            className="h-7 w-7 text-white/35"
+                            className="h-8 w-8 text-white/35"
                             strokeWidth={1.5}
                         />
+                        <audio controls src={item.url} className="w-full" />
                     </div>
                 ) : item.url ? (
                     <button
@@ -170,18 +172,23 @@ function Card({ item, fresh, onReuse, onEdit, onOpen }) {
 
                         <span className="absolute inset-0 flex items-center justify-center bg-black/55 opacity-0 transition group-hover:opacity-100">
                             <Maximize2
-                                className="h-4 w-4 text-white"
+                                className="h-5 w-5 text-white"
                                 strokeWidth={2}
                             />
                         </span>
                     </button>
                 ) : (
-                    <div className="flex h-full w-full items-center justify-center">
+                    <div className="flex h-full w-full flex-col items-center justify-center gap-2 px-4 text-center">
                         {failed ? (
-                            <AlertCircle
-                                className="h-5 w-5 text-rose-300/70"
-                                strokeWidth={1.75}
-                            />
+                            <>
+                                <AlertCircle
+                                    className="h-5 w-5 text-rose-300/70"
+                                    strokeWidth={1.75}
+                                />
+                                <span className="text-[12px] text-white/45">
+                                    Could not create this one
+                                </span>
+                            </>
                         ) : (
                             <span className="h-6 w-6 animate-spin rounded-full border-2 border-white/15 border-t-white/60" />
                         )}
@@ -189,77 +196,42 @@ function Card({ item, fresh, onReuse, onEdit, onOpen }) {
                 )}
             </div>
 
-            <div className="flex min-w-0 flex-1 flex-col">
-                <p
-                    className={`line-clamp-2 text-[13px] leading-snug ${
-                        failed ? 'text-white/40' : 'text-white/80'
-                    }`}
-                >
-                    {failed ? 'Could not create this one' : item.prompt}
-                </p>
-
-                <p className="mt-1 text-[11px] text-white/35">
-                    {[item.model, item.operation !== 'generate' ? label(item.operation) : null]
-                        .filter(Boolean)
-                        .join(' · ')}
-                </p>
-
-                {isAudio && item.url && (
-                    <audio controls src={item.url} className="mt-2 w-full" />
+            {/* Действия столбиком сбоку: на виду и не закрывают работу. */}
+            <div className="flex shrink-0 flex-col gap-1.5">
+                {item.url && (
+                    <Action
+                        title="Download"
+                        href={`${item.url}?download=1`}
+                        icon={Download}
+                    />
                 )}
 
-                <div className="mt-auto flex flex-wrap items-center gap-1.5 pt-2">
-                    {item.url && (
-                        <Action
-                            title="Download"
-                            href={`${item.url}?download=1`}
-                            icon={Download}
-                        />
-                    )}
+                <Action
+                    title={failed ? 'Try again' : 'Create another'}
+                    onClick={retry}
+                    icon={RotateCw}
+                />
 
+                {!isAudio && (
                     <Action
-                        title={failed ? 'Try again' : 'Create another'}
-                        onClick={retry}
-                        icon={RotateCw}
+                        title="Use these settings"
+                        onClick={() => onReuse(item)}
+                        icon={Wand2}
                     />
+                )}
 
-                    {!isAudio && (
-                        <Action
-                            title="Use these settings"
-                            onClick={() => onReuse(item)}
-                            icon={Wand2}
-                        />
-                    )}
-
-                    {!isAudio && item.url && onEdit && (
-                        <Action
-                            title="Edit this image"
-                            onClick={() => onEdit(item)}
-                            icon={Pencil}
-                        />
-                    )}
-
+                {!isAudio && item.url && onEdit && (
                     <Action
-                        title="Delete"
-                        onClick={remove}
-                        icon={Trash2}
-                        danger
+                        title="Edit this image"
+                        onClick={() => onEdit(item)}
+                        icon={Pencil}
                     />
-                </div>
+                )}
+
+                <Action title="Delete" onClick={remove} icon={Trash2} danger />
             </div>
         </div>
     );
-}
-
-/** Название инструмента для подписи. */
-function label(operation) {
-    return {
-        edit: 'Edited',
-        combine: 'Combined',
-        upscale: 'Upscaled',
-        background_remove: 'Background removed',
-        speech: 'Speech',
-    }[operation] ?? null;
 }
 
 function Action({ title, icon: Icon, onClick, href, danger }) {
