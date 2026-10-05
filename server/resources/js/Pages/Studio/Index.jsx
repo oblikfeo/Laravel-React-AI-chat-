@@ -74,10 +74,34 @@ export default function StudioIndex({
     // Свежая работа: её видно в галерее сразу после создания.
     const [fresh, setFresh] = useState(null);
 
+    /*
+     * Работы, которых ещё нет в базе.
+     *
+     * Картинка рисуется за несколько секунд, и всё это время запрос
+     * висит. Без заглушки экран просто замирает, и непонятно, идёт
+     * ли вообще работа.
+     */
+    const [pending, setPending] = useState([]);
+
+    const startPending = (count, prompt, kind = 'image') =>
+        setPending(
+            Array.from({ length: count }, (_, index) => ({
+                id: `pending-${Date.now()}-${index}`,
+                kind,
+                status: 'pending',
+                prompt,
+                url: null,
+                thumbnail: null,
+            })),
+        );
+
     const finish = {
         preserveScroll: true,
         showProgress: false,
-        onFinish: () => setBusy(false),
+        onFinish: () => {
+            setBusy(false);
+            setPending([]);
+        },
         // Самая свежая работа подсвечивается в галерее: иначе
         // непонятно, что именно получилось.
         onSuccess: (page) => setFresh(page.props.generations?.[0]?.id ?? null),
@@ -85,11 +109,13 @@ export default function StudioIndex({
 
     const submitImage = (values) => {
         setBusy(true);
+        startPending(values.variants ?? 1, values.prompt);
         router.post('/studio', values, finish);
     };
 
     const submitEdit = (values) => {
         setBusy(true);
+        startPending(1, values.prompt ?? 'Working on your image');
 
         // Файлы уходят как форма, иначе вложения не доедут.
         router.post('/studio/edit', values, {
@@ -174,12 +200,18 @@ export default function StudioIndex({
      * Картинки и правка работают с общим набором, поэтому у них
      * галерея общая.
      */
-    const shown = generations.filter((item) =>
-        tab === 'audio'
-            ? item.kind === 'audio' &&
-              item.operation === AUDIO_OPERATIONS[audioMode]
-            : item.kind !== 'audio',
-    );
+    const shown = [
+        // Заглушки сверху: человек только что нажал кнопку.
+        ...pending.filter((item) =>
+            tab === 'audio' ? item.kind === 'audio' : item.kind !== 'audio',
+        ),
+        ...generations.filter((item) =>
+            tab === 'audio'
+                ? item.kind === 'audio' &&
+                  item.operation === AUDIO_OPERATIONS[audioMode]
+                : item.kind !== 'audio',
+        ),
+    ];
 
     return (
         <>

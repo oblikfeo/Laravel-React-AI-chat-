@@ -278,4 +278,46 @@ class FeedTest extends TestCase
             ->assertOk()
             ->assertInertia(fn ($page) => $page->where('fromFeed', null));
     }
+
+    /**
+     * Гость должен получать файлы.
+     *
+     * Посредник, опознающий гостя, ставил куку способом, которого у
+     * потокового ответа нет, — и выдача картинок падала с ошибкой.
+     */
+    public function test_guest_receives_a_file(): void
+    {
+        $this->post('/studio', [
+            'prompt' => 'A guest drawing',
+            'model' => 'fast',
+            'aspect_ratio' => '1:1',
+        ]);
+
+        $work = Generation::latest('id')->first();
+
+        $this->assertNotNull($work->guest_id);
+
+        $token = \App\Models\Guest::first()->token;
+
+        $this->withCookie(config('guests.cookie_name'), $token)
+            ->get("/studio/{$work->id}/file")
+            ->assertOk();
+    }
+
+    /** И миниатюру тоже. */
+    public function test_guest_receives_a_thumbnail(): void
+    {
+        $this->post('/studio', [
+            'prompt' => 'A guest drawing',
+            'model' => 'fast',
+            'aspect_ratio' => '1:1',
+        ]);
+
+        $work = Generation::latest('id')->first();
+        $token = \App\Models\Guest::first()->token;
+
+        $this->withCookie(config('guests.cookie_name'), $token)
+            ->get("/studio/{$work->id}/file?small=1")
+            ->assertOk();
+    }
 }

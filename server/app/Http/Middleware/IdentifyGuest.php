@@ -48,11 +48,17 @@ class IdentifyGuest
 
         // Кука живёт год: иначе посетитель терял бы свои чаты после
         // каждого закрытия браузера.
-        return $response->withCookie(cookie(
+        //
+        // Кладём в заголовки напрямую: файлы отдаются потоком, а у
+        // потокового ответа метода withCookie нет — на нём падала
+        // выдача картинок гостю.
+        $response->headers->setCookie(cookie(
             name: config('guests.cookie_name'),
             value: $guest->token,
             minutes: config('guests.cookie_days') * 24 * 60,
             httpOnly: true,
         ));
+
+        return $response;
     }
 }

@@ -8,6 +8,7 @@ import {
     Wand2,
     AlertCircle,
     Pencil,
+    Sparkles,
     Images,
     Music,
     Mic,
@@ -197,6 +198,7 @@ export default function GenerationGrid({
 function Card({ item, fresh, audio, onReuse, onEdit, onOpen }) {
     const failed = item.status === 'failed';
     const isAudio = item.kind === 'audio';
+    const working = !item.url && !failed;
 
     const remove = () => {
         router.delete(`/studio/${item.id}`, {
@@ -215,10 +217,14 @@ function Card({ item, fresh, audio, onReuse, onEdit, onOpen }) {
 
     return (
         <div
-            className={`flex gap-3 rounded-2xl border bg-slate-950/55 p-3 transition ${
+            className={`relative flex gap-3 rounded-2xl border bg-slate-950/55 p-3 transition ${
+                working ? 'work-border border-white/[0.06]' : ''
+            } ${
                 fresh
                     ? 'border-sky-300/50 ring-1 ring-sky-300/25'
-                    : 'border-white/[0.08]'
+                    : working
+                      ? ''
+                      : 'border-white/[0.08]'
             }`}
         >
             {/* Картинка занимает карточку: ради неё сюда и смотрят.
@@ -257,22 +263,18 @@ function Card({ item, fresh, audio, onReuse, onEdit, onOpen }) {
                             />
                         </span>
                     </button>
-                ) : (
+                ) : failed ? (
                     <div className="flex h-full w-full flex-col items-center justify-center gap-2 px-4 text-center">
-                        {failed ? (
-                            <>
-                                <AlertCircle
-                                    className="h-5 w-5 text-rose-300/70"
-                                    strokeWidth={1.75}
-                                />
-                                <span className="text-[12px] text-white/45">
-                                    Could not create this one
-                                </span>
-                            </>
-                        ) : (
-                            <span className="h-6 w-6 animate-spin rounded-full border-2 border-white/15 border-t-white/60" />
-                        )}
+                        <AlertCircle
+                            className="h-5 w-5 text-rose-300/70"
+                            strokeWidth={1.75}
+                        />
+                        <span className="text-[12px] text-white/45">
+                            Could not create this one
+                        </span>
                     </div>
+                ) : (
+                    <Working prompt={item.prompt} />
                 )}
             </div>
 
@@ -318,6 +320,86 @@ function Card({ item, fresh, audio, onReuse, onEdit, onOpen }) {
             </div>
         </div>
     );
+}
+
+/**
+ * Положение звёзд задано заранее, а не случайно при отрисовке: иначе
+ * они прыгали бы с места на место при каждом обновлении ленты.
+ */
+const STARS = [
+    { top: '16%', left: '20%', size: 3, delay: 0 },
+    { top: '30%', left: '70%', size: 2, delay: 0.4 },
+    { top: '52%', left: '12%', size: 2, delay: 0.9 },
+    { top: '68%', left: '55%', size: 3, delay: 0.2 },
+    { top: '24%', left: '46%', size: 2, delay: 1.3 },
+    { top: '80%', left: '80%', size: 2, delay: 0.7 },
+    { top: '44%', left: '88%', size: 3, delay: 1.1 },
+    { top: '60%', left: '32%', size: 2, delay: 1.6 },
+    { top: '36%', left: '34%', size: 2, delay: 2.0 },
+];
+
+/**
+ * Работа в процессе.
+ *
+ * Полоса прогресса здесь не годится: провайдер не сообщает, как
+ * далеко продвинулся. Мерцают звёзды и идёт счётчик времени — то же,
+ * что у звука.
+ */
+function Working({ prompt }) {
+    const [elapsed, setElapsed] = useState(0);
+
+    useEffect(() => {
+        const started = Date.now();
+        const timer = setInterval(() => setElapsed(Date.now() - started), 500);
+
+        return () => clearInterval(timer);
+    }, []);
+
+    return (
+        <div className="relative flex h-full w-full flex-col items-center justify-center gap-2 overflow-hidden px-4 text-center">
+            <span aria-hidden="true" className="pointer-events-none absolute inset-0">
+                {STARS.map((star, index) => (
+                    <span
+                        key={index}
+                        className="absolute rounded-full bg-sky-200"
+                        style={{
+                            top: star.top,
+                            left: star.left,
+                            width: `${star.size}px`,
+                            height: `${star.size}px`,
+                            boxShadow: '0 0 6px 1px rgb(125 211 252 / 0.8)',
+                            animation: `work-twinkle 2.4s ease-in-out ${star.delay}s infinite`,
+                        }}
+                    />
+                ))}
+            </span>
+
+            <Sparkles
+                className="relative h-6 w-6 text-sky-300/70"
+                strokeWidth={1.5}
+                style={{ animation: 'work-pulse 1.8s ease-in-out infinite' }}
+            />
+
+            <span className="relative line-clamp-2 text-[12px] leading-snug text-white/55">
+                {prompt}
+            </span>
+
+            <span className="relative text-[11px] tabular-nums text-white/35">
+                {clock(elapsed / 1000)}
+            </span>
+        </div>
+    );
+}
+
+/** Время словами. */
+function clock(seconds) {
+    if (!seconds || !Number.isFinite(seconds)) {
+        return '0:00';
+    }
+
+    const whole = Math.floor(seconds);
+
+    return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, '0')}`;
 }
 
 function Action({ label, icon: Icon, onClick, href, danger }) {
