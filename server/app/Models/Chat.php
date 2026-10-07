@@ -16,6 +16,7 @@ class Chat extends Model
         // поля заполняются явно при создании чата.
         'user_id',
         'guest_id',
+        'character_id',
         'title',
         'model_key',
         'visibility',
@@ -44,5 +45,27 @@ class Chat extends Model
     public function messages(): HasMany
     {
         return $this->hasMany(Message::class);
+    }
+
+    /** Персонаж, с которым идёт диалог, если это диалог с персонажем. */
+    public function character(): BelongsTo
+    {
+        return $this->belongsTo(Character::class);
+    }
+
+    /**
+     * Какой моделью отвечать.
+     *
+     * В диалоге с персонажем модель задаёт его автор, и её смена
+     * должна действовать сразу. Гостю платные модели закрыты, поэтому
+     * у него остаётся та, с которой чат создан.
+     */
+    public function effectiveModelKey(): string
+    {
+        if ($this->character && $this->user_id !== null) {
+            return $this->character->model_key;
+        }
+
+        return (string) $this->model_key;
     }
 }

@@ -7,6 +7,7 @@ use App\Models\Chat;
 use App\Models\Message;
 use App\Services\Ai\AiChatProvider;
 use App\Services\Ai\ModelCatalog;
+use App\Services\Characters\CharacterPrompt;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -21,8 +22,10 @@ use Throwable;
  */
 class SendMessage
 {
-    public function __construct(private readonly AiChatProvider $provider)
-    {
+    public function __construct(
+        private readonly AiChatProvider $provider,
+        private readonly CharacterPrompt $characterPrompt,
+    ) {
     }
 
     /**
@@ -73,7 +76,8 @@ class SendMessage
 
     private function askProvider(Chat $chat): Message
     {
-        $key = ModelCatalog::resolve($chat->model_key);
+        // В диалоге с персонажем модель задаёт его автор.
+        $key = ModelCatalog::resolve($chat->effectiveModelKey());
         $messages = $this->buildContext($chat);
 
         // Картинку понимает не каждая модель: при вложении подставляем
@@ -122,6 +126,7 @@ class SendMessage
         $response = $this->provider->complete(
             $messages,
             ModelCatalog::providerModel($key),
+            $this->optionsFor($chat),
         );
 
         return $chat->messages()->create([
@@ -158,9 +163,34 @@ class SendMessage
             ->all();
 
         return array_merge(
-            [['role' => 'system', 'content' => config('ai.system_prompt')]],
+            [['role' => 'system', 'content' => $this->systemPrompt($chat)]],
             $history,
         );
+    }
+
+    /**
+     * Кем быть модели в этом чате.
+     *
+     * В обычном чате это наш помощник, в диалоге с персонажем —
+     * сам персонаж со всем, что о нём написал автор.
+     */
+    private function systemPrompt(Chat $chat): string
+    {
+        return $chat->character
+            ? $this->characterPrompt->for($chat->character)
+            : config('ai.system_prompt');
+    }
+
+    /**
+     * Тонкие настройки ответа.
+     *
+     * @return array<string, mixed>
+     */
+    private function optionsFor(Chat $chat): array
+    {
+        $temperature = $chat->character?->temperature;
+
+        return $temperature !== null ? ['temperature' => $temperature] : [];
     }
 
     /**

@@ -1,5 +1,12 @@
 <?php
 
+use App\Http\Controllers\Characters\DestroyCharacterController;
+use App\Http\Controllers\Characters\IndexCharactersController;
+use App\Http\Controllers\Characters\ShowCharacterAvatarController;
+use App\Http\Controllers\Characters\StartCharacterChatController;
+use App\Http\Controllers\Characters\StoreCharacterController;
+use App\Http\Controllers\Characters\UpdateCharacterController;
+use App\Http\Controllers\Characters\WriteCharacterTextController;
 use App\Http\Controllers\Chat\DestroyChatController;
 use App\Http\Controllers\Chat\IndexChatController;
 use App\Http\Controllers\Chat\ReplyController;
@@ -62,6 +69,17 @@ Route::group([], function () {
     Route::post('chats/from-feed', StoreChatFromFeedController::class)
         ->name('chats.from-feed');
 
+    // Персонажи: каталог виден всем, поговорить с открытым
+    // персонажем может и гость — в пределах своего дневного лимита.
+    Route::get('characters', IndexCharactersController::class)
+        ->name('characters.index');
+    Route::get('characters/{character}/avatar', ShowCharacterAvatarController::class)
+        ->whereNumber('character')
+        ->name('characters.avatar');
+    Route::post('characters/{character}/chat', StartCharacterChatController::class)
+        ->whereNumber('character')
+        ->name('characters.chat');
+
     // Студия открыта и гостю: попробовать до регистрации, с малым
     // дневным лимитом, см. config/studio.php.
     Route::get('studio', ShowStudioController::class)->name('studio');
@@ -94,6 +112,22 @@ Route::middleware('auth')->group(function () {
         ->name('settings.profile.update');
     Route::put('settings/password', UpdatePasswordController::class)
         ->name('settings.password.update');
+
+    // Создавать и править персонажей может только вошедший: у
+    // персонажа должен быть автор.
+    Route::post('characters', StoreCharacterController::class)
+        ->name('characters.store');
+    // Дописывание текста обращается к модели, поэтому с ограничением
+    // частоты: кнопку нельзя превращать в бесплатный чат.
+    Route::post('characters/write', WriteCharacterTextController::class)
+        ->middleware('throttle:12,1')
+        ->name('characters.write');
+    Route::post('characters/{character}', UpdateCharacterController::class)
+        ->whereNumber('character')
+        ->name('characters.update');
+    Route::delete('characters/{character}', DestroyCharacterController::class)
+        ->whereNumber('character')
+        ->name('characters.destroy');
 
     Route::post('billing/subscribe', StoreSubscriptionController::class)
         ->name('billing.subscribe');

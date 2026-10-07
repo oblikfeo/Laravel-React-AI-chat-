@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Chat;
 
 use App\Actions\Chat\RequestReply;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\CharacterCardResource;
 use App\Http\Resources\ChatResource;
 use App\Http\Resources\MessageResource;
 use App\Models\Chat;
@@ -24,8 +25,15 @@ class ShowChatController extends Controller
             throw new AccessDeniedHttpException();
         }
 
+        $character = $chat->character?->load('user:id,name');
+
         return Inertia::render('Chat/Show', [
             'chat' => ChatResource::make($chat),
+            // Диалог с персонажем выглядит иначе: его имя и аватар
+            // вместо нашего значка, модель не выбирается.
+            'character' => $character
+                ? CharacterCardResource::make($character)
+                : null,
             'messages' => MessageResource::collection(
                 $chat->messages()->with('attachments')->oldest('id')->get()
             ),

@@ -311,6 +311,31 @@
         --tw-shadow: var(--tw-shadow-colored);
     }
 
+    /*
+     * Разделители между строками списка и наведение на родителя:
+     * те же белые линии и белый текст, только заданные иначе.
+     */
+    html.light [class*='divide-white'] > * {
+        border-color: rgb(var(--line));
+    }
+
+    html.light .group:hover [class*='group-hover:text-white'] {
+        color: rgb(var(--ink));
+    }
+
+    html.light .group:hover [class*='group-hover:bg-white/'] {
+        background-color: rgb(24 31 46 / 0.09);
+    }
+
+    /*
+     * Буква на цветном фоне (аватар без картинки) белая в любой теме:
+     * фон под ней насыщенный, тёмная буква на нём не читается.
+     */
+    .keep-light,
+    html.light .keep-light {
+        color: rgb(255 255 255);
+    }
+
     /* ── Сообщения о сбое и об успехе ───────────────────────── */
 
     /*
@@ -711,6 +736,30 @@
     html.light .chip-outline {
         border-color: rgb(24 31 46 / 0.18);
         color: rgb(40 51 69);
+    }
+
+    /*
+     * Переключатель «включено / выключено».
+     *
+     * Выключенный должен быть виден как выключенный, а не пропадать:
+     * десятая часть белого на светлой панели не видна вовсе.
+     */
+    .switch {
+        background-color: rgb(255 255 255 / 0.16);
+    }
+
+    html.light .switch {
+        background-color: rgb(24 31 46 / 0.22);
+    }
+
+    .switch-on,
+    html.light .switch-on {
+        background-color: rgb(14 165 233);
+    }
+
+    .switch-knob {
+        background-color: rgb(255 255 255);
+        box-shadow: 0 1px 3px rgb(0 0 0 / 0.35);
     }
 
     /* Переключатель темы. */

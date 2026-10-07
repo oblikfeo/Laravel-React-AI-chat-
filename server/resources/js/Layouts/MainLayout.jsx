@@ -37,7 +37,9 @@ function MainLayoutInner({ children }) {
           ? 'studio'
           : url.startsWith('/feed')
             ? 'feed'
-            : null;
+            : url.startsWith('/characters')
+              ? 'characters'
+              : null;
     const activeChatId = Number(url.match(/^\/chats\/(\d+)/)?.[1]) || null;
 
     // Главная: там композиция с планетой, её сдвигать нельзя.

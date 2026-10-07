@@ -4,6 +4,7 @@ import Markdown from '@/Components/Chat/Markdown';
 import MessageAttachments from '@/Components/Chat/MessageAttachments';
 import useTypewriter from '@/Components/Chat/useTypewriter';
 import ModelChangeMark from '@/Components/Chat/ModelChangeMark';
+import CharacterAvatar from '@/Components/Characters/CharacterAvatar';
 
 /**
  * Одно сообщение диалога.
@@ -19,6 +20,7 @@ export default function MessageBubble({
     typing = false,
     fresh = false,
     onRetry,
+    character = null,
 }) {
     const isUser = message.role === 'user';
 
@@ -59,9 +61,19 @@ export default function MessageBubble({
 
     return (
         <div className={`flex gap-3.5 ${enter}`}>
-            <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.06]">
-                <LogoMark className="h-5 w-5" />
-            </span>
+            {/* В диалоге с персонажем отвечает он, а не мы: вместо
+                нашего значка стоит его аватар. */}
+            {character ? (
+                <CharacterAvatar
+                    name={character.name}
+                    src={character.avatar}
+                    className="mt-0.5 h-8 w-8 rounded-full text-sm"
+                />
+            ) : (
+                <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.06]">
+                    <LogoMark className="h-5 w-5" />
+                </span>
+            )}
 
             {/* Название модели намеренно не показываем: это внутренняя
                 деталь, она хранится в базе и видна только в админке.

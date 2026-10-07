@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import MainLayout from '@/Layouts/MainLayout';
 import PromptComposer from '@/Components/Home/PromptComposer';
 import MessageBubble from '@/Components/Chat/MessageBubble';
 import TypingIndicator from '@/Components/Chat/TypingIndicator';
 import GuestNotice from '@/Components/Layout/GuestNotice';
+import CharacterAvatar from '@/Components/Characters/CharacterAvatar';
 
 /**
  * Режим диалога: лента сообщений с полем ввода, закреплённым снизу.
@@ -13,7 +14,7 @@ import GuestNotice from '@/Components/Layout/GuestNotice';
  * уже из открытого диалога: так человек не смотрит на полосу загрузки,
  * а видит свой текст и индикатор набора.
  */
-export default function ChatShow({ chat, messages, awaitingReply }) {
+export default function ChatShow({ chat, messages, awaitingReply, character }) {
     const { defaultModel, guest } = usePage().props;
     const [draft, setDraft] = useState('');
     const [files, setFiles] = useState([]);
@@ -154,9 +155,21 @@ export default function ChatShow({ chat, messages, awaitingReply }) {
             <div className="flex min-h-0 flex-1 flex-col">
                 <div className="flex-1 overflow-y-auto scrollbar-thin">
                     <div className="mx-auto w-full max-w-[820px] px-4 py-6 sm:px-6">
+                        {character && <CharacterHeader character={character} />}
+
                         {/* Общая подложка под всей перепиской: выделяет
                             область разговора на фоне с планетой. */}
                         <div className="space-y-7 rounded-[28px] border border-white/[0.06] bg-slate-950/45 p-4 backdrop-blur-md sm:p-6">
+                            {/* Персонаж без вступления: пустое окно
+                                выглядело бы сломанным. */}
+                            {character && list.length === 0 && !waiting && (
+                                <p className="py-6 text-center text-[14px] text-white/45">
+                                    Say hello to {character.name} — the
+                                    conversation is saved and continues every
+                                    time you come back.
+                                </p>
+                            )}
+
                             {list.map((message) => {
                                 const fresh = !shownRef.current.has(message.id);
                                 shownRef.current.add(message.id);
@@ -168,11 +181,12 @@ export default function ChatShow({ chat, messages, awaitingReply }) {
                                         typing={message.id === typingId}
                                         fresh={fresh}
                                         onRetry={retry}
+                                        character={character}
                                     />
                                 );
                             })}
 
-                            {waiting && <TypingIndicator />}
+                            {waiting && <TypingIndicator character={character} />}
                         </div>
 
                         <div ref={bottomRef} />
@@ -188,11 +202,17 @@ export default function ChatShow({ chat, messages, awaitingReply }) {
                             onChange={setDraft}
                             onSubmit={submit}
                             model={model}
-                            onModelChange={changeModel}
+                            // В диалоге с персонажем модель задаёт его
+                            // автор, выбирать её здесь нельзя.
+                            onModelChange={character ? undefined : changeModel}
                             files={files}
                             onFilesChange={setFiles}
                             busy={waiting || guest?.remaining === 0}
-                            placeholder="Ask anything…"
+                            placeholder={
+                                character
+                                    ? `Message ${character.name}…`
+                                    : 'Ask anything…'
+                            }
                             minRows={1}
                             autoFocus
                         />
@@ -200,6 +220,38 @@ export default function ChatShow({ chat, messages, awaitingReply }) {
                 </div>
             </div>
         </>
+    );
+}
+
+/**
+ * Шапка диалога с персонажем: с кем идёт разговор.
+ */
+function CharacterHeader({ character }) {
+    return (
+        <div className="mb-4 flex items-center gap-3.5 rounded-2xl border border-white/[0.08] bg-slate-950/55 p-3.5 backdrop-blur-xl">
+            <CharacterAvatar
+                name={character.name}
+                src={character.avatar}
+                className="h-12 w-12 rounded-2xl text-xl"
+            />
+
+            <div className="min-w-0 flex-1">
+                <p className="truncate text-[15px] font-semibold text-white">
+                    {character.name}
+                </p>
+                <p className="truncate text-[13px] text-white/50">
+                    {character.description ||
+                        (character.author ? `by ${character.author}` : 'Character')}
+                </p>
+            </div>
+
+            <Link
+                href="/characters"
+                className="shrink-0 rounded-full border border-white/[0.14] px-3.5 py-1.5 text-[13px] text-white/70 transition hover:bg-white/10 hover:text-white"
+            >
+                All characters
+            </Link>
+        </div>
     );
 }
 

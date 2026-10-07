@@ -67,6 +67,11 @@ class User extends Authenticatable
         return $this->hasMany(Chat::class)->latest('last_message_at');
     }
 
+    public function characters(): HasMany
+    {
+        return $this->hasMany(Character::class)->latest('id');
+    }
+
     public function subscriptions(): HasMany
     {
         return $this->hasMany(Subscription::class)->latest('id');

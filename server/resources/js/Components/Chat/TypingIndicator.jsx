@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { LogoMark } from '@/Components/Layout/Logo';
+import CharacterAvatar from '@/Components/Characters/CharacterAvatar';
 
 /**
  * Что показываем, пока модель думает.
@@ -14,7 +15,7 @@ const STAGES = [
     { after: 25000, label: 'Taking longer than usual…' },
 ];
 
-export default function TypingIndicator() {
+export default function TypingIndicator({ character = null }) {
     const [elapsed, setElapsed] = useState(0);
 
     useEffect(() => {
@@ -28,10 +29,18 @@ export default function TypingIndicator() {
 
     return (
         <div className="flex animate-[message-in_0.3s_ease-out] gap-3.5">
-            <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.06]">
-                {/* Значок дышит: видно, что интерфейс жив. */}
-                <LogoMark className="h-5 w-5 animate-[logo-pulse_2s_ease-in-out_infinite]" />
-            </span>
+            {character ? (
+                <CharacterAvatar
+                    name={character.name}
+                    src={character.avatar}
+                    className="mt-0.5 h-8 w-8 animate-[logo-pulse_2s_ease-in-out_infinite] rounded-full text-sm"
+                />
+            ) : (
+                <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.06]">
+                    {/* Значок дышит: видно, что интерфейс жив. */}
+                    <LogoMark className="h-5 w-5 animate-[logo-pulse_2s_ease-in-out_infinite]" />
+                </span>
+            )}
 
             {/* Подложка та же, что у готового ответа: панель не появляется
                 рывком, а просто наполняется текстом. */}

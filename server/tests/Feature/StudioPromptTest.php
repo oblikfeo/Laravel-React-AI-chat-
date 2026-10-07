@@ -45,7 +45,7 @@ class StudioPromptTest extends TestCase
                 return true;
             }
 
-            public function complete(array $messages, ?string $model = null): AiResponse
+            public function complete(array $messages, ?string $model = null, array $options = []): AiResponse
             {
                 return new AiResponse(content: $this->answer);
             }
@@ -115,7 +115,7 @@ class StudioPromptTest extends TestCase
                 return true;
             }
 
-            public function complete(array $messages, ?string $model = null): AiResponse
+            public function complete(array $messages, ?string $model = null, array $options = []): AiResponse
             {
                 throw new \RuntimeException('провайдер недоступен');
             }

@@ -32,7 +32,7 @@ class OpenAiCompatibleProvider implements AiChatProvider
      * @param  string|null  $model  Название модели у провайдера.
      *                              Пусто — берём из настроек.
      */
-    public function complete(array $messages, ?string $model = null): AiResponse
+    public function complete(array $messages, ?string $model = null, array $options = []): AiResponse
     {
         $response = Http::withToken($this->apiKey)
             ->timeout($this->timeout)
@@ -41,6 +41,12 @@ class OpenAiCompatibleProvider implements AiChatProvider
                 'model' => $model ?: $this->model,
                 'messages' => $messages,
                 'max_tokens' => $this->maxTokens,
+                // Температура уходит, только когда её задали: у каждой
+                // модели своё значение по умолчанию, и подменять его
+                // общим числом незачем.
+                ...(isset($options['temperature'])
+                    ? ['temperature' => (float) $options['temperature']]
+                    : []),
                 // Рассуждающие модели тратят весь лимит на размышления
                 // и отвечают через десятки секунд пустотой. В чате важна
                 // скорость, поэтому размышления отключаем.

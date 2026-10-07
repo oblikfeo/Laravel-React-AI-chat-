@@ -28,6 +28,11 @@ class UpdateChatModelController extends Controller
             return back();
         }
 
+        // В диалоге с персонажем модель задаёт его автор.
+        if ($chat->character_id) {
+            return back();
+        }
+
         $validated = $request->validate([
             'model' => ['required', Rule::in(array_keys(config('models.list')))],
         ]);
