@@ -10,10 +10,9 @@ import CharacterAvatar from '@/Components/Characters/CharacterAvatar';
  * Одно сообщение диалога.
  *
  * Сообщение пользователя — стеклянный пузырь справа.
- * Ответ модели — панель слева со значком: фон с планетой местами
- * светлый, и белый текст на нём терялся, поэтому под ответом лежит
- * затемнённое стекло. Пузырь пользователя оставлен светлее, чтобы
- * две стороны диалога различались с первого взгляда.
+ * Ответ модели — текст слева со значком, прямо на подложке окна
+ * диалога: читаемость на фоне с планетой даёт она, поэтому своей
+ * рамки у ответа нет.
  */
 export default function MessageBubble({
     message,
@@ -46,7 +45,7 @@ export default function MessageBubble({
     if (isUser) {
         return (
             <div className={`flex justify-end ${enter}`}>
-                <div className="max-w-[80%] rounded-3xl rounded-br-lg border border-white/[0.12] bg-white/[0.09] px-5 py-3.5">
+                <div className="max-w-[80%] rounded-3xl rounded-br-lg border border-white/[0.10] bg-white/[0.08] px-5 py-3">
                     <MessageAttachments items={message.attachments} />
 
                     {message.content && (
@@ -81,10 +80,12 @@ export default function MessageBubble({
                 Ответ приходит в Markdown, сообщение пользователя — обычным
                 текстом: звёздочки в его словах разметкой быть не должны. */}
             <div
-                className={`min-w-0 flex-1 rounded-3xl rounded-tl-lg border px-5 py-4 shadow-lg shadow-black/20 ${
+                // Ответ лежит прямо на подложке окна. Рамка остаётся
+                // только у несостоявшегося ответа: его надо выделить.
+                className={`min-w-0 flex-1 ${
                     failed
-                        ? 'border-rose-400/20 bg-rose-950/40'
-                        : 'border-white/[0.07] bg-slate-950/70'
+                        ? 'rounded-2xl border border-rose-400/20 bg-rose-950/40 px-4 py-3.5'
+                        : 'pt-1'
                 }`}
             >
                 <Markdown>{shown}</Markdown>

@@ -80,11 +80,11 @@ export default function PromptComposer({
                 event.preventDefault();
                 addFiles(event.dataTransfer.files);
             }}
-            // В окне диалога поле — часть общей подложки: своей рамки
-            // и фона у него нет.
+            // В окне диалога поле лежит на общей подложке: размытие
+            // даёт она, а скругление подогнано под её углы.
             className={`w-full p-4 sm:p-5 ${
                 embedded
-                    ? ''
+                    ? 'rounded-[20px] border border-white/[0.12] bg-white/[0.05] transition-colors focus-within:border-white/25'
                     : 'rounded-3xl border border-white/20 bg-white/[0.03] backdrop-blur-md'
             }`}
         >

@@ -153,20 +153,22 @@ export default function ChatShow({ chat, messages, awaitingReply, character }) {
             <Head title={`${chat.title} — Uncensia`} />
 
             <div className="flex min-h-0 flex-1 flex-col px-3 pb-4 sm:px-6 sm:pb-6">
-                {/* Окно диалога — один элемент: шапка персонажа, переписка
-                    и поле ввода лежат на общей подложке. Прокручивается
-                    только переписка внутри окна, поэтому его углы всегда
-                    целы. Обрезку не ставим на само окно: список моделей
-                    раскрывается из поля ввода вверх и должен быть виден. */}
-                <div className="mx-auto flex min-h-0 w-full max-w-[820px] flex-1 flex-col rounded-[28px] border border-white/[0.08] bg-slate-950/45 backdrop-blur-md">
+                {/* Окно диалога — одна подложка на всё: шапка персонажа,
+                    переписка и поле ввода. Поле ввода — вложенная в неё
+                    карточка, а не отдельная полоса: линий-разделителей
+                    нет, сообщения растворяются над ним. Ответы идут
+                    прямо по подложке, без своих рамок, — иначе в окне
+                    получаются коробки в коробке. Обрезку не ставим на
+                    само окно: список моделей раскрывается вверх. */}
+                <div className="mx-auto flex min-h-0 w-full max-w-[820px] flex-1 flex-col rounded-[32px] border border-white/[0.08] bg-slate-950/60 backdrop-blur-xl">
                     {character && <CharacterHeader character={character} />}
 
                     <div
                         className={`chat-scroll min-h-0 flex-1 overflow-y-auto scrollbar-thin ${
-                            character ? '' : 'rounded-t-[27px]'
+                            character ? '' : 'rounded-t-[31px]'
                         }`}
                     >
-                        <div className="space-y-7 p-4 sm:p-6">
+                        <div className="space-y-7 px-4 py-6 sm:px-7 sm:py-7">
                             {/* Персонаж без вступления: пустое окно
                                 выглядело бы сломанным. */}
                             {character && list.length === 0 && !waiting && (
@@ -199,11 +201,9 @@ export default function ChatShow({ chat, messages, awaitingReply, character }) {
                         </div>
                     </div>
 
-                    <div className="shrink-0 border-t border-white/[0.08]">
+                    <div className="shrink-0 px-3 pb-3">
                         {guest && (
-                            <div className="-mb-3 px-4 pt-4 sm:px-5">
-                                <GuestNotice />
-                            </div>
+                            <GuestNotice />
                         )}
 
                         <PromptComposer
@@ -238,7 +238,7 @@ export default function ChatShow({ chat, messages, awaitingReply, character }) {
  */
 function CharacterHeader({ character }) {
     return (
-        <div className="flex shrink-0 items-center gap-3.5 border-b border-white/[0.08] p-3.5 sm:px-5">
+        <div className="mx-3 mt-3 flex shrink-0 items-center gap-3.5 rounded-[20px] border border-white/[0.08] bg-white/[0.04] p-3">
             <CharacterAvatar
                 name={character.name}
                 src={character.avatar}

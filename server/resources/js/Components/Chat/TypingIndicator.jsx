@@ -42,9 +42,8 @@ export default function TypingIndicator({ character = null }) {
                 </span>
             )}
 
-            {/* Подложка та же, что у готового ответа: панель не появляется
-                рывком, а просто наполняется текстом. */}
-            <div className="flex items-center gap-3 rounded-3xl rounded-tl-lg border border-white/[0.07] bg-slate-950/70 px-5 py-4 shadow-lg shadow-black/20">
+            {/* Как и готовый ответ — без рамки, на подложке окна. */}
+            <div className="flex h-9 items-center gap-3">
                 <span className="flex items-center gap-1.5">
                     {[0, 160, 320].map((delay) => (
                         <span
