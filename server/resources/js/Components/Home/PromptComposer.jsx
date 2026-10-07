@@ -25,6 +25,7 @@ export default function PromptComposer({
     busy = false,
     autoFocus = false,
     minRows = 3,
+    embedded = false,
 }) {
     const textareaRef = useRef(null);
     const fileRef = useRef(null);
@@ -79,7 +80,13 @@ export default function PromptComposer({
                 event.preventDefault();
                 addFiles(event.dataTransfer.files);
             }}
-            className="w-full rounded-3xl border border-white/20 bg-white/[0.03] p-4 backdrop-blur-md sm:p-5"
+            // В окне диалога поле — часть общей подложки: своей рамки
+            // и фона у него нет.
+            className={`w-full p-4 sm:p-5 ${
+                embedded
+                    ? ''
+                    : 'rounded-3xl border border-white/20 bg-white/[0.03] backdrop-blur-md'
+            }`}
         >
             {onFilesChange && (
                 <AttachedFiles

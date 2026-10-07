@@ -46,7 +46,7 @@ export default function MessageBubble({
     if (isUser) {
         return (
             <div className={`flex justify-end ${enter}`}>
-                <div className="max-w-[80%] rounded-3xl rounded-br-lg border border-white/[0.12] bg-white/[0.09] px-5 py-3.5 backdrop-blur-xl">
+                <div className="max-w-[80%] rounded-3xl rounded-br-lg border border-white/[0.12] bg-white/[0.09] px-5 py-3.5">
                     <MessageAttachments items={message.attachments} />
 
                     {message.content && (
@@ -81,7 +81,7 @@ export default function MessageBubble({
                 Ответ приходит в Markdown, сообщение пользователя — обычным
                 текстом: звёздочки в его словах разметкой быть не должны. */}
             <div
-                className={`min-w-0 flex-1 rounded-3xl rounded-tl-lg border px-5 py-4 shadow-lg shadow-black/20 backdrop-blur-xl ${
+                className={`min-w-0 flex-1 rounded-3xl rounded-tl-lg border px-5 py-4 shadow-lg shadow-black/20 ${
                     failed
                         ? 'border-rose-400/20 bg-rose-950/40'
                         : 'border-white/[0.07] bg-slate-950/70'

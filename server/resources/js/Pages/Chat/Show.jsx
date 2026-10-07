@@ -152,14 +152,21 @@ export default function ChatShow({ chat, messages, awaitingReply, character }) {
         <>
             <Head title={`${chat.title} — Uncensia`} />
 
-            <div className="flex min-h-0 flex-1 flex-col">
-                <div className="flex-1 overflow-y-auto scrollbar-thin">
-                    <div className="mx-auto w-full max-w-[820px] px-4 py-6 sm:px-6">
-                        {character && <CharacterHeader character={character} />}
+            <div className="flex min-h-0 flex-1 flex-col px-3 pb-4 sm:px-6 sm:pb-6">
+                {/* Окно диалога — один элемент: шапка персонажа, переписка
+                    и поле ввода лежат на общей подложке. Прокручивается
+                    только переписка внутри окна, поэтому его углы всегда
+                    целы. Обрезку не ставим на само окно: список моделей
+                    раскрывается из поля ввода вверх и должен быть виден. */}
+                <div className="mx-auto flex min-h-0 w-full max-w-[820px] flex-1 flex-col rounded-[28px] border border-white/[0.08] bg-slate-950/45 backdrop-blur-md">
+                    {character && <CharacterHeader character={character} />}
 
-                        {/* Общая подложка под всей перепиской: выделяет
-                            область разговора на фоне с планетой. */}
-                        <div className="space-y-7 rounded-[28px] border border-white/[0.06] bg-slate-950/45 p-4 backdrop-blur-md sm:p-6">
+                    <div
+                        className={`chat-scroll min-h-0 flex-1 overflow-y-auto scrollbar-thin ${
+                            character ? '' : 'rounded-t-[27px]'
+                        }`}
+                    >
+                        <div className="space-y-7 p-4 sm:p-6">
                             {/* Персонаж без вступления: пустое окно
                                 выглядело бы сломанным. */}
                             {character && list.length === 0 && !waiting && (
@@ -187,16 +194,18 @@ export default function ChatShow({ chat, messages, awaitingReply, character }) {
                             })}
 
                             {waiting && <TypingIndicator character={character} />}
+
+                            <div ref={bottomRef} />
                         </div>
-
-                        <div ref={bottomRef} />
                     </div>
-                </div>
 
-                <div className="shrink-0 px-4 pb-6 pt-2 sm:px-6">
-                    <GuestNotice />
+                    <div className="shrink-0 border-t border-white/[0.08]">
+                        {guest && (
+                            <div className="-mb-3 px-4 pt-4 sm:px-5">
+                                <GuestNotice />
+                            </div>
+                        )}
 
-                    <div className="mx-auto w-full max-w-[820px]">
                         <PromptComposer
                             value={draft}
                             onChange={setDraft}
@@ -215,6 +224,7 @@ export default function ChatShow({ chat, messages, awaitingReply, character }) {
                             }
                             minRows={1}
                             autoFocus
+                            embedded
                         />
                     </div>
                 </div>
@@ -224,11 +234,11 @@ export default function ChatShow({ chat, messages, awaitingReply, character }) {
 }
 
 /**
- * Шапка диалога с персонажем: с кем идёт разговор.
+ * Шапка окна диалога с персонажем: с кем идёт разговор.
  */
 function CharacterHeader({ character }) {
     return (
-        <div className="mb-4 flex items-center gap-3.5 rounded-2xl border border-white/[0.08] bg-slate-950/55 p-3.5 backdrop-blur-xl">
+        <div className="flex shrink-0 items-center gap-3.5 border-b border-white/[0.08] p-3.5 sm:px-5">
             <CharacterAvatar
                 name={character.name}
                 src={character.avatar}

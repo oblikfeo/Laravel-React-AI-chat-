@@ -44,7 +44,7 @@ export default function TypingIndicator({ character = null }) {
 
             {/* Подложка та же, что у готового ответа: панель не появляется
                 рывком, а просто наполняется текстом. */}
-            <div className="flex items-center gap-3 rounded-3xl rounded-tl-lg border border-white/[0.07] bg-slate-950/70 px-5 py-4 shadow-lg shadow-black/20 backdrop-blur-xl">
+            <div className="flex items-center gap-3 rounded-3xl rounded-tl-lg border border-white/[0.07] bg-slate-950/70 px-5 py-4 shadow-lg shadow-black/20">
                 <span className="flex items-center gap-1.5">
                     {[0, 160, 320].map((delay) => (
                         <span

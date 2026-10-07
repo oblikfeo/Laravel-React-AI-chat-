@@ -1053,6 +1053,25 @@
         }
     }
 
+    /* Переписка в окне диалога: у верхнего и нижнего края сообщения
+       растворяются, а не обрезаются по линии. */
+    .chat-scroll {
+        -webkit-mask-image: linear-gradient(
+            to bottom,
+            transparent,
+            #000 18px,
+            #000 calc(100% - 18px),
+            transparent
+        );
+        mask-image: linear-gradient(
+            to bottom,
+            transparent,
+            #000 18px,
+            #000 calc(100% - 18px),
+            transparent
+        );
+    }
+
     /* Тонкий скроллбар для списков чатов и меню */
     .scrollbar-thin {
         scrollbar-width: thin;
