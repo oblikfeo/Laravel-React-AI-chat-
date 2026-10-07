@@ -45,7 +45,7 @@ export default function MobileMenu({ open, onClose, current, activeChatId }) {
                     type="button"
                     onClick={onClose}
                     aria-label="Close menu"
-                    className="rounded-lg p-1.5 text-white/70 transition hover:bg-white/10 hover:text-white"
+                    className="icon-btn rounded-lg p-1.5 transition"
                 >
                     <X className="h-6 w-6" strokeWidth={1.75} />
                 </button>
@@ -55,7 +55,7 @@ export default function MobileMenu({ open, onClose, current, activeChatId }) {
                 <Link
                     href="/"
                     onClick={onClose}
-                    className="flex h-12 items-center gap-2.5 rounded-full bg-gradient-to-r from-[#dff3ff] to-[#eaf6ff] px-5 font-medium text-black"
+                    className="new-chat flex h-12 items-center gap-2.5 rounded-full px-5 font-medium"
                 >
                     <Plus className="h-5 w-5" strokeWidth={2.4} />
                     <span className="text-base">New chat</span>
@@ -68,10 +68,10 @@ export default function MobileMenu({ open, onClose, current, activeChatId }) {
 
                     const classes = `flex h-12 items-center gap-3.5 rounded-xl px-2 transition ${
                         active
-                            ? 'text-white'
+                            ? 'nav-item-current'
                             : ready
-                              ? 'text-white/65 hover:bg-white/[0.07] hover:text-white'
-                              : 'cursor-not-allowed text-white/25'
+                              ? 'nav-item'
+                              : 'nav-item-disabled'
                     }`;
 
                     const inner = (
@@ -114,7 +114,7 @@ export default function MobileMenu({ open, onClose, current, activeChatId }) {
             <div className="mt-auto space-y-4 px-5 pb-6 pt-4">
                 <ProBanner />
 
-                <div className="border-t border-white/[0.07] pt-4">
+                <div className="side-divider border-t pt-4">
                     <UserCard />
                 </div>
             </div>

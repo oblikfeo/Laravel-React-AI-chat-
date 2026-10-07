@@ -38,7 +38,7 @@ export default function AssetPicker({
 
     return (
         <div
-            className="fixed inset-0 z-[70] flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm"
+            className="backdrop-dim fixed inset-0 z-[70] flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm"
             onClick={onClose}
             role="dialog"
             aria-modal="true"
@@ -102,7 +102,7 @@ export default function AssetPicker({
                                         onClick={() => setPreview(item)}
                                         aria-label="View full size"
                                         title="View full size"
-                                        className="absolute right-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-lg border border-white/20 bg-black/60 text-white/80 opacity-0 backdrop-blur transition hover:bg-white/15 hover:text-white group-hover:opacity-100"
+                                        className="on-media absolute right-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-lg border border-white/20 bg-black/60 text-white/80 opacity-0 backdrop-blur transition hover:bg-white/15 hover:text-white group-hover:opacity-100"
                                     >
                                         <Maximize2
                                             className="h-3.5 w-3.5"
@@ -167,7 +167,7 @@ export default function AssetPicker({
 
             {preview && (
                 <div
-                    className="fixed inset-0 z-[80] flex items-center justify-center bg-black/95 p-4"
+                    className="on-media media-viewer fixed inset-0 z-[80] flex items-center justify-center bg-black/95 p-4"
                     onClick={(event) => {
                         event.stopPropagation();
                         setPreview(null);

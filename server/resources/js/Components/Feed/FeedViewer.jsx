@@ -22,7 +22,7 @@ export default function FeedViewer({ item, onClose }) {
 
     return (
         <div
-            className="fixed inset-0 z-[70] flex items-center justify-center bg-black/92 p-4 backdrop-blur-sm"
+            className="on-media media-viewer fixed inset-0 z-[70] flex items-center justify-center bg-black/92 p-4 backdrop-blur-sm"
             onClick={onClose}
             role="dialog"
             aria-modal="true"

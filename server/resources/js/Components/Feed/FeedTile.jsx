@@ -15,7 +15,7 @@ export default function FeedTile({ item, span }) {
             type="button"
             onClick={span.onOpen}
             style={{ gridColumn: span.column, gridRow: span.row }}
-            className="group relative overflow-hidden rounded-xl border border-white/[0.08] bg-slate-950/50 text-left transition hover:z-10 hover:border-white/25 hover:shadow-xl hover:shadow-black/40 dark:border-white/[0.08] dark:bg-slate-950/50"
+            className="group relative overflow-hidden rounded-xl border border-white/[0.08] bg-slate-950/50 text-left transition hover:z-10 hover:border-white/25 hover:shadow-xl hover:shadow-black/40"
         >
             {/* Место держим заранее: иначе лента прыгает, пока
                 картинки подгружаются. */}
@@ -34,7 +34,7 @@ export default function FeedTile({ item, span }) {
                 }`}
             />
 
-            <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent p-3 opacity-0 transition group-hover:opacity-100">
+            <span className="on-media pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent p-3 opacity-0 transition group-hover:opacity-100">
                 <span className="line-clamp-2 block text-[12px] leading-snug text-white/90">
                     {item.prompt}
                 </span>

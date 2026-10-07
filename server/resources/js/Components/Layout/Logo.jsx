@@ -31,7 +31,10 @@ export function LogoMark({ className = 'h-8 w-8' }) {
             <circle cx="15.5" cy="20.5" r="3.2" fill={`url(#${gradientId})`} />
             <path
                 d="M24 5.5l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z"
-                fill="#ffffff"
+                // Искра берёт цвет текста: белая на светлом фоне
+                // пропадала.
+                className="side-title"
+                fill="currentColor"
             />
         </svg>
     );
@@ -41,7 +44,7 @@ export function LogoFull({ className = '' }) {
     return (
         <span className={`flex items-center gap-2.5 ${className}`}>
             <LogoMark className="h-7 w-7" />
-            <span className="text-xl font-light tracking-tight text-white">
+            <span className="side-title text-xl font-light tracking-tight">
                 uncensia
             </span>
         </span>

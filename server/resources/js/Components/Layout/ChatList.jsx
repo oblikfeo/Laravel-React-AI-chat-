@@ -19,13 +19,13 @@ export default function ChatList({ activeId, onNavigate }) {
     }
 
     return (
-        <div className="mt-4 border-t border-white/[0.07] pt-3">
-            <p className="px-3 pb-1.5 text-xs font-medium text-white/40">
+        <div className="side-divider mt-4 border-t pt-3">
+            <p className="side-label px-3 pb-1.5 text-xs font-medium">
                 Recent
             </p>
 
             {sidebarChats.length === 0 ? (
-                <p className="px-3 py-2 text-sm leading-relaxed text-white/35">
+                <p className="side-label px-3 py-2 text-sm leading-relaxed">
                     No chats yet. Start one from the home page.
                 </p>
             ) : (
@@ -39,8 +39,8 @@ export default function ChatList({ activeId, onNavigate }) {
                                 title={chat.title}
                                 className={`flex h-9 items-center rounded-lg px-3 text-sm transition ${
                                     String(activeId) === String(chat.id)
-                                        ? 'bg-white/10 text-white'
-                                        : 'text-white/55 hover:bg-white/[0.07] hover:text-white'
+                                        ? 'nav-item-active font-medium'
+                                        : 'nav-item'
                                 }`}
                             >
                                 <span className="truncate">{chat.title}</span>
@@ -51,7 +51,7 @@ export default function ChatList({ activeId, onNavigate }) {
                     <Link
                         href="/chats"
                         onClick={onNavigate}
-                        className="mt-1 flex h-9 items-center rounded-lg px-3 text-sm text-white/40 transition hover:bg-white/[0.07] hover:text-white"
+                        className="nav-item-muted mt-1 flex h-9 items-center rounded-lg px-3 text-sm transition"
                     >
                         All chats
                     </Link>

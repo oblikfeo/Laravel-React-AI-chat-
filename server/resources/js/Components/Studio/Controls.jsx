@@ -100,7 +100,7 @@ export function Thumbnails({ files, onRemove }) {
                         type="button"
                         onClick={() => onRemove(index)}
                         aria-label="Remove"
-                        className="absolute inset-0 flex items-center justify-center bg-black/65 opacity-0 transition group-hover:opacity-100"
+                        className="on-media absolute inset-0 flex items-center justify-center bg-black/65 opacity-0 transition group-hover:opacity-100"
                     >
                         <X className="h-4 w-4 text-white" strokeWidth={2} />
                     </button>

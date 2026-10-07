@@ -14,7 +14,7 @@ export default function ThemeToggle() {
     ];
 
     return (
-        <div className="flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.06] p-1 backdrop-blur-xl">
+        <div className="glass-chip flex items-center gap-1 rounded-full border p-1 backdrop-blur-xl">
             {options.map(({ value, icon: Icon, label }) => {
                 const active = theme === value;
 
@@ -27,8 +27,8 @@ export default function ThemeToggle() {
                         aria-pressed={active}
                         className={`flex h-8 w-8 items-center justify-center rounded-full transition ${
                             active
-                                ? 'bg-white/15 text-white'
-                                : 'text-white/45 hover:text-white/70'
+                                ? 'glass-chip-item-active'
+                                : 'glass-chip-item'
                         }`}
                     >
                         <Icon className="h-4 w-4" strokeWidth={1.75} />

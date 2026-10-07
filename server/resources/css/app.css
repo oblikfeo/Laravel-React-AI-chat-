@@ -86,90 +86,272 @@
     }
 
     /*
-     * Переходные правила для вёрстки, написанной в тёмной палитре.
+     * Светлая тема для вёрстки, написанной в тёмной палитре.
      *
-     * Экраны переводятся на токены постепенно; пока они не переведены,
-     * эти правила не дают светлой теме рассыпаться. По мере перехода
-     * блок будет сокращаться.
+     * Правила заданы диапазонами, а не списком классов: список
+     * неизбежно отставал от вёрстки, и всё, что в него не попало,
+     * оставалось белым на белом — так пропал текст ответа модели.
+     *
+     * Селектор вида [class^='x'], [class*=' x'] ловит класс только
+     * как отдельное слово. Иначе «hover:text-white» или
+     * «marker:text-white/35» красили бы сам элемент.
      */
-    html.light .text-white {
+
+    /* ── Текст ─────────────────────────────────────────────── */
+
+    html.light [class^='text-white'],
+    html.light [class*=' text-white'] {
         color: rgb(var(--ink));
     }
 
-    html.light .text-white\/90,
-    html.light .text-white\/85,
-    html.light .text-white\/80,
-    html.light .text-white\/75 {
+    html.light [class^='text-white/8'],
+    html.light [class*=' text-white/8'],
+    html.light [class^='text-white/7'],
+    html.light [class*=' text-white/7'] {
         color: rgb(var(--ink-soft));
     }
 
-    html.light .text-white\/70,
-    html.light .text-white\/65,
-    html.light .text-white\/60,
-    html.light .text-white\/55,
-    html.light .text-white\/50,
-    html.light .text-white\/45 {
+    html.light [class^='text-white/6'],
+    html.light [class*=' text-white/6'],
+    html.light [class^='text-white/5'],
+    html.light [class*=' text-white/5'],
+    html.light [class^='text-white/4'],
+    html.light [class*=' text-white/4'] {
         color: rgb(var(--ink-faint));
     }
 
-    html.light .text-white\/40,
-    html.light .text-white\/35,
-    html.light .text-white\/30 {
+    html.light [class^='text-white/3'],
+    html.light [class*=' text-white/3'],
+    html.light [class^='text-white/2'],
+    html.light [class*=' text-white/2'],
+    html.light [class^='text-white/1'],
+    html.light [class*=' text-white/1'] {
+        color: rgb(var(--ink-ghost));
+    }
+
+    html.light [class*='hover:text-white']:hover {
+        color: rgb(var(--ink));
+    }
+
+    html.light [class*='marker:text-white'] ::marker,
+    html.light [class*='marker:text-white']::marker {
+        color: rgb(var(--ink-ghost));
+    }
+
+    html.light input::placeholder,
+    html.light textarea::placeholder {
         color: rgb(var(--ink-ghost));
     }
 
     /*
-     * Самые бледные надписи.
+     * Цветные надписи.
      *
-     * На тёмном фоне четверть белого ещё читается, на светлом — уже
-     * нет, поэтому берём заметнее.
+     * Светлые оттенки (небесный, янтарный, розовый, зелёный трёхсотой
+     * ступени) читаются на тёмном, а на белом выцветают. Берём те же
+     * цвета, но тёмной ступени.
      */
-    html.light .text-white\/25,
-    html.light .text-white\/20 {
-        color: rgb(var(--ink-ghost) / 0.85);
+    html.light [class^='text-sky-'],
+    html.light [class*=' text-sky-'] {
+        color: rgb(3 105 161);
     }
 
-    /* Границы: белые линии на светлом фоне не видны. */
-    html.light [class*='border-white'] {
+    html.light [class^='text-amber-'],
+    html.light [class*=' text-amber-'] {
+        color: rgb(146 64 14);
+    }
+
+    html.light [class^='text-rose-'],
+    html.light [class*=' text-rose-'] {
+        color: rgb(190 18 60);
+    }
+
+    html.light [class^='text-emerald-'],
+    html.light [class*=' text-emerald-'] {
+        color: rgb(4 120 87);
+    }
+
+    html.light [class*='hover:text-rose-']:hover {
+        color: rgb(190 18 60);
+    }
+
+    html.light [class*='hover:text-sky-']:hover {
+        color: rgb(3 105 161);
+    }
+
+    /* ── Границы ───────────────────────────────────────────── */
+
+    html.light [class^='border-white'],
+    html.light [class*=' border-white'],
+    html.light [class*=' border-t-white'],
+    html.light [class*=' border-b-white'],
+    html.light [class*=' border-l-white'] {
         border-color: rgb(var(--line));
     }
 
-    /* Тёмные подложки панелей становятся светлыми. */
-    html.light [class*='bg-slate-950'],
-    html.light [class*='bg-slate-900'],
-    html.light [class*='bg-black'] {
-        background-color: rgb(var(--surface-raised) / 0.92);
+    /* Кнопки-капсулы: обводка заметнее, иначе кнопка теряется. */
+    html.light [class*='rounded-full'][class*=' border-white'] {
+        border-color: rgb(var(--line-strong));
     }
 
-    /* Полупрозрачные белые подложки на светлом фоне не видны. */
-    html.light .bg-white\/\[0\.03\],
-    html.light .bg-white\/\[0\.04\],
-    html.light .bg-white\/\[0\.06\],
-    html.light .bg-white\/\[0\.07\],
-    html.light .bg-white\/\[0\.09\],
-    html.light .bg-white\/5,
-    html.light .bg-white\/10 {
-        background-color: rgb(var(--surface-hover) / 0.6);
+    html.light [class*='hover:border-white']:hover {
+        border-color: rgb(var(--line-strong));
     }
 
-    /* Наведение на светлом фоне тоже должно темнеть, а не светлеть. */
-    html.light .hover\:bg-white\/10:hover,
-    html.light .hover\:bg-white\/15:hover,
-    html.light .hover\:bg-white\/\[0\.12\]:hover,
-    html.light .hover\:bg-white\/5:hover {
-        background-color: rgb(var(--surface-hover));
+    html.light [class*=' border-sky-'],
+    html.light [class^='border-sky-'] {
+        border-color: rgb(14 165 233 / 0.7);
     }
 
-    html.light .hover\:text-white:hover {
-        color: rgb(var(--ink));
+    html.light [class*=' ring-sky-'] {
+        --tw-ring-color: rgb(14 165 233 / 0.25);
+    }
+
+    html.light [class*=' border-amber-'],
+    html.light [class^='border-amber-'] {
+        border-color: rgb(245 158 11 / 0.45);
+    }
+
+    html.light [class*=' ring-white'] {
+        --tw-ring-color: rgb(24 31 46 / 0.1);
+    }
+
+    /* ── Подложки ──────────────────────────────────────────── */
+
+    /* Тёмные панели становятся светлыми и плотными. */
+    html.light [class^='bg-slate-9'],
+    html.light [class*=' bg-slate-9'],
+    html.light [class^='bg-slate-8'],
+    html.light [class*=' bg-slate-8'],
+    html.light [class^='bg-black'],
+    html.light [class*=' bg-black'] {
+        background-color: rgb(255 255 255 / 0.9);
     }
 
     /*
-     * Главная кнопка: белая на тёмном, тёмная на светлом. Без этого
-     * она сливается с подложкой и выглядит отключённой.
+     * Всплывающие списки и окна почти непрозрачны: сквозь них
+     * проступал текст страницы под ними.
+     */
+    html.light [class^='bg-slate-950/9'],
+    html.light [class*=' bg-slate-950/9'] {
+        background-color: rgb(255 255 255 / 0.985);
+    }
+
+    /*
+     * Полупрозрачный белый — подсветка на тёмном. На светлом её роль
+     * играет лёгкое затемнение.
+     */
+    html.light [class^='bg-white/'],
+    html.light [class*=' bg-white/'] {
+        background-color: rgb(24 31 46 / 0.055);
+    }
+
+    html.light [class*='hover:bg-white/']:hover {
+        background-color: rgb(24 31 46 / 0.09);
+    }
+
+    /*
+     * Выбранное состояние: «подсветка + белый текст».
      *
-     * Важность нужна: правила выше перекрашивают любые подложки, и
-     * кнопка снова становилась белой.
+     * Вкладки, пункты списков. Едва заметного затемнения мало —
+     * выбранное должно быть видно сразу.
+     */
+    html.light [class*=' bg-white/10'][class*=' text-white'],
+    html.light [class^='bg-white/10'][class*=' text-white'] {
+        background-color: rgb(24 31 46 / 0.11);
+    }
+
+    /*
+     * Выбранная плитка инструмента — белая с чёткой рамкой. Плитки
+     * лежат прямо на картинке, и затемнение на них выглядело мутным
+     * пятном, сквозь которое видно небо.
+     *
+     * Только кнопки: тем же классом оформлен пузырь сообщения
+     * пользователя, и рамка появлялась вокруг него.
+     */
+    html.light button[class*=' bg-white/[0.09]'] {
+        background-color: rgb(255 255 255);
+        border-color: rgb(var(--accent));
+        box-shadow:
+            0 0 0 1px rgb(var(--accent)),
+            0 10px 22px -12px rgb(24 31 46 / 0.45);
+    }
+
+    /*
+     * Поле ввода на главной лежит прямо на картинке, поэтому плотное:
+     * сквозь прозрачное просвечивало небо.
+     */
+    html.light [class*=' bg-white/[0.03]'],
+    html.light [class^='bg-white/[0.03]'],
+    html.light [class*=' bg-white/[0.04]'],
+    html.light [class^='bg-white/[0.04]'] {
+        background-color: rgb(255 255 255);
+    }
+
+    html.light [class*=' bg-amber-'],
+    html.light [class^='bg-amber-'] {
+        background-color: rgb(255 251 235);
+    }
+
+    html.light [class*='hover:bg-amber-']:hover {
+        background-color: rgb(254 243 199);
+    }
+
+    html.light [class*=' bg-emerald-400/'] {
+        background-color: rgb(209 250 229);
+    }
+
+    html.light [class*=' bg-sky-'],
+    html.light [class^='bg-sky-'] {
+        background-color: rgb(14 165 233);
+    }
+
+    /* Тени под панелями: чёрная тень на светлом выглядит грязью. */
+    html.light [class*='shadow-black'] {
+        --tw-shadow-color: rgb(24 31 46 / 0.12);
+        --tw-shadow: var(--tw-shadow-colored);
+    }
+
+    /* ── Сообщения о сбое и об успехе ───────────────────────── */
+
+    /*
+     * Тёмно-бордовая подложка на светлом фоне выглядела выцветшей, а
+     * не тревожной. Светлый красный с красным текстом читается как
+     * ошибка.
+     */
+    html.light [class*=' bg-rose-950'],
+    html.light [class^='bg-rose-950'] {
+        background-color: rgb(254 242 242);
+        border-color: rgb(252 165 165);
+    }
+
+    html.light [class*='bg-rose-950'],
+    html.light [class*='bg-rose-950'] p,
+    html.light [class*='bg-rose-950'] strong,
+    html.light [class*='bg-rose-950'] button {
+        color: rgb(153 27 27);
+    }
+
+    html.light [class*='bg-rose-950'] button {
+        border-color: rgb(248 113 113);
+    }
+
+    html.light [class*=' bg-emerald-950'],
+    html.light [class^='bg-emerald-950'] {
+        background-color: rgb(240 253 244);
+        border-color: rgb(134 239 172);
+    }
+
+    html.light [class*='bg-emerald-950'],
+    html.light [class*='bg-emerald-950'] p,
+    html.light [class*='bg-emerald-950'] button {
+        color: rgb(22 101 52);
+    }
+
+    /* ── Главная кнопка ─────────────────────────────────────── */
+
+    /*
+     * Белая на тёмном, тёмная на светлом: белая кнопка на белой
+     * панели выглядела отключённой.
      */
     html.light .bg-white.text-black {
         background-color: rgb(var(--accent)) !important;
@@ -177,101 +359,398 @@
         border-color: transparent !important;
     }
 
-    html.light .bg-white.text-black:hover,
-    html.light .hover\:bg-white\/90:hover {
+    html.light .bg-white.text-black:hover {
         background-color: rgb(var(--accent) / 0.88) !important;
     }
 
-    html.light .bg-white.text-black svg {
+    html.light .bg-white.text-black * {
         color: rgb(var(--accent-ink)) !important;
     }
 
-    /*
-     * Поля ввода.
-     *
-     * Прозрачная подложка на цветном фоне не читалась: небо
-     * просвечивало сквозь поле, и границы было не видно.
-     */
-    html.light .bg-white\/\[0\.03\],
-    html.light .bg-white\/\[0\.04\] {
-        background-color: rgb(var(--surface-raised));
-        border-color: rgb(var(--line));
-    }
-
-    /*
-     * Круглые кнопки с одним значком.
-     *
-     * Светлая обводка на светлом фоне пропадала, значок казался
-     * выключенным.
-     */
-    html.light [class*='rounded-full'][class*='border-white'] {
-        border-color: rgb(var(--line-strong));
-    }
-
-    /* Поля ввода. */
-    html.light input::placeholder,
-    html.light textarea::placeholder {
-        color: rgb(var(--ink-ghost));
-    }
-
     html.light select option {
-        background-color: rgb(var(--surface-raised));
+        background-color: rgb(255 255 255);
         color: rgb(var(--ink));
     }
 
-    /*
-     * Сообщение о сбое.
-     *
-     * Тёмно-бордовая подложка на светлом фоне выглядела выцветшей, а
-     * не тревожной. Берём светлый розовый с красным текстом: ошибка
-     * должна читаться как ошибка.
-     */
-    html.light .bg-rose-950\/40,
-    html.light .bg-rose-950\/80 {
-        background-color: rgb(254 242 242);
-        border-color: rgb(252 205 205);
-    }
-
-    html.light .bg-rose-950\/40 .text-white,
-    html.light .bg-rose-950\/40 p,
-    html.light .bg-rose-950\/80 p,
-    html.light .bg-rose-950\/40 .text-white\/75 {
-        color: rgb(153 27 27);
-    }
-
-    html.light .bg-emerald-950\/80 {
-        background-color: rgb(240 253 244);
-        border-color: rgb(187 235 200);
-    }
-
-    html.light .bg-emerald-950\/80 p {
-        color: rgb(22 101 52);
-    }
+    /* ── Что остаётся тёмным ────────────────────────────────── */
 
     /*
-     * Что остаётся тёмным намеренно.
-     *
-     * Фон приложения — космос, и работы в Студии показываются на
-     * тёмной подложке: на белом они выглядят вырезанными.
+     * Акцентные блоки (баннер тарифа) тёмные в обеих темах.
      */
     html.light .keep-dark,
-    html.light .keep-dark *,
-    html.light .keep-dark p,
-    html.light .keep-dark span {
+    html.light .keep-dark * {
         color: rgb(255 255 255) !important;
     }
 
-    html.light .keep-dark,
-    html.light .keep-dark[class*='bg-'] {
+    html.light .keep-dark {
         background-color: rgb(24 31 46) !important;
         background-image: none !important;
         border-color: rgb(55 65 81) !important;
     }
 
-    /* Приглушённые надписи внутри тёмного блока. */
     html.light .keep-dark [class*='text-white/5'],
     html.light .keep-dark [class*='text-white/6'] {
         color: rgb(203 213 225) !important;
+    }
+
+    /*
+     * Всё, что лежит поверх картинок: подписи, значки при наведении,
+     * просмотр во весь экран. Картинка тёмная или пёстрая, поэтому
+     * подложка остаётся тёмной, а текст — белым.
+     */
+    html.light .on-media,
+    html.light .on-media * {
+        color: rgb(255 255 255) !important;
+    }
+
+    html.light .on-media[class*='bg-black'] {
+        background-color: rgb(8 12 22 / 0.62) !important;
+    }
+
+    html.light .on-media.media-viewer {
+        background-color: rgb(8 12 22 / 0.9) !important;
+    }
+
+    html.light .on-media [class*=' text-white/3'],
+    html.light .on-media [class*=' text-white/4'] {
+        color: rgb(203 213 225) !important;
+    }
+
+    html.light .on-media [class*=' border-white'] {
+        border-color: rgb(255 255 255 / 0.25) !important;
+    }
+
+    html.light .on-media [class*='hover:bg-white/']:hover {
+        background-color: rgb(255 255 255 / 0.14) !important;
+    }
+
+    /* Внутри тёмных блоков главная кнопка остаётся белой. */
+    html.light .keep-dark .bg-white.text-black,
+    html.light .on-media .bg-white.text-black {
+        background-color: rgb(255 255 255) !important;
+        color: rgb(15 23 42) !important;
+    }
+
+    html.light .keep-dark .bg-white.text-black *,
+    html.light .on-media .bg-white.text-black * {
+        color: rgb(15 23 42) !important;
+    }
+
+    /* Слои, которые нужны только тёмной теме: космос за тарифами. */
+    html.light .dark-only {
+        display: none;
+    }
+
+    /* Затемнение под всплывающим окном. */
+    html.light .backdrop-dim {
+        background-color: rgb(24 31 46 / 0.45) !important;
+    }
+}
+
+@layer components {
+    /*
+     * Оболочка приложения: боковая панель, её пункты, карточка
+     * пользователя, всплывающее меню, переключатель темы.
+     *
+     * У каждого элемента два набора цветов, заданных явно. Общие
+     * правила перекраски здесь не годятся: «десятая часть белого» —
+     * подсветка на тёмном и ничто на светлом, поэтому выбранный пункт
+     * пропадал, а панель из стекла превращалась в белую стену.
+     */
+
+    /* Панель — стекло в обеих темах: фон должен просвечивать. */
+    .side-panel {
+        background-color: rgb(10 10 15 / 0.85);
+        border-color: rgb(255 255 255 / 0.07);
+    }
+
+    html.light .side-panel {
+        background-color: rgb(255 255 255 / 0.5);
+        border-color: rgb(255 255 255 / 0.7);
+        box-shadow: 1px 0 28px rgb(24 31 46 / 0.07);
+    }
+
+    .side-divider {
+        border-color: rgb(255 255 255 / 0.07);
+    }
+
+    html.light .side-divider {
+        border-color: rgb(24 31 46 / 0.12);
+    }
+
+    .side-label {
+        color: rgb(255 255 255 / 0.4);
+    }
+
+    html.light .side-label {
+        color: rgb(71 85 105);
+    }
+
+    /* Пункт меню и строка чата. */
+    .nav-item {
+        color: rgb(255 255 255 / 0.6);
+    }
+
+    .nav-item:hover {
+        background-color: rgb(255 255 255 / 0.07);
+        color: rgb(255 255 255);
+    }
+
+    html.light .nav-item {
+        color: rgb(40 51 69);
+    }
+
+    html.light .nav-item:hover {
+        background-color: rgb(24 31 46 / 0.08);
+        color: rgb(15 23 42);
+    }
+
+    /*
+     * Выбранный пункт.
+     *
+     * На светлом — белая плашка с тенью и цветным значком: её видно
+     * на стекле сразу, в отличие от полупрозрачной подсветки.
+     */
+    .nav-item-active,
+    .nav-item-active:hover {
+        background-color: rgb(255 255 255 / 0.1);
+        color: rgb(255 255 255);
+    }
+
+    html.light .nav-item-active,
+    html.light .nav-item-active:hover {
+        background-color: rgb(255 255 255);
+        color: rgb(15 23 42);
+        box-shadow:
+            0 1px 3px rgb(24 31 46 / 0.14),
+            0 0 0 1px rgb(24 31 46 / 0.06);
+    }
+
+    html.light .nav-item-active svg {
+        color: rgb(2 132 199);
+    }
+
+    /* Текущий раздел в мобильном меню: без плашки, только цвет. */
+    .nav-item-current {
+        color: rgb(255 255 255);
+    }
+
+    html.light .nav-item-current {
+        color: rgb(2 132 199);
+    }
+
+    .nav-item-disabled {
+        cursor: not-allowed;
+        color: rgb(255 255 255 / 0.25);
+    }
+
+    html.light .nav-item-disabled {
+        color: rgb(100 116 139 / 0.8);
+    }
+
+    /* Второстепенная ссылка: «All chats», «+3». */
+    .nav-item-muted {
+        color: rgb(255 255 255 / 0.4);
+    }
+
+    .nav-item-muted:hover {
+        background-color: rgb(255 255 255 / 0.07);
+        color: rgb(255 255 255);
+    }
+
+    html.light .nav-item-muted {
+        color: rgb(71 85 105);
+    }
+
+    html.light .nav-item-muted:hover {
+        background-color: rgb(24 31 46 / 0.08);
+        color: rgb(15 23 42);
+    }
+
+    /* Кнопка с одним значком: свернуть меню, закрыть. */
+    .icon-btn {
+        color: rgb(255 255 255 / 0.5);
+    }
+
+    .icon-btn:hover {
+        background-color: rgb(255 255 255 / 0.1);
+        color: rgb(255 255 255);
+    }
+
+    html.light .icon-btn {
+        color: rgb(71 85 105);
+    }
+
+    html.light .icon-btn:hover {
+        background-color: rgb(24 31 46 / 0.08);
+        color: rgb(15 23 42);
+    }
+
+    /*
+     * «New chat».
+     *
+     * В тёмной теме — светлая голубоватая, как в макете. В светлой тот
+     * же бледный градиент с голубой тенью давал неопределённый оттенок
+     * на светлом фоне, поэтому здесь кнопка тёмная, как все главные.
+     */
+    .new-chat {
+        background-image: linear-gradient(to right, #dff3ff, #eaf6ff);
+        color: rgb(0 0 0);
+        box-shadow: 0 10px 15px -3px rgb(14 165 233 / 0.1);
+    }
+
+    html.light .new-chat {
+        background-image: none;
+        background-color: rgb(var(--accent));
+        color: rgb(255 255 255);
+        box-shadow: 0 6px 16px -6px rgb(24 31 46 / 0.45);
+    }
+
+    /* Кнопка с обводкой: «Sign in». */
+    .btn-outline {
+        border-color: rgb(255 255 255 / 0.12);
+        color: rgb(255 255 255 / 0.8);
+    }
+
+    .btn-outline:hover {
+        background-color: rgb(255 255 255 / 0.1);
+        color: rgb(255 255 255);
+    }
+
+    html.light .btn-outline {
+        border-color: rgb(24 31 46 / 0.22);
+        background-color: rgb(255 255 255 / 0.65);
+        color: rgb(15 23 42);
+    }
+
+    html.light .btn-outline:hover {
+        background-color: rgb(255 255 255);
+    }
+
+    /* Карточка пользователя. */
+    .avatar {
+        background-color: rgb(255 255 255 / 0.1);
+        color: rgb(255 255 255);
+        box-shadow: 0 0 0 1px rgb(255 255 255 / 0.15);
+    }
+
+    html.light .avatar {
+        background-color: rgb(var(--accent));
+        color: rgb(255 255 255);
+        box-shadow: none;
+    }
+
+    .avatar-dot {
+        border-color: #0a0a0f;
+    }
+
+    html.light .avatar-dot {
+        border-color: rgb(255 255 255);
+    }
+
+    .side-title {
+        color: rgb(255 255 255);
+    }
+
+    html.light .side-title {
+        color: rgb(15 23 42);
+    }
+
+    .side-sub {
+        color: rgb(255 255 255 / 0.45);
+    }
+
+    html.light .side-sub {
+        color: rgb(71 85 105);
+    }
+
+    .side-row:hover {
+        background-color: rgb(255 255 255 / 0.07);
+    }
+
+    html.light .side-row:hover {
+        background-color: rgb(24 31 46 / 0.08);
+    }
+
+    /* Всплывающее меню. */
+    .popover {
+        border-color: rgb(255 255 255 / 0.1);
+        background-color: rgb(2 6 23 / 0.9);
+        box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.6);
+    }
+
+    html.light .popover {
+        border-color: rgb(24 31 46 / 0.1);
+        background-color: rgb(255 255 255 / 0.96);
+        box-shadow: 0 20px 44px -14px rgb(24 31 46 / 0.3);
+    }
+
+    .popover-item {
+        color: rgb(255 255 255 / 0.8);
+    }
+
+    .popover-item:hover {
+        background-color: rgb(255 255 255 / 0.1);
+        color: rgb(255 255 255);
+    }
+
+    html.light .popover-item {
+        color: rgb(40 51 69);
+    }
+
+    html.light .popover-item:hover {
+        background-color: rgb(24 31 46 / 0.07);
+        color: rgb(15 23 42);
+    }
+
+    .chip-outline {
+        border-color: rgb(255 255 255 / 0.12);
+        color: rgb(255 255 255 / 0.7);
+    }
+
+    html.light .chip-outline {
+        border-color: rgb(24 31 46 / 0.18);
+        color: rgb(40 51 69);
+    }
+
+    /* Переключатель темы. */
+    .glass-chip {
+        border-color: rgb(255 255 255 / 0.1);
+        background-color: rgb(255 255 255 / 0.06);
+    }
+
+    html.light .glass-chip {
+        border-color: rgb(255 255 255 / 0.8);
+        background-color: rgb(255 255 255 / 0.6);
+        box-shadow: 0 2px 10px rgb(24 31 46 / 0.08);
+    }
+
+    .glass-chip-item {
+        color: rgb(255 255 255 / 0.45);
+    }
+
+    .glass-chip-item:hover {
+        color: rgb(255 255 255 / 0.7);
+    }
+
+    html.light .glass-chip-item {
+        color: rgb(71 85 105);
+    }
+
+    html.light .glass-chip-item:hover {
+        color: rgb(15 23 42);
+    }
+
+    .glass-chip-item-active,
+    .glass-chip-item-active:hover {
+        background-color: rgb(255 255 255 / 0.15);
+        color: rgb(255 255 255);
+    }
+
+    html.light .glass-chip-item-active,
+    html.light .glass-chip-item-active:hover {
+        background-color: rgb(var(--accent));
+        color: rgb(255 255 255);
     }
 }
 
@@ -529,6 +1008,15 @@
     .scrollbar-thin {
         scrollbar-width: thin;
         scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+    }
+
+    /* На светлом фоне белая полоса не видна вовсе. */
+    html.light .scrollbar-thin {
+        scrollbar-color: rgb(24 31 46 / 0.32) transparent;
+    }
+
+    html.light .scrollbar-thin::-webkit-scrollbar-thumb {
+        background-color: rgb(24 31 46 / 0.32);
     }
 
     .scrollbar-thin::-webkit-scrollbar {

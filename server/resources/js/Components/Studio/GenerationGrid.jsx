@@ -256,7 +256,7 @@ function Card({ item, fresh, audio, onReuse, onEdit, onOpen }) {
                             className="h-full w-full object-cover"
                         />
 
-                        <span className="absolute inset-0 flex items-center justify-center bg-black/55 opacity-0 transition group-hover:opacity-100">
+                        <span className="on-media absolute inset-0 flex items-center justify-center bg-black/55 opacity-0 transition group-hover:opacity-100">
                             <Maximize2
                                 className="h-5 w-5 text-white"
                                 strokeWidth={2}
@@ -440,7 +440,7 @@ function Action({ label, icon: Icon, onClick, href, danger }) {
 function Lightbox({ item, onClose }) {
     return (
         <div
-            className="fixed inset-0 z-[70] flex items-center justify-center bg-black/92 p-4 backdrop-blur-sm"
+            className="on-media media-viewer fixed inset-0 z-[70] flex items-center justify-center bg-black/92 p-4 backdrop-blur-sm"
             onClick={onClose}
             role="dialog"
             aria-modal="true"

@@ -10,7 +10,7 @@ export default function AuthSubmit({ children, disabled = false }) {
         <button
             type="submit"
             disabled={disabled}
-            className="flex h-12 w-full items-center justify-center rounded-full bg-gradient-to-r from-[#dff3ff] to-[#eaf6ff] text-[15px] font-semibold text-black transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-12 w-full items-center justify-center new-chat rounded-full text-[15px] font-semibold transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-50"
         >
             {children}
         </button>

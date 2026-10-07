@@ -342,7 +342,7 @@ function Thumb({ src, caption, onRemove }) {
         <div className="group relative h-[84px] w-[84px] shrink-0 overflow-hidden rounded-xl border border-white/25">
             <img src={src} alt="" className="h-full w-full object-cover" />
 
-            <span className="absolute inset-x-0 bottom-0 bg-black/70 px-1 py-0.5 text-center text-[9px] uppercase tracking-wide text-white/65">
+            <span className="on-media absolute inset-x-0 bottom-0 bg-black/70 px-1 py-0.5 text-center text-[9px] uppercase tracking-wide text-white/65">
                 {caption}
             </span>
 
@@ -350,7 +350,7 @@ function Thumb({ src, caption, onRemove }) {
                 type="button"
                 onClick={onRemove}
                 aria-label="Remove"
-                className="absolute inset-0 flex items-center justify-center bg-black/65 opacity-0 transition group-hover:opacity-100"
+                className="on-media absolute inset-0 flex items-center justify-center bg-black/65 opacity-0 transition group-hover:opacity-100"
             >
                 <X className="h-4 w-4 text-white" strokeWidth={2} />
             </button>

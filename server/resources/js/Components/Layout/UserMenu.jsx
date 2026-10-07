@@ -42,23 +42,23 @@ export default function UserMenu({ user, collapsed, onClose }) {
     }, [onClose]);
 
     const item =
-        'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-white/80 transition hover:bg-white/10 hover:text-white';
+        'popover-item flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition';
 
     return (
         <div
             ref={ref}
             role="menu"
-            className={`absolute bottom-full z-40 mb-2 w-[252px] overflow-hidden rounded-2xl border border-white/10 bg-slate-950/90 p-1.5 shadow-2xl shadow-black/60 backdrop-blur-2xl ${
+            className={`absolute bottom-full z-40 mb-2 w-[252px] popover overflow-hidden rounded-2xl border p-1.5 backdrop-blur-2xl ${
                 collapsed ? 'left-0' : 'left-1 right-1 w-auto'
             }`}
         >
-            <div className="border-b border-white/[0.07] px-3 pb-3 pt-2">
-                <p className="truncate text-sm font-medium text-white">
+            <div className="side-divider border-b px-3 pb-3 pt-2">
+                <p className="side-title truncate text-sm font-medium">
                     {user.name}
                 </p>
-                <p className="truncate text-xs text-white/45">{user.email}</p>
+                <p className="side-sub truncate text-xs">{user.email}</p>
 
-                <span className="mt-2 inline-flex items-center rounded-full border border-white/[0.12] px-2.5 py-0.5 text-[11px] font-medium text-white/70">
+                <span className="chip-outline mt-2 inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-medium">
                     {user.plan} plan
                 </span>
             </div>

@@ -50,12 +50,12 @@ export default function PlansDialog({ open, onClose }) {
                 спорили с картинкой, а текст оставался читаемым. */}
             <div
                 aria-hidden
-                className="pointer-events-none fixed inset-0 bg-cover bg-center opacity-[0.55]"
+                className="dark-only pointer-events-none fixed inset-0 bg-cover bg-center opacity-[0.55]"
                 style={{ backgroundImage: "url('/images/plans-bg.png')" }}
             />
             <div
                 aria-hidden
-                className="pointer-events-none fixed inset-0 bg-gradient-to-b from-[#06060b]/40 via-[#06060b]/75 to-[#06060b]"
+                className="dark-only pointer-events-none fixed inset-0 bg-gradient-to-b from-[#06060b]/40 via-[#06060b]/75 to-[#06060b]"
             />
 
             <div className="relative flex min-h-full flex-col justify-center px-4 py-8 sm:px-6 sm:py-10">

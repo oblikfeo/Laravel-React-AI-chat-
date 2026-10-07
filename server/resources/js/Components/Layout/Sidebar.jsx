@@ -25,7 +25,7 @@ export default function Sidebar({
         <aside
             // Панель плавающая: при раскрытии она наезжает на фон, а не
             // раздвигает страницу. Иначе центр композиции уезжает вбок.
-            className={`fixed inset-y-0 left-0 z-30 hidden h-screen flex-col border-r border-line/60 bg-surface-sunken/85 backdrop-blur-xl transition-[width] duration-300 ease-out lg:flex ${
+            className={`fixed inset-y-0 left-0 z-30 hidden h-screen flex-col side-panel border-r backdrop-blur-xl transition-[width] duration-300 ease-out lg:flex ${
                 collapsed ? 'w-[72px]' : 'w-[280px]'
             }`}
         >
@@ -40,7 +40,7 @@ export default function Sidebar({
                         onClick={onToggle}
                         aria-label="Expand menu"
                         title="Expand menu"
-                        className="rounded-lg p-1 transition hover:bg-white/10"
+                        className="icon-btn rounded-lg p-1 transition"
                     >
                         <LogoMark className="h-8 w-8" />
                     </button>
@@ -55,7 +55,7 @@ export default function Sidebar({
                         type="button"
                         onClick={onToggle}
                         aria-label="Collapse menu"
-                        className="rounded-lg p-1.5 text-white/50 transition hover:bg-white/10 hover:text-white"
+                        className="icon-btn rounded-lg p-1.5 transition"
                     >
                         <PanelLeft className="h-5 w-5" strokeWidth={1.75} />
                     </button>
@@ -67,7 +67,7 @@ export default function Sidebar({
                     href="/"
                     aria-label="New chat"
                     title={collapsed ? 'New chat' : undefined}
-                    className={`flex items-center rounded-full bg-gradient-to-r from-[#dff3ff] to-[#eaf6ff] font-medium text-black shadow-lg shadow-sky-500/10 transition hover:brightness-105 ${
+                    className={`new-chat flex items-center rounded-full font-medium transition hover:brightness-105 ${
                         collapsed
                             ? 'h-11 w-11 justify-center'
                             : 'h-11 gap-2.5 px-4'
@@ -96,10 +96,10 @@ export default function Sidebar({
                                     : 'h-11 gap-3 px-3'
                             } ${
                                 active
-                                    ? 'bg-white/10 text-white'
+                                    ? 'nav-item-active'
                                     : ready
-                                      ? 'text-white/60 hover:bg-white/[0.07] hover:text-white'
-                                      : 'cursor-not-allowed text-white/25'
+                                      ? 'nav-item'
+                                      : 'nav-item-disabled'
                             }`;
 
                             const inner = (
@@ -161,7 +161,7 @@ export default function Sidebar({
                 {!collapsed && <ProBanner />}
 
                 <div
-                    className={`border-t border-white/[0.07] pt-4 ${
+                    className={`side-divider border-t pt-4 ${
                         collapsed ? 'flex justify-center' : ''
                     }`}
                 >
