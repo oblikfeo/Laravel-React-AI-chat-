@@ -167,15 +167,45 @@
     /*
      * Главная кнопка: белая на тёмном, тёмная на светлом. Без этого
      * она сливается с подложкой и выглядит отключённой.
+     *
+     * Важность нужна: правила выше перекрашивают любые подложки, и
+     * кнопка снова становилась белой.
      */
     html.light .bg-white.text-black {
-        background-color: rgb(var(--accent));
-        color: rgb(var(--accent-ink));
+        background-color: rgb(var(--accent)) !important;
+        color: rgb(var(--accent-ink)) !important;
+        border-color: transparent !important;
     }
 
     html.light .bg-white.text-black:hover,
     html.light .hover\:bg-white\/90:hover {
-        background-color: rgb(var(--accent) / 0.88);
+        background-color: rgb(var(--accent) / 0.88) !important;
+    }
+
+    html.light .bg-white.text-black svg {
+        color: rgb(var(--accent-ink)) !important;
+    }
+
+    /*
+     * Поля ввода.
+     *
+     * Прозрачная подложка на цветном фоне не читалась: небо
+     * просвечивало сквозь поле, и границы было не видно.
+     */
+    html.light .bg-white\/\[0\.03\],
+    html.light .bg-white\/\[0\.04\] {
+        background-color: rgb(var(--surface-raised));
+        border-color: rgb(var(--line));
+    }
+
+    /*
+     * Круглые кнопки с одним значком.
+     *
+     * Светлая обводка на светлом фоне пропадала, значок казался
+     * выключенным.
+     */
+    html.light [class*='rounded-full'][class*='border-white'] {
+        border-color: rgb(var(--line-strong));
     }
 
     /* Поля ввода. */
