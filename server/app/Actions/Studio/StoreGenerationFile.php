@@ -48,8 +48,15 @@ class StoreGenerationFile
             Storage::disk($disk)->put($thumbnailPath, $thumbnail);
         }
 
+        // Настоящие размеры картинки: провайдер мог отдать не то,
+        // что просили, а лента раскладывает плитки по пропорциям.
+        $size = str_starts_with($mime, 'image/')
+            ? @getimagesizefromstring($contents)
+            : null;
+
         $generation->forceFill([
             'status' => Generation::STATUS_READY,
+            ...($size ? ['width' => $size[0], 'height' => $size[1]] : []),
             'disk' => $disk,
             'path' => $path,
             'thumbnail_path' => $thumbnailPath,

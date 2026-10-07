@@ -6,10 +6,32 @@ import FeedTile from '@/Components/Feed/FeedTile';
 import FeedViewer from '@/Components/Feed/FeedViewer';
 
 /**
+ * Узор раскладки.
+ *
+ * Повторяется каждые двенадцать работ: крупные, широкие, высокие и
+ * обычные плитки чередуются так, чтобы в сетке не оставалось дыр.
+ * Числа — сколько колонок и строк занимает плитка.
+ */
+const PATTERN = [
+    { w: 2, h: 2 },
+    { w: 1, h: 1 },
+    { w: 1, h: 1 },
+    { w: 1, h: 2 },
+    { w: 2, h: 1 },
+    { w: 1, h: 1 },
+    { w: 1, h: 1 },
+    { w: 1, h: 2 },
+    { w: 2, h: 2 },
+    { w: 1, h: 1 },
+    { w: 1, h: 1 },
+    { w: 2, h: 1 },
+];
+
+/**
  * Общая лента работ.
  *
- * Кладём плитки в колонки по высоте, а не ровной сеткой: у работ
- * разные пропорции, и сетка из квадратов обрезала бы половину.
+ * Плитки разного размера складываются как мозаика: ровная сетка из
+ * одинаковых квадратов выглядит каталогом, а не лентой.
  */
 export default function FeedIndex({ works }) {
     const [open, setOpen] = useState(null);
@@ -77,31 +99,37 @@ export default function FeedIndex({ works }) {
             <Head title="Feed — Uncensia" />
 
             <div className="flex-1 overflow-y-auto scrollbar-thin">
-                <div className="mx-auto w-full max-w-[1280px] px-4 py-6 sm:px-6">
+                <div className="mx-auto w-full max-w-[1320px] px-4 py-6 sm:px-6">
                     <div className="mb-6">
-                        <h1 className="text-2xl font-light tracking-tight text-white">
+                        <h1 className="text-2xl font-light tracking-tight text-ink">
                             Feed
                         </h1>
-                        <p className="mt-1 text-sm text-white/40">
+                        <p className="mt-1 text-sm text-ink-faint">
                             What people are making right now
                         </p>
                     </div>
 
                     {items.length ? (
-                        <div className="flex gap-3">
-                            {spread(items, columns).map((column, index) => (
-                                <div
-                                    key={index}
-                                    className="flex min-w-0 flex-1 flex-col gap-3"
-                                >
-                                    {column.map((item) => (
-                                        <FeedTile
-                                            key={item.id}
-                                            item={item}
-                                            onOpen={() => setOpen(item)}
-                                        />
-                                    ))}
-                                </div>
+                        <div
+                            className="grid gap-3"
+                            style={{
+                                gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
+                                // Строка — половина колонки: из таких
+                                // кирпичиков собираются и квадраты, и
+                                // вытянутые плитки.
+                                gridAutoRows: 'minmax(0, 11rem)',
+                                gridAutoFlow: 'dense',
+                            }}
+                        >
+                            {items.map((item, index) => (
+                                <FeedTile
+                                    key={item.id}
+                                    item={item}
+                                    span={{
+                                        ...sizeFor(index, columns),
+                                        onOpen: () => setOpen(item),
+                                    }}
+                                />
                             ))}
                         </div>
                     ) : (
@@ -111,7 +139,7 @@ export default function FeedIndex({ works }) {
                     <div ref={tailRef} className="h-12" />
 
                     {loading && (
-                        <p className="pb-6 text-center text-[13px] text-white/35">
+                        <p className="pb-6 text-center text-[13px] text-ink-faint">
                             Loading more…
                         </p>
                     )}
@@ -127,18 +155,18 @@ export default function FeedIndex({ works }) {
 
 function Empty() {
     return (
-        <div className="rounded-2xl border border-white/[0.07] bg-slate-950/40 px-6 py-16 text-center backdrop-blur-md">
-            <Images className="mx-auto h-8 w-8 text-white/20" strokeWidth={1.5} />
+        <div className="rounded-2xl border border-line bg-surface px-6 py-16 text-center backdrop-blur-md">
+            <Images className="mx-auto h-8 w-8 text-ink-faint" strokeWidth={1.5} />
 
-            <p className="mt-4 text-[15px] text-white/60">Nothing here yet</p>
-            <p className="mt-1 text-sm text-white/35">
+            <p className="mt-4 text-[15px] text-ink-soft">Nothing here yet</p>
+            <p className="mt-1 text-sm text-ink-faint">
                 Work people share will show up here.
             </p>
 
             <button
                 type="button"
                 onClick={() => router.visit('/studio')}
-                className="mx-auto mt-5 flex h-10 items-center gap-2 rounded-full bg-white px-5 text-[14px] font-semibold text-black transition hover:bg-white/90"
+                className="mx-auto mt-5 flex h-10 items-center gap-2 rounded-full bg-accent px-5 text-[14px] font-semibold text-accent-ink transition hover:opacity-90"
             >
                 <Sparkles className="h-4 w-4" strokeWidth={2} />
                 Create something
@@ -150,7 +178,7 @@ function Empty() {
 /** Сколько колонок помещается по ширине окна. */
 function columnCount() {
     if (typeof window === 'undefined') {
-        return 3;
+        return 4;
     }
 
     const width = window.innerWidth;
@@ -167,34 +195,19 @@ function columnCount() {
 }
 
 /**
- * Раскладывает работы по колонкам.
+ * Размер плитки по её месту в ленте.
  *
- * Каждая следующая плитка уходит в самую короткую колонку: так низ
- * ленты получается ровным, а не лесенкой.
+ * На узких экранах крупные плитки не помещаются, поэтому широкие
+ * куски ужимаются до ширины сетки.
  */
-function spread(items, columns) {
-    const buckets = Array.from({ length: columns }, () => []);
-    const heights = Array(columns).fill(0);
+function sizeFor(index, columns) {
+    const shape = PATTERN[index % PATTERN.length];
+    const width = Math.min(shape.w, columns);
 
-    items.forEach((item) => {
-        let shortest = 0;
-
-        heights.forEach((height, index) => {
-            if (height < heights[shortest]) {
-                shortest = index;
-            }
-        });
-
-        buckets[shortest].push(item);
-
-        // Высота в долях ширины колонки: точные размеры не нужны,
-        // важно лишь соотношение.
-        heights[shortest] += item.width && item.height
-            ? item.height / item.width
-            : 1;
-    });
-
-    return buckets;
+    return {
+        column: `span ${width}`,
+        row: `span ${shape.h}`,
+    };
 }
 
 FeedIndex.layout = (page) => <MainLayout>{page}</MainLayout>;

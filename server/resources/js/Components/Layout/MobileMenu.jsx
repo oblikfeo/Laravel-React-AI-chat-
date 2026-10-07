@@ -37,7 +37,7 @@ export default function MobileMenu({ open, onClose, current, activeChatId }) {
     }
 
     return (
-        <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-[#0a0a0f] lg:hidden">
+        <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-surface-sunken lg:hidden">
             <div className="flex h-16 shrink-0 items-center justify-between px-5">
                 <LogoFull />
 

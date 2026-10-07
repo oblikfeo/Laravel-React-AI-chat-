@@ -15,178 +15,174 @@
 }
 
 @layer base {
-    html {
+    /*
+     * Цвета интерфейса.
+     *
+     * Раньше светлая тема делалась полусотней точечных правил поверх
+     * тёмной вёрстки: каждый новый экран приходилось чинить вручную,
+     * и половина оставалась тёмной.
+     *
+     * Теперь цвет задаётся токенами, а тема меняет их значения. В
+     * разметке пишется text-ink или bg-surface — и работает в обеих.
+     *
+     * ink — текст (от основного к едва заметному),
+     * surface — подложки, line — границы, accent — главная кнопка.
+     */
+    :root {
+        --ink: 255 255 255;
+        --ink-soft: 226 232 240;
+        --ink-faint: 148 163 184;
+        --ink-ghost: 100 116 139;
+
+        --surface: 8 12 22;
+        --surface-raised: 17 24 39;
+        --surface-sunken: 2 6 14;
+        --surface-hover: 30 41 59;
+
+        --line: 51 65 85;
+        --line-strong: 71 85 105;
+
+        --accent: 255 255 255;
+        --accent-ink: 9 12 20;
+
         color-scheme: dark;
     }
 
     html.light {
+        --ink: 15 23 42;
+        --ink-soft: 51 65 85;
+        --ink-faint: 100 116 139;
+        --ink-ghost: 148 163 184;
+
+        --surface: 255 255 255;
+        --surface-raised: 248 250 252;
+        --surface-sunken: 241 245 249;
+        --surface-hover: 226 232 240;
+
+        --line: 203 213 225;
+        --line-strong: 148 163 184;
+
+        --accent: 15 23 42;
+        --accent-ink: 255 255 255;
+
         color-scheme: light;
     }
 
     body {
-        @apply bg-black text-white antialiased;
+        @apply antialiased;
+        background-color: rgb(var(--surface));
+        color: rgb(var(--ink));
     }
 
     /*
-     * Светлая тема.
+     * Переходные правила для вёрстки, написанной в тёмной палитре.
      *
-     * Вёрстка написана в тёмной палитре (белый текст, белые стеклянные
-     * поверхности). Вместо дублирования классов в каждом компоненте
-     * инвертируем эти же токены на уровне темы: так светлая тема
-     * автоматически подхватывается новыми страницами.
+     * Экраны переводятся на токены постепенно; пока они не переведены,
+     * эти правила не дают светлой теме рассыпаться. По мере перехода
+     * блок будет сокращаться.
      */
-    html.light body {
-        background-color: rgb(255 255 255);
-        color: rgb(15 23 42);
-    }
-
     html.light .text-white {
-        color: rgb(15 23 42);
+        color: rgb(var(--ink));
     }
 
-    html.light .text-white\/95,
-    html.light .text-white\/90 {
-        color: rgb(30 41 59);
-    }
-
+    html.light .text-white\/90,
+    html.light .text-white\/85,
     html.light .text-white\/80,
-    html.light .text-white\/75,
-    html.light .text-white\/70 {
-        color: rgb(51 65 85);
+    html.light .text-white\/75 {
+        color: rgb(var(--ink-soft));
     }
 
+    html.light .text-white\/70,
     html.light .text-white\/65,
     html.light .text-white\/60,
-    html.light .text-white\/55 {
-        color: rgb(71 85 105);
-    }
-
+    html.light .text-white\/55,
     html.light .text-white\/50,
-    html.light .text-white\/45,
-    html.light .text-white\/40,
-    html.light .text-white\/35 {
-        color: rgb(100 116 139);
+    html.light .text-white\/45 {
+        color: rgb(var(--ink-faint));
     }
 
-    html.light .bg-white\/5,
+    html.light .text-white\/40,
+    html.light .text-white\/35,
+    html.light .text-white\/30,
+    html.light .text-white\/25,
+    html.light .text-white\/20 {
+        color: rgb(var(--ink-ghost));
+    }
+
+    /* Границы: белые линии на светлом фоне не видны. */
+    html.light [class*='border-white'] {
+        border-color: rgb(var(--line));
+    }
+
+    /* Тёмные подложки панелей становятся светлыми. */
+    html.light [class*='bg-slate-950'],
+    html.light [class*='bg-slate-900'],
+    html.light [class*='bg-black'] {
+        background-color: rgb(var(--surface-raised) / 0.92);
+    }
+
+    /* Полупрозрачные белые подложки на светлом фоне не видны. */
+    html.light .bg-white\/\[0\.03\],
     html.light .bg-white\/\[0\.04\],
-    html.light .bg-white\/\[0\.05\],
     html.light .bg-white\/\[0\.06\],
     html.light .bg-white\/\[0\.07\],
-    html.light .bg-white\/\[0\.09\] {
-        background-color: rgb(15 23 42 / 0.05);
+    html.light .bg-white\/\[0\.09\],
+    html.light .bg-white\/5,
+    html.light .bg-white\/10 {
+        background-color: rgb(var(--surface-hover) / 0.6);
     }
 
-    html.light .bg-white\/10,
-    html.light .bg-white\/\[0\.13\] {
-        background-color: rgb(15 23 42 / 0.1);
+    /* Наведение на светлом фоне тоже должно темнеть, а не светлеть. */
+    html.light .hover\:bg-white\/10:hover,
+    html.light .hover\:bg-white\/15:hover,
+    html.light .hover\:bg-white\/\[0\.12\]:hover,
+    html.light .hover\:bg-white\/5:hover {
+        background-color: rgb(var(--surface-hover));
     }
 
-    html.light .border-white\/10,
-    html.light .border-white\/\[0\.1\],
-    html.light .border-white\/\[0\.12\],
-    html.light .border-white\/\[0\.07\] {
-        border-color: rgb(15 23 42 / 0.12);
-    }
-
-    /* Боковое меню в светлой теме остаётся светлым, а не чёрным.
-       Мобильное меню перекрывает страницу целиком, поэтому оно плотное. */
-    html.light .bg-\[\#0a0a0f\]\/85 {
-        background-color: rgb(248 250 252 / 0.92);
-    }
-
-    html.light .bg-\[\#0a0a0f\] {
-        background-color: rgb(248 250 252);
-    }
-
-    /* Плотные тёмные панели (поле ввода, карточка входа, pill-кнопки)
-       в светлой теме становятся светлыми. */
-    html.light .bg-slate-950\/55,
-    html.light .bg-slate-950\/50 {
-        background-color: rgb(255 255 255 / 0.75);
-    }
-
-    /* Подложка ответа модели: в светлой теме она плотнее остальных
-       поверхностей, иначе свечение планеты пробивается сквозь неё
-       и текст бледнеет так же, как бледнел на тёмной. */
-    html.light .bg-slate-950\/70 {
-        background-color: rgb(255 255 255 / 0.92);
-    }
-
-    html.light .bg-slate-900\/60 {
-        background-color: rgb(255 255 255 / 0.85);
-    }
-
-    /* Разметка в ответе модели: в светлой теме блок кода должен быть
-       светлым, а ссылки и встроенный код — заметно темнее фона. */
-    html.light .bg-black\/40 {
-        background-color: rgb(241 245 249);
-    }
-
-    html.light .text-sky-200,
-    html.light .text-sky-300 {
-        color: rgb(2 105 161);
-    }
-
-    html.light .marker\:text-white\/35 > li::marker {
-        color: rgb(100 116 139);
-    }
-
-    /* Pro-баннер остаётся тёмным, поэтому его текст не инвертируем. */
-    html.light .from-slate-800\/80 .text-white,
-    html.light .from-slate-800\/80 .text-white\/55 {
-        color: rgb(255 255 255 / 0.92);
+    html.light .hover\:text-white:hover {
+        color: rgb(var(--ink));
     }
 
     /*
-     * Чат в светлой теме.
-     *
-     * Пузырь пользователя был почти белым на белом фоне, а рамки
-     * сливались. Делаем его заметной плашкой, а ответ модели —
-     * светлой панелью с чёткой границей.
+     * Главная кнопка: белая на тёмном, тёмная на светлом. Без этого
+     * она сливается с подложкой и выглядит отключённой.
      */
-    html.light .bg-white\/\[0\.09\] {
-        background-color: rgb(59 130 246 / 0.12);
-    }
-
-    html.light .bg-white\/\[0\.09\] p {
-        color: rgb(15 23 42);
-    }
-
-    /* Общая подложка под перепиской: в тёмной теме она затемняет
-       фон, в светлой должна осветлять. */
-    html.light .bg-slate-950\/45 {
-        background-color: rgb(255 255 255 / 0.72);
-    }
-
-    /* Значок модели и тонкие разделители: на светлом фоне белые
-       границы не видны. */
-    html.light .bg-white\/\[0\.06\] {
-        background-color: rgb(15 23 42 / 0.06);
-    }
-
-    html.light .bg-white\/\[0\.08\],
-    html.light .bg-white\/\[0\.1\] {
-        background-color: rgb(15 23 42 / 0.12);
-    }
-
-    /* Точки ожидания и подписи к ним. */
-    html.light .bg-white\/60,
-    html.light .bg-white\/50 {
-        background-color: rgb(71 85 105);
-    }
-
-    /* Сообщения от сервера остаются тёмными: это заметная плашка
-       поверх страницы, инвертировать её не нужно. */
-    html.light .bg-rose-950\/80 p,
-    html.light .bg-emerald-950\/80 p {
-        color: rgb(255 255 255 / 0.95);
-    }
-
-    /* Кнопка отправки: в светлой теме белое на белом не читается. */
     html.light .bg-white.text-black {
-        background-color: rgb(15 23 42);
+        background-color: rgb(var(--accent));
+        color: rgb(var(--accent-ink));
+    }
+
+    html.light .bg-white.text-black:hover,
+    html.light .hover\:bg-white\/90:hover {
+        background-color: rgb(var(--accent) / 0.88);
+    }
+
+    /* Поля ввода. */
+    html.light input::placeholder,
+    html.light textarea::placeholder {
+        color: rgb(var(--ink-ghost));
+    }
+
+    html.light select option {
+        background-color: rgb(var(--surface-raised));
+        color: rgb(var(--ink));
+    }
+
+    /*
+     * Что остаётся тёмным намеренно.
+     *
+     * Фон приложения — космос, и работы в Студии показываются на
+     * тёмной подложке: на белом они выглядят вырезанными.
+     */
+    html.light .keep-dark,
+    html.light .keep-dark * {
         color: rgb(255 255 255);
+    }
+
+    html.light .keep-dark {
+        background-color: rgb(15 23 42);
+        border-color: rgb(51 65 85);
     }
 }
 

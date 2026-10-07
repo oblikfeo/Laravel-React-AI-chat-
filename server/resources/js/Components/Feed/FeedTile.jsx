@@ -3,25 +3,22 @@ import { useState } from 'react';
 /**
  * Работа в ленте.
  *
- * Высота плитки задаётся пропорциями самой работы: у людей разные
- * форматы, и подгонять их под квадрат — значит обрезать половину.
+ * Размер плитки задаёт раскладка: лента складывается из квадратов,
+ * вытянутых и широких кусков, как мозаика. Внутри плитки работа
+ * обрезается по центру, поэтому её форма на раскладку не влияет.
  */
-export default function FeedTile({ item, onOpen }) {
+export default function FeedTile({ item, span }) {
     const [loaded, setLoaded] = useState(false);
-
-    const ratio = item.width && item.height
-        ? `${item.width} / ${item.height}`
-        : '1 / 1';
 
     return (
         <button
             type="button"
-            onClick={onOpen}
-            style={{ aspectRatio: ratio }}
-            className="group relative w-full overflow-hidden rounded-xl border border-white/[0.08] bg-slate-950/50 text-left transition hover:border-white/25"
+            onClick={span.onOpen}
+            style={{ gridColumn: span.column, gridRow: span.row }}
+            className="group relative overflow-hidden rounded-xl border border-white/[0.08] bg-slate-950/50 text-left transition hover:z-10 hover:border-white/25 hover:shadow-xl hover:shadow-black/40 dark:border-white/[0.08] dark:bg-slate-950/50"
         >
-            {/* Место под работу держим заранее: иначе лента прыгает,
-                пока картинки подгружаются. */}
+            {/* Место держим заранее: иначе лента прыгает, пока
+                картинки подгружаются. */}
             {!loaded && (
                 <span className="absolute inset-0 animate-pulse bg-white/[0.04]" />
             )}
@@ -32,7 +29,7 @@ export default function FeedTile({ item, onOpen }) {
                 loading="lazy"
                 decoding="async"
                 onLoad={() => setLoaded(true)}
-                className={`h-full w-full object-cover transition duration-500 group-hover:scale-[1.03] ${
+                className={`h-full w-full object-cover transition duration-500 group-hover:scale-[1.04] ${
                     loaded ? 'opacity-100' : 'opacity-0'
                 }`}
             />

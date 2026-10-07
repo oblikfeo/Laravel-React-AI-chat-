@@ -23,6 +23,36 @@ export default {
                     900: '#0a0e1a',
                     800: '#0f1524',
                 },
+
+                /*
+                 * Цвета интерфейса.
+                 *
+                 * Значения лежат в app.css и меняются вместе с темой,
+                 * поэтому в разметке не нужно писать «белое в тёмной,
+                 * чёрное в светлой» — достаточно одного класса.
+                 *
+                 * ink — текст, surface — подложки, line — границы.
+                 */
+                ink: {
+                    DEFAULT: 'rgb(var(--ink) / <alpha-value>)',
+                    soft: 'rgb(var(--ink-soft) / <alpha-value>)',
+                    faint: 'rgb(var(--ink-faint) / <alpha-value>)',
+                    ghost: 'rgb(var(--ink-ghost) / <alpha-value>)',
+                },
+                surface: {
+                    DEFAULT: 'rgb(var(--surface) / <alpha-value>)',
+                    raised: 'rgb(var(--surface-raised) / <alpha-value>)',
+                    sunken: 'rgb(var(--surface-sunken) / <alpha-value>)',
+                    hover: 'rgb(var(--surface-hover) / <alpha-value>)',
+                },
+                line: {
+                    DEFAULT: 'rgb(var(--line) / <alpha-value>)',
+                    strong: 'rgb(var(--line-strong) / <alpha-value>)',
+                },
+                accent: {
+                    DEFAULT: 'rgb(var(--accent) / <alpha-value>)',
+                    ink: 'rgb(var(--accent-ink) / <alpha-value>)',
+                },
             },
         },
     },

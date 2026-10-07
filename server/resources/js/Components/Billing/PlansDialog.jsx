@@ -34,7 +34,7 @@ export default function PlansDialog({ open, onClose }) {
 
     return (
         <div
-            className="fixed inset-0 z-50 overflow-y-auto bg-[#06060b]"
+            className="fixed inset-0 z-50 overflow-y-auto bg-surface"
             role="dialog"
             aria-modal="true"
             aria-label="Upgrade your plan"
