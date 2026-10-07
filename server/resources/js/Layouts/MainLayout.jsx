@@ -40,6 +40,9 @@ function MainLayoutInner({ children }) {
             : null;
     const activeChatId = Number(url.match(/^\/chats\/(\d+)/)?.[1]) || null;
 
+    // Главная: там композиция с планетой, её сдвигать нельзя.
+    const isHome = url === '/' || url.startsWith('/?');
+
     // Переход на другую страницу закрывает мобильное меню: иначе
     // оно остаётся поверх новой страницы.
     useEffect(() => {
@@ -73,9 +76,19 @@ function MainLayoutInner({ children }) {
                 activeChatId={activeChatId}
             />
 
-            {/* Отступ равен ширине свёрнутой панели и не меняется при её
-                раскрытии: композиция страницы должна стоять на месте. */}
-            <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden lg:pl-[72px]">
+            {/*
+                Отступ под панель.
+
+                На главной он постоянный: там выстроена композиция с
+                планетой по центру, и раскрытие меню не должно её
+                сдвигать. На остальных страницах отступ идёт за
+                панелью, иначе содержимое уезжает под неё.
+            */}
+            <div
+                className={`relative flex min-w-0 flex-1 flex-col overflow-hidden transition-[padding] duration-300 ease-out ${
+                    isHome || collapsed ? 'lg:pl-[72px]' : 'lg:pl-[280px]'
+                }`}
+            >
                 <header className="flex h-16 shrink-0 items-center justify-between px-4 sm:px-6">
                     <button
                         type="button"

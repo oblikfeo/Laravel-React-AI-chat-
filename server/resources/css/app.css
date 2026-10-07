@@ -103,10 +103,19 @@
 
     html.light .text-white\/40,
     html.light .text-white\/35,
-    html.light .text-white\/30,
+    html.light .text-white\/30 {
+        color: rgb(var(--ink-ghost));
+    }
+
+    /*
+     * Самые бледные надписи.
+     *
+     * На тёмном фоне четверть белого ещё читается, на светлом — уже
+     * нет, поэтому берём заметнее.
+     */
     html.light .text-white\/25,
     html.light .text-white\/20 {
-        color: rgb(var(--ink-ghost));
+        color: rgb(var(--ink-ghost) / 0.85);
     }
 
     /* Границы: белые линии на светлом фоне не видны. */
