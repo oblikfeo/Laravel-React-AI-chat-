@@ -49,20 +49,31 @@
     }
 
     html.light {
-        --ink: 15 23 42;
-        --ink-soft: 51 65 85;
-        --ink-faint: 100 116 139;
-        --ink-ghost: 148 163 184;
+        /*
+         * Светлая тема.
+         *
+         * Фон — цветная картинка (луг), поэтому подложки плотные: на
+         * просвечивающих панелях текст ложился бы на траву.
+         *
+         * Текст тёмный, но не чёрный: чистый чёрный на светлом даёт
+         * резкий контраст и утомляет. Самая бледная ступень всё равно
+         * читается — раньше надписи на ней сливались с подложкой.
+         */
+        --ink: 24 31 46;
+        --ink-soft: 55 65 81;
+        --ink-faint: 90 101 118;
+        --ink-ghost: 124 135 152;
 
-        --surface: 255 255 255;
-        --surface-raised: 248 250 252;
-        --surface-sunken: 241 245 249;
-        --surface-hover: 226 232 240;
+        --surface: 247 249 252;
+        --surface-raised: 255 255 255;
+        --surface-sunken: 252 253 255;
+        --surface-hover: 237 242 248;
 
-        --line: 203 213 225;
-        --line-strong: 148 163 184;
+        /* Линии почти незаметны: сетка серых границ рябит в глазах. */
+        --line: 222 229 238;
+        --line-strong: 199 209 222;
 
-        --accent: 15 23 42;
+        --accent: 29 39 58;
         --accent-ink: 255 255 255;
 
         color-scheme: light;
@@ -179,19 +190,58 @@
     }
 
     /*
+     * Сообщение о сбое.
+     *
+     * Тёмно-бордовая подложка на светлом фоне выглядела выцветшей, а
+     * не тревожной. Берём светлый розовый с красным текстом: ошибка
+     * должна читаться как ошибка.
+     */
+    html.light .bg-rose-950\/40,
+    html.light .bg-rose-950\/80 {
+        background-color: rgb(254 242 242);
+        border-color: rgb(252 205 205);
+    }
+
+    html.light .bg-rose-950\/40 .text-white,
+    html.light .bg-rose-950\/40 p,
+    html.light .bg-rose-950\/80 p,
+    html.light .bg-rose-950\/40 .text-white\/75 {
+        color: rgb(153 27 27);
+    }
+
+    html.light .bg-emerald-950\/80 {
+        background-color: rgb(240 253 244);
+        border-color: rgb(187 235 200);
+    }
+
+    html.light .bg-emerald-950\/80 p {
+        color: rgb(22 101 52);
+    }
+
+    /*
      * Что остаётся тёмным намеренно.
      *
      * Фон приложения — космос, и работы в Студии показываются на
      * тёмной подложке: на белом они выглядят вырезанными.
      */
     html.light .keep-dark,
-    html.light .keep-dark * {
-        color: rgb(255 255 255);
+    html.light .keep-dark *,
+    html.light .keep-dark p,
+    html.light .keep-dark span {
+        color: rgb(255 255 255) !important;
     }
 
-    html.light .keep-dark {
-        background-color: rgb(15 23 42);
-        border-color: rgb(51 65 85);
+    html.light .keep-dark,
+    html.light .keep-dark[class*='bg-'] {
+        background-color: rgb(24 31 46) !important;
+        background-image: none !important;
+        border-color: rgb(55 65 81) !important;
+    }
+
+    /* Приглушённые надписи внутри тёмного блока. */
+    html.light .keep-dark [class*='text-white/5'],
+    html.light .keep-dark [class*='text-white/6'] {
+        color: rgb(203 213 225) !important;
     }
 }
 

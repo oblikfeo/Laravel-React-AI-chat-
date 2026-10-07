@@ -17,7 +17,7 @@ export default function ProBanner() {
     }
 
     return (
-        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-slate-800/80 via-slate-900/60 to-sky-950/60 p-4 backdrop-blur-md">
+        <div className="keep-dark relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-slate-800/80 via-slate-900/60 to-sky-950/60 p-4 backdrop-blur-md">
             <div className="relative z-10 pr-16">
                 <p className="text-sm font-semibold text-white">
                     Become Pro Access
