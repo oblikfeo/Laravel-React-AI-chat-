@@ -1,4 +1,5 @@
 import { X, Globe, Lock } from 'lucide-react';
+import { formatPrice } from '@/Components/Studio/price';
 
 /**
  * Панель формы.
@@ -56,6 +57,29 @@ export function Visibility({ value, onChange }) {
             )}
             {value ? 'Public' : 'Private'}
         </button>
+    );
+}
+
+/**
+ * Сколько стоит работа.
+ *
+ * Стоит рядом с кнопкой запуска: человек видит цену до того, как
+ * нажмёт. Пока это себестоимость у провайдера, без наших кредитов.
+ */
+export function Price({ value }) {
+    const text = formatPrice(value);
+
+    if (!text) {
+        return null;
+    }
+
+    return (
+        <span
+            title="Cost of this request"
+            className="text-[13px] tabular-nums text-white/40"
+        >
+            {text}
+        </span>
     );
 }
 

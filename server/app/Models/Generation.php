@@ -36,6 +36,10 @@ class Generation extends Model
     public const OP_EFFECT = 'effect';
     public const OP_VOICE_CHANGE = 'voice_change';
 
+    /** Ролик по описанию и оживление картинки. */
+    public const OP_VIDEO = 'video';
+    public const OP_ANIMATE = 'animate';
+
     protected $fillable = [
         'user_id',
         'guest_id',
@@ -47,11 +51,13 @@ class Generation extends Model
         'status',
         'is_public',
         'queue_id',
+        'download_url',
         'expected_ms',
         'prompt',
         'lyrics',
         'negative_prompt',
         'aspect_ratio',
+        'resolution',
         'style',
         'seed',
         'variants',

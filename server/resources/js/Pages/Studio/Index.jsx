@@ -5,6 +5,7 @@ import MainLayout from '@/Layouts/MainLayout';
 import GenerationForm from '@/Components/Studio/GenerationForm';
 import EditForm from '@/Components/Studio/EditForm';
 import AudioStudio from '@/Components/Studio/AudioStudio';
+import VideoStudio from '@/Components/Studio/VideoStudio';
 import GenerationGrid from '@/Components/Studio/GenerationGrid';
 import AssetPicker from '@/Components/Studio/AssetPicker';
 
@@ -17,10 +18,7 @@ const TABS = [
 ];
 
 /**
- * Студия: создание изображений, правка, озвучка и лента работ.
- *
- * Видео пока заглушка, но вкладка стоит сразу: человек должен
- * понимать, что раздел шире одной задачи.
+ * Студия: создание изображений, правка, звук, видео и галерея работ.
  */
 export default function StudioIndex({
     generations,
@@ -30,6 +28,10 @@ export default function StudioIndex({
     speechModels,
     musicModels,
     effectModels,
+    videoModels,
+    defaultVideoModel,
+    editPrices,
+    video,
     voices,
     defaultModel,
     defaultSpeechModel,
@@ -70,6 +72,10 @@ export default function StudioIndex({
 
     // Открыт ли выбор из своих работ.
     const [browsing, setBrowsing] = useState(false);
+
+    // Картинка из галереи, которую оживляет видео.
+    const [picture, setPicture] = useState(null);
+    const [pickingPicture, setPickingPicture] = useState(false);
 
     // Свежая работа: её видно в галерее сразу после создания.
     const [fresh, setFresh] = useState(null);
@@ -142,6 +148,24 @@ export default function StudioIndex({
         });
     };
 
+    /**
+     * Отправка видео.
+     *
+     * Оживление уходит формой: картинка может быть файлом с диска.
+     */
+    const submitVideo = (kind, values) => {
+        setBusy(true);
+
+        router.post(`/studio/${kind}`, values, {
+            ...finish,
+            forceFormData: kind === 'animate',
+            onSuccess: (page) => {
+                setPicture(null);
+                setFresh(page.props.generations?.[0]?.id ?? null);
+            },
+        });
+    };
+
     const startEditing = (item) => {
         setSources([item]);
         setTab('edit');
@@ -149,8 +173,9 @@ export default function StudioIndex({
 
     const shared = { available: studioReady, busy, limit };
 
-    // Музыка и эффекты считаются у провайдера: пока есть незаконченные
-    // работы, спрашиваем готовность, и результат появляется сам.
+    // Музыка, эффекты и ролики считаются у провайдера: пока есть
+    // незаконченные работы, спрашиваем готовность, и результат
+    // появляется сам.
     const waiting = generations.some((item) => item.status === 'queued');
 
     useEffect(() => {
@@ -171,7 +196,7 @@ export default function StudioIndex({
                     onSuccess: (page) => {
                         const done = (page.props.generations ?? []).find(
                             (item) =>
-                                item.kind === 'audio' &&
+                                item.kind !== 'image' &&
                                 item.status === 'ready',
                         );
 
@@ -200,17 +225,21 @@ export default function StudioIndex({
      * Картинки и правка работают с общим набором, поэтому у них
      * галерея общая.
      */
+    const belongs = (item) => {
+        if (tab === 'audio') {
+            return (
+                item.kind === 'audio' &&
+                item.operation === AUDIO_OPERATIONS[audioMode]
+            );
+        }
+
+        return tab === 'video' ? item.kind === 'video' : item.kind === 'image';
+    };
+
     const shown = [
         // Заглушки сверху: человек только что нажал кнопку.
-        ...pending.filter((item) =>
-            tab === 'audio' ? item.kind === 'audio' : item.kind !== 'audio',
-        ),
-        ...generations.filter((item) =>
-            tab === 'audio'
-                ? item.kind === 'audio' &&
-                  item.operation === AUDIO_OPERATIONS[audioMode]
-                : item.kind !== 'audio',
-        ),
+        ...pending.filter((item) => tab !== 'audio' && tab !== 'video'),
+        ...generations.filter(belongs),
     ];
 
     return (
@@ -246,6 +275,7 @@ export default function StudioIndex({
                             <EditForm
                                 {...shared}
                                 aspectRatios={aspectRatios}
+                                prices={editPrices}
                                 upscaleScales={upscaleScales}
                                 maxCombine={maxCombine}
                                 sources={sources}
@@ -277,8 +307,33 @@ export default function StudioIndex({
                             />
                         )}
 
-                        {tab === 'video' && <ComingSoon />}
+                        {tab === 'video' && (
+                            <VideoStudio
+                                models={videoModels}
+                                defaultModel={defaultVideoModel}
+                                access={video.access}
+                                limit={video.limit}
+                                available={studioReady}
+                                busy={busy}
+                                picture={picture}
+                                onClearPicture={() => setPicture(null)}
+                                onBrowse={() => setPickingPicture(true)}
+                                onSubmit={submitVideo}
+                            />
+                        )}
                     </div>
+
+                    {pickingPicture && (
+                        <AssetPicker
+                            items={generations}
+                            hint="Pick the picture you want to animate"
+                            onPick={(items) => {
+                                setPicture(items[0] ?? null);
+                                setPickingPicture(false);
+                            }}
+                            onClose={() => setPickingPicture(false)}
+                        />
+                    )}
 
                     {browsing && (
                         <AssetPicker
@@ -306,18 +361,22 @@ export default function StudioIndex({
                         />
                     )}
 
-                    {tab !== 'video' && (
-                        <GenerationGrid
-                            items={shown}
-                            kind={tab === 'audio' ? audioMode : 'image'}
-                            highlight={fresh}
-                            onReuse={(item) => {
-                                setPreset(item);
-                                setTab('image');
-                            }}
-                            onEdit={startEditing}
-                        />
-                    )}
+                    <GenerationGrid
+                        items={shown}
+                        kind={
+                            tab === 'audio'
+                                ? audioMode
+                                : tab === 'video'
+                                  ? 'video'
+                                  : 'image'
+                        }
+                        highlight={fresh}
+                        onReuse={(item) => {
+                            setPreset(item);
+                            setTab('image');
+                        }}
+                        onEdit={startEditing}
+                    />
                 </div>
             </div>
         </>
@@ -344,23 +403,6 @@ function TabSwitch({ value, onChange }) {
                     <span className="hidden sm:inline">{label}</span>
                 </button>
             ))}
-        </div>
-    );
-}
-
-function ComingSoon() {
-    return (
-        <div className="rounded-2xl border border-white/[0.08] bg-slate-950/55 px-6 py-16 text-center backdrop-blur-xl">
-            <Video
-                className="mx-auto h-8 w-8 text-white/25"
-                strokeWidth={1.5}
-            />
-            <p className="mt-4 text-[15px] font-medium text-white">
-                Video is coming soon
-            </p>
-            <p className="mt-1.5 text-sm text-white/45">
-                Generate clips from text or bring a still image to life.
-            </p>
         </div>
     );
 }

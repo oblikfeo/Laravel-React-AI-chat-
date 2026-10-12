@@ -99,6 +99,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Платный ли тариф.
+     */
+    public function hasPaidPlan(): bool
+    {
+        return ! $this->isPromotedPlan();
+    }
+
+    /**
      * Название тарифа для интерфейса.
      */
     public function planName(): string

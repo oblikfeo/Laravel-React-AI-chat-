@@ -29,6 +29,14 @@ class StoreMusicRequest extends FormRequest
             if (($model['lyrics_required'] ?? false) && blank($this->input('lyrics'))) {
                 $validator->errors()->add('lyrics', 'This model needs lyrics to sing.');
             }
+
+            // Музыка стоит денег за каждую секунду, поэтому длину
+            // держим в границах модели и на сервере тоже.
+            $max = $model['max_duration'] ?? null;
+
+            if ($max && (int) $this->input('duration') > $max) {
+                $validator->errors()->add('duration', 'This track is too long for the chosen style.');
+            }
         });
     }
 

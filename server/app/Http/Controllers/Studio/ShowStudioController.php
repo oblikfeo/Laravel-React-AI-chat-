@@ -9,6 +9,7 @@ use App\Services\Guests\CurrentGuest;
 use App\Services\Studio\ImageGenerator;
 use App\Services\Studio\StudioCatalog;
 use App\Services\Studio\StudioLimiter;
+use App\Services\Studio\VideoLimiter;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -21,6 +22,7 @@ class ShowStudioController extends Controller
     public function __invoke(
         Request $request,
         StudioLimiter $limiter,
+        VideoLimiter $videoLimiter,
         ImageGenerator $generator,
     ): Response {
         $user = $request->user();
@@ -56,6 +58,24 @@ class ShowStudioController extends Controller
             'speechModels' => StudioCatalog::speechModels($user),
             'musicModels' => StudioCatalog::musicModels($user),
             'effectModels' => StudioCatalog::effectModels($user),
+            'videoModels' => StudioCatalog::videoModels(),
+            'defaultVideoModel' => config('studio.video.default_model'),
+            'editPrices' => StudioCatalog::editPrices(),
+
+            // Видео — только на платном тарифе и со своим лимитом.
+            // Гостю и бесплатному тарифу показываем, что оно есть и
+            // как его получить, а не прячем вкладку.
+            'video' => [
+                'access' => match (true) {
+                    $user === null => 'guest',
+                    ! $videoLimiter->hasAccess($user) => 'upgrade',
+                    default => 'open',
+                },
+                'limit' => [
+                    'remaining' => $videoLimiter->remaining($user),
+                    'total' => $videoLimiter->limitFor($user),
+                ],
+            ],
             'voices' => StudioCatalog::voices(),
             'defaultVoice' => config('studio.default_voice'),
             'defaultMusicModel' => config('studio.music.default_model'),

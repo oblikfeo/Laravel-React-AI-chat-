@@ -14,6 +14,7 @@ export default function AssetPicker({
     onClose,
     multiple = false,
     chosenIds = [],
+    hint = null,
 }) {
     const [preview, setPreview] = useState(null);
     const [chosen, setChosen] = useState([]);
@@ -21,7 +22,7 @@ export default function AssetPicker({
     // Уже взятые в работу выбирать повторно незачем.
     const images = items.filter(
         (item) =>
-            item.url && item.kind !== 'audio' && !chosenIds.includes(item.id),
+            item.url && item.kind === 'image' && !chosenIds.includes(item.id),
     );
 
     const toggle = (item) => {
@@ -53,9 +54,10 @@ export default function AssetPicker({
                             Your work
                         </h2>
                         <p className="mt-0.5 text-[12px] text-white/40">
-                            {multiple
-                                ? 'Pick one or more images'
-                                : 'Pick the image you want to edit'}
+                            {hint ??
+                                (multiple
+                                    ? 'Pick one or more images'
+                                    : 'Pick the image you want to edit')}
                         </p>
                     </div>
 

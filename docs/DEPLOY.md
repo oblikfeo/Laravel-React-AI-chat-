@@ -219,7 +219,7 @@ crontab -l | grep schedule:run
 Если строки нет, добавьте:
 
 ```
-* * * * * cd /var/www/uncensia/server && php artisan schedule:run >> /dev/null 2>&1
+* * * * * cd /var/www/uncensia/server && runuser -u www-data -- php artisan schedule:run >> /dev/null 2>&1
 ```
 
 ---

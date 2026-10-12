@@ -27,6 +27,62 @@ class StudioCatalog
                 // скрывать их бессмысленно — человек должен понимать,
                 // что получит.
                 'locked' => ($model['paid'] ?? false) && ! self::isPaid($user),
+                'price' => self::price($model),
+            ])
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Цена модели в том виде, в каком её берёт провайдер.
+     *
+     * Интерфейс сам считает итог: он зависит от длины и количества,
+     * которые человек меняет на лету.
+     *
+     * @param  array<string, mixed>  $model
+     * @return array<string, mixed>|null
+     */
+    public static function price(array $model): ?array
+    {
+        return match (true) {
+            isset($model['cost']) => ['flat' => $model['cost']],
+            isset($model['cost_per_second']) => ['perSecond' => $model['cost_per_second']],
+            isset($model['cost_per_million']) => ['perMillion' => $model['cost_per_million']],
+            isset($model['costs']) => ['table' => $model['costs']],
+            default => null,
+        };
+    }
+
+    /**
+     * Цены инструментов правки.
+     *
+     * @return array<string, mixed>
+     */
+    public static function editPrices(): array
+    {
+        return config('studio.edit.costs', []);
+    }
+
+    /**
+     * Модели видео.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public static function videoModels(): array
+    {
+        return collect(config('studio.video.models'))
+            ->map(fn (array $model, string $key) => [
+                'key' => $key,
+                'label' => $model['label'],
+                'description' => $model['description'],
+                'durations' => $model['durations'],
+                'defaultDuration' => $model['default_duration'],
+                'resolutions' => $model['resolutions'],
+                'defaultResolution' => $model['default_resolution'],
+                'aspectRatios' => $model['aspect_ratios'],
+                'defaultAspectRatio' => $model['default_aspect_ratio'],
+                // Режим → разрешение → секунды → цена.
+                'prices' => $model['costs'],
             ])
             ->values()
             ->all();
@@ -97,6 +153,7 @@ class StudioCatalog
                 'paid' => (bool) ($model['paid'] ?? false),
                 'badge' => ($model['paid'] ?? false) ? 'Pro' : null,
                 'locked' => ($model['paid'] ?? false) && ! self::isPaid($user),
+                'price' => self::price($model),
             ])
             ->values()
             ->all();
@@ -105,8 +162,7 @@ class StudioCatalog
     /** Есть ли у человека платный тариф. */
     private static function isPaid(?User $user): bool
     {
-        return $user !== null
-            && ! in_array($user->plan, config('plans.promoted'), true);
+        return $user !== null && $user->hasPaidPlan();
     }
 
     /**
@@ -154,6 +210,7 @@ class StudioCatalog
                 'paid' => (bool) ($model['paid'] ?? false),
                 'badge' => ($model['paid'] ?? false) ? 'Pro' : null,
                 'locked' => ($model['paid'] ?? false) && ! self::isPaid($user),
+                'price' => self::price($model),
                 ...$extra($model),
             ])
             ->values()

@@ -7,18 +7,19 @@ use App\Models\Generation;
 use App\Services\Guests\CurrentGuest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use League\Flysystem\Local\LocalFilesystemAdapter;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class ShowGenerationFileController extends Controller
 {
     /**
-     * Отдаёт готовое изображение.
+     * Отдаёт готовую работу: картинку, запись или ролик.
      *
      * Файлы лежат вне публичной папки, поэтому доступ идёт через
      * приложение: чужую работу открыть нельзя.
      */
-    public function __invoke(Request $request, Generation $generation): StreamedResponse
+    public function __invoke(Request $request, Generation $generation): Response
     {
         if (! $generation->isReady()) {
             throw new AccessDeniedHttpException();
@@ -41,6 +42,22 @@ class ShowGenerationFileController extends Controller
         $name = 'uncensia-'.$generation->id.'.'.pathinfo($path, PATHINFO_EXTENSION);
 
         $disk = Storage::disk($generation->disk);
+
+        // Ролик и запись проигрыватель запрашивает кусками: без этого
+        // не работает перемотка, а Safari не играет видео вовсе.
+        // Отдача по частям есть только у файла на своём диске.
+        if (
+            ! $download
+            && $generation->kind !== Generation::KIND_IMAGE
+            // Обложка ролика — картинка, ей это не нужно.
+            && $path === $generation->path
+            && $disk->getAdapter() instanceof LocalFilesystemAdapter
+        ) {
+            return response()->file($disk->path($path), [
+                'Content-Type' => $generation->mime ?: 'application/octet-stream',
+                'Cache-Control' => 'private, max-age=604800',
+            ]);
+        }
 
         return $download
             ? $disk->download($generation->path, 'uncensia-'.$generation->id.'.'.pathinfo($generation->path, PATHINFO_EXTENSION))

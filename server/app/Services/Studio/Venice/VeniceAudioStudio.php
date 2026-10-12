@@ -15,7 +15,7 @@ use App\Services\Studio\QueueResult;
  */
 class VeniceAudioStudio implements AudioStudio
 {
-    public function __construct(private readonly VeniceAudioQueue $queue)
+    public function __construct(private readonly VeniceQueue $queue)
     {
     }
 

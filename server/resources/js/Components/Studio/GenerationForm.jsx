@@ -15,7 +15,9 @@ import {
     NotReady,
     Remaining,
     Visibility,
+    Price,
 } from '@/Components/Studio/Controls';
+import { priceOf } from '@/Components/Studio/price';
 import Dropdown from '@/Components/Studio/Dropdown';
 
 /**
@@ -171,6 +173,13 @@ export default function GenerationForm({
                 <Visibility value={isPublic} onChange={setIsPublic} />
 
                 <div className="ml-auto flex items-center gap-3">
+                    <Price
+                        value={priceOf(
+                            models.find((item) => item.key === model)?.price,
+                            { count: variants },
+                        )}
+                    />
+
                     <Remaining limit={limit} />
 
                     <button

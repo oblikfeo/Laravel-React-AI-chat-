@@ -29,7 +29,10 @@ use App\Http\Controllers\Studio\ShowStudioController;
 use App\Http\Controllers\Studio\StoreGenerationController;
 use App\Http\Controllers\Feed\ShowFeedController;
 use App\Http\Controllers\Feed\StoreChatFromFeedController;
-use App\Http\Controllers\Studio\CollectAudioController;
+use App\Http\Controllers\Studio\CollectQueuedController;
+use App\Http\Controllers\Studio\StoreAnimationController;
+use App\Http\Controllers\Studio\StoreVideoController;
+use App\Http\Middleware\EnsureVideoAccess;
 use App\Http\Controllers\Studio\StoreEffectController;
 use App\Http\Controllers\Studio\StoreMusicController;
 use App\Http\Controllers\Studio\StoreVoiceChangeController;
@@ -95,9 +98,9 @@ Route::group([], function () {
         ->name('studio.effect');
     Route::post('studio/voice-change', StoreVoiceChangeController::class)
         ->name('studio.voice-change');
-    // Звук считается долго: страница спрашивает готовность, пока
-    // работа не появится в галерее.
-    Route::post('studio/collect', CollectAudioController::class)
+    // Звук и видео считаются долго: страница спрашивает готовность,
+    // пока работа не появится в галерее.
+    Route::post('studio/collect', CollectQueuedController::class)
         ->name('studio.collect');
     Route::post('studio/{generation}/retry', RetryGenerationController::class)
         ->name('studio.retry');
@@ -108,6 +111,15 @@ Route::group([], function () {
 });
 
 Route::middleware('auth')->group(function () {
+    // Видео — только вошедшим на платном тарифе и в пределах
+    // дневного лимита: ролик стоит на порядок дороже картинки.
+    Route::middleware(EnsureVideoAccess::class)->group(function () {
+        Route::post('studio/video', StoreVideoController::class)
+            ->name('studio.video');
+        Route::post('studio/animate', StoreAnimationController::class)
+            ->name('studio.animate');
+    });
+
     Route::put('settings/profile', UpdateProfileController::class)
         ->name('settings.profile.update');
     Route::put('settings/password', UpdatePasswordController::class)

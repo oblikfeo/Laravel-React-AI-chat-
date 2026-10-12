@@ -1,12 +1,20 @@
 <?php
 
 /**
- * Студия: изображения, правка и озвучка.
+ * Студия: изображения, правка, звук и видео.
  *
  * Названия моделей у провайдера пользователю не показываются — только
  * наши ярлыки, как и в чате (дизайн-система, §12).
  *
  * Провайдер — Venice AI, разбор его возможностей в docs/STUDIO-API.md.
+ *
+ * Цены — себестоимость у провайдера в долларах. Записаны по-разному,
+ * потому что и берутся по-разному:
+ *   cost             — за одну работу;
+ *   cost_per_second  — за секунду результата;
+ *   costs            — таблица по длительности или размеру;
+ *   cost_per_million — за миллион символов текста.
+ * Пока своей системы кредитов нет, интерфейс показывает их как есть.
  */
 return [
 
@@ -172,6 +180,14 @@ return [
         'model' => env('STUDIO_EDIT_MODEL', 'firered-image-edit'),
         'max_combine' => 4,
         'scales' => [2, 4],
+
+        // Цена удаления фона в каталоге провайдера не названа,
+        // поэтому её здесь нет и интерфейс её не показывает.
+        'costs' => [
+            'edit' => 0.04,
+            'combine' => 0.04,
+            'upscale' => [2 => 0.02, 4 => 0.08],
+        ],
     ],
 
     /*
@@ -191,7 +207,7 @@ return [
                 'description' => 'Natural voice, 54 voices',
                 'provider_model' => 'tts-kokoro',
                 'voice' => 'af_heart',
-                'cost' => 0.0001,
+                'cost_per_million' => 3.5,
             ],
             'premium' => [
                 'label' => 'Premium',
@@ -199,7 +215,7 @@ return [
                 'provider_model' => 'tts-elevenlabs-turbo-v2-5',
                 'voice' => 'Aria',
                 'paid' => true,
-                'cost' => 0.002,
+                'cost_per_million' => 62.5,
             ],
         ],
 
@@ -248,19 +264,22 @@ return [
         'models' => [
             'instrumental' => [
                 'label' => 'Instrumental',
-                'description' => 'Music without vocals, up to 10 min',
+                'description' => 'Music without vocals, up to 2 min',
                 'provider_model' => 'sonilo-v1-1-music',
-                'cost' => 0.003,
+                // Цена идёт за секунду, а не за трек: десять минут,
+                // которые модель умеет, стоили бы $1.72 за нажатие.
+                // Поэтому длина ограничена двумя минутами.
+                'cost_per_second' => 0.002875,
                 'lyrics' => false,
                 'min_duration' => 10,
-                'max_duration' => 600,
-                'default_duration' => 60,
+                'max_duration' => 120,
+                'default_duration' => 30,
             ],
             'song' => [
                 'label' => 'Song',
                 'description' => 'Your own lyrics, sung',
                 'provider_model' => 'ace-step-15',
-                'cost' => 0.03,
+                'costs' => [60 => 0.03, 90 => 0.04, 120 => 0.05, 150 => 0.06, 180 => 0.07, 210 => 0.08],
                 'lyrics' => true,
                 'lyrics_required' => false,
                 // Модель принимает только эти длительности.
@@ -296,7 +315,7 @@ return [
                 'label' => 'Quick',
                 'description' => 'Short effects, up to 30 s',
                 'provider_model' => 'mmaudio-v2-text-to-audio',
-                'cost' => 0.001,
+                'cost_per_second' => 0.00092,
                 'min_duration' => 1,
                 'max_duration' => 30,
                 'default_duration' => 5,
@@ -305,7 +324,7 @@ return [
                 'label' => 'Extended',
                 'description' => 'Up to 3 minutes',
                 'provider_model' => 'sonilo-v1-1-sound-effects',
-                'cost' => 0.002,
+                'cost_per_second' => 0.00207,
                 'min_duration' => 1,
                 'max_duration' => 180,
                 'default_duration' => 8,
@@ -314,7 +333,7 @@ return [
                 'label' => 'Seamless',
                 'description' => 'Loops without a gap',
                 'provider_model' => 'elevenlabs-sound-effects-v2',
-                'cost' => 0.002,
+                'cost_per_second' => 0.0023,
                 'min_duration' => 1,
                 'max_duration' => 22,
                 'default_duration' => 7,
@@ -337,8 +356,73 @@ return [
 
     'voice_changer' => [
         'provider_model' => env('STUDIO_VOICE_CHANGER_MODEL', 'elevenlabs-voice-changer'),
-        'cost' => 0.01,
+        // Цена в каталоге провайдера не названа.
         'max_upload' => 25600,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Видео
+    |--------------------------------------------------------------------------
+    |
+    | Самое дорогое в Студии: секунда ролика стоит как несколько
+    | картинок. Поэтому видео есть только на платных тарифах и со своим
+    | дневным лимитом, отдельным от остальных инструментов.
+    |
+    | Ролик по описанию и оживление картинки у провайдера — две разные
+    | модели одного семейства. Для человека это одна модель с двумя
+    | режимами.
+    |
+    | Цены сняты запросом расчёта у провайдера (POST /video/quote)
+    | 12.10. Подключена самая дешёвая модель каталога.
+    |
+    */
+
+    'video' => [
+        'default_model' => 'quick',
+
+        'models' => [
+            'quick' => [
+                'label' => 'Quick',
+                'description' => 'Short clips with sound',
+                'provider_model' => 'grok-imagine-1-5-lite-text-to-video',
+                'provider_model_image' => 'grok-imagine-1-5-lite-image-to-video',
+                'durations' => [3, 5, 8, 10],
+                'default_duration' => 5,
+                'resolutions' => ['480p', '720p'],
+                'default_resolution' => '480p',
+                'aspect_ratios' => ['16:9', '9:16', '1:1'],
+                'default_aspect_ratio' => '16:9',
+                // Режим → разрешение → секунды → цена.
+                'costs' => [
+                    'text' => [
+                        '480p' => [3 => 0.07, 5 => 0.12, 8 => 0.19, 10 => 0.24],
+                        '720p' => [3 => 0.11, 5 => 0.18, 8 => 0.29, 10 => 0.36],
+                    ],
+                    'image' => [
+                        '480p' => [3 => 0.08, 5 => 0.13, 8 => 0.20, 10 => 0.25],
+                        '720p' => [3 => 0.12, 5 => 0.19, 8 => 0.30, 10 => 0.37],
+                    ],
+                ],
+            ],
+        ],
+
+        // Роликов в день по тарифам. Тарифа нет в списке — видео
+        // недоступно.
+        'daily_limits' => [
+            'pro' => 3,
+            'pro_plus' => 10,
+            'max' => 25,
+        ],
+
+        'max_prompt' => 2000,
+        'max_upload' => 10240,
+
+        // Что делать с картинкой, если человек не написал.
+        'default_motion' => 'Bring this image to life with natural, subtle motion',
+
+        // Ролик считается дольше звука.
+        'timeout_seconds' => (int) env('STUDIO_VIDEO_TIMEOUT', 1800),
     ],
 
     /*

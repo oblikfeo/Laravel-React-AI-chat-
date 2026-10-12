@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { router } from '@inertiajs/react';
 import AudioCard from '@/Components/Studio/AudioCard';
+import VideoCard from '@/Components/Studio/VideoCard';
 import {
     Download,
     RotateCw,
@@ -14,6 +15,7 @@ import {
     Mic,
     Repeat,
     AudioWaveform,
+    Video,
     ChevronDown,
     Maximize2,
     X,
@@ -61,6 +63,13 @@ const LOOKS = {
         many: 'effects',
         empty: 'Sound effects you create will appear here.',
     },
+    video: {
+        icon: Video,
+        title: 'Videos',
+        one: 'video',
+        many: 'videos',
+        empty: 'Videos you create will appear here.',
+    },
 };
 
 /**
@@ -103,7 +112,7 @@ export default function GenerationGrid({
 
     const readyCount = items.filter((item) => item.status === 'ready').length;
     const look = LOOKS[kind] ?? LOOKS.image;
-    const audio = kind !== 'image';
+    const audio = kind !== 'image' && kind !== 'video';
 
     return (
         <div className="mt-6">
@@ -142,11 +151,21 @@ export default function GenerationGrid({
                     {items.length ? (
                         <div
                             className={`grid gap-3 ${
-                                audio ? '' : 'sm:grid-cols-2 xl:grid-cols-3'
+                                audio
+                                    ? ''
+                                    : kind === 'video'
+                                      ? 'sm:grid-cols-2'
+                                      : 'sm:grid-cols-2 xl:grid-cols-3'
                             }`}
                         >
                             {items.map((item) =>
-                                item.kind === 'audio' ? (
+                                item.kind === 'video' ? (
+                                    <VideoCard
+                                        key={item.id}
+                                        item={item}
+                                        fresh={item.id === highlight}
+                                    />
+                                ) : item.kind === 'audio' ? (
                                     <AudioCard
                                         key={item.id}
                                         item={item}

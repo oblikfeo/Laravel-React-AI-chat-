@@ -250,7 +250,7 @@ const STARS = [
     { top: '62%', left: '34%', size: 2, delay: 1.6 },
 ];
 
-function Stars() {
+export function Stars() {
     return (
         <span aria-hidden="true" className="pointer-events-none absolute inset-0">
             {STARS.map((star, index) => (
@@ -278,7 +278,7 @@ function Stars() {
  * продвинулся, и полоса либо врёт, либо замирает у края. Остаётся
  * честный счётчик времени.
  */
-function Waiting() {
+export function Waiting() {
     const [elapsed, setElapsed] = useState(0);
 
     useEffect(() => {
@@ -300,7 +300,7 @@ function Waiting() {
     );
 }
 
-function Action({ label, icon: Icon, onClick, href, danger }) {
+export function Action({ label, icon: Icon, onClick, href, danger }) {
     const className = `flex h-8 items-center gap-1.5 rounded-lg border border-white/[0.1] bg-white/[0.03] px-2.5 text-[12px] transition hover:bg-white/[0.12] ${
         danger
             ? 'text-white/55 hover:border-rose-300/30 hover:text-rose-300'

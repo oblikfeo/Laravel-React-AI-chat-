@@ -14,6 +14,7 @@ import {
     NotReady,
     Remaining,
     Visibility,
+    Price,
 } from '@/Components/Studio/Controls';
 import Dropdown from '@/Components/Studio/Dropdown';
 
@@ -68,6 +69,7 @@ export default function EditForm({
     aspectRatios,
     upscaleScales = [2, 4],
     maxCombine = 4,
+    prices = {},
     available,
     busy,
     limit,
@@ -315,6 +317,15 @@ export default function EditForm({
                     <Visibility value={isPublic} onChange={setIsPublic} />
 
                     <div className="ml-auto flex items-center gap-3">
+                        {/* У увеличения цена зависит от кратности. */}
+                        <Price
+                            value={
+                                tool === 'upscale'
+                                    ? prices.upscale?.[scale]
+                                    : prices[tool]
+                            }
+                        />
+
                         <Remaining limit={limit} />
 
                         <button

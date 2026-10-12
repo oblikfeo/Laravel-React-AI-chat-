@@ -41,10 +41,14 @@ class CollectAudio
         } catch (GenerationFailed $exception) {
             Log::warning('Студия: не удалось забрать звук', [
                 'generation_id' => $generation->id,
+                'temporary' => $exception->temporary,
                 'message' => $exception->getMessage(),
             ]);
 
-            return $this->giveUp($generation, $exception->getMessage());
+            // Минутный сбой у провайдера — не повод бросать работу.
+            return $exception->temporary
+                ? $generation
+                : $this->giveUp($generation, $exception->getMessage());
         }
 
         if (! $result->done) {

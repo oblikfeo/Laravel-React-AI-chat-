@@ -17,6 +17,7 @@ class GenerationResource extends JsonResource
             'prompt' => $this->prompt,
             'negativePrompt' => $this->negative_prompt,
             'aspectRatio' => $this->aspect_ratio,
+            'resolution' => $this->resolution,
             'style' => $this->style,
             'seed' => $this->seed,
             'duration' => $this->duration,
@@ -31,7 +32,8 @@ class GenerationResource extends JsonResource
             'model' => config("studio.models.{$this->model_key}.label")
                 ?? config("studio.speech.models.{$this->model_key}.label")
                 ?? config("studio.music.models.{$this->model_key}.label")
-                ?? config("studio.effects.models.{$this->model_key}.label"),
+                ?? config("studio.effects.models.{$this->model_key}.label")
+                ?? config("studio.video.models.{$this->model_key}.label"),
             'modelKey' => $this->model_key,
             'url' => $this->isReady()
                 ? route('studio.file', $this->resource)
@@ -40,6 +42,10 @@ class GenerationResource extends JsonResource
             'thumbnail' => $this->isReady()
                 ? route('studio.file', $this->resource)
                     .($this->thumbnail_path ? '?small=1' : '')
+                : null,
+            // Обложка ролика: картинка, которую оживляли.
+            'poster' => $this->kind === 'video' && $this->isReady() && $this->thumbnail_path
+                ? route('studio.file', $this->resource).'?small=1'
                 : null,
             'createdAt' => $this->created_at?->toIso8601String(),
         ];

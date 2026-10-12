@@ -59,7 +59,8 @@ class StoreGenerationFile
             ...($size ? ['width' => $size[0], 'height' => $size[1]] : []),
             'disk' => $disk,
             'path' => $path,
-            'thumbnail_path' => $thumbnailPath,
+            // У оживлённой картинки обложка уже есть — сам исходник.
+            'thumbnail_path' => $thumbnailPath ?? $generation->thumbnail_path,
             'mime' => $mime,
             'failure_reason' => null,
             'completed_at' => now(),

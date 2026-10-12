@@ -13,8 +13,9 @@ import {
     Square,
     X,
 } from 'lucide-react';
-import { Panel, NotReady, Remaining } from '@/Components/Studio/Controls';
+import { Panel, NotReady, Remaining, Price } from '@/Components/Studio/Controls';
 import Dropdown from '@/Components/Studio/Dropdown';
+import { priceOf } from '@/Components/Studio/price';
 
 /**
  * Режимы звука.
@@ -303,7 +304,14 @@ function MusicForm({
                     </button>
                 )}
 
-                <Submit busy={busy} canSubmit={canSubmit} limit={limit} />
+                <Submit
+                    busy={busy}
+                    canSubmit={canSubmit}
+                    limit={limit}
+                    price={priceOf(current?.price, {
+                        seconds: Number(chosenDuration),
+                    })}
+                />
             </div>
         </Panel>
     );
@@ -386,7 +394,15 @@ function SpeechForm({
                     icon={Gauge}
                 />
 
-                <Submit busy={busy} canSubmit={canSubmit} limit={limit} />
+                <Submit
+                    busy={busy}
+                    canSubmit={canSubmit}
+                    limit={limit}
+                    price={priceOf(
+                        models.find((item) => item.key === model)?.price,
+                        { characters: text.length },
+                    )}
+                />
             </div>
         </Panel>
     );
@@ -651,15 +667,24 @@ function EffectForm({
                     />
                 )}
 
-                <Submit busy={busy} canSubmit={canSubmit} limit={limit} />
+                <Submit
+                    busy={busy}
+                    canSubmit={canSubmit}
+                    limit={limit}
+                    price={priceOf(current?.price, {
+                        seconds: Number(chosenDuration),
+                    })}
+                />
             </div>
         </Panel>
     );
 }
 
-function Submit({ busy, canSubmit, limit }) {
+function Submit({ busy, canSubmit, limit, price = null }) {
     return (
         <div className="ml-auto flex items-center gap-3">
+            <Price value={price} />
+
             <Remaining limit={limit} />
 
             <button

@@ -23,8 +23,14 @@ class DestroyGenerationController extends Controller
 
         // Файл удаляем тоже: иначе хранилище забьётся тем, что никому
         // уже не принадлежит.
-        if ($generation->path) {
-            Storage::disk($generation->disk)->delete($generation->path);
+        $files = array_filter([
+            $generation->path,
+            $generation->thumbnail_path,
+            $generation->source_path,
+        ]);
+
+        if ($files && $generation->disk) {
+            Storage::disk($generation->disk)->delete($files);
         }
 
         $generation->delete();

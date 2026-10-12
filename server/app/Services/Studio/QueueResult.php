@@ -36,6 +36,9 @@ class QueueResult
             'audio/mp4', 'audio/x-m4a' => 'm4a',
             'audio/aac' => 'aac',
             'audio/opus', 'audio/ogg' => 'opus',
+            'video/mp4' => 'mp4',
+            'video/webm' => 'webm',
+            'video/quicktime' => 'mov',
             default => 'mp3',
         };
     }
