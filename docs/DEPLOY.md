@@ -385,3 +385,16 @@ curl -s https://api.venice.ai/api/v1/models?type=image   -H "Authorization: Bear
 Цены из каталога провайдера: рисование 0.01–0.10 $ за картинку,
 увеличение 0.02–0.08 $, озвучка дешевле. Остаток виден по
 `GET /billing/balance`.
+
+## Размер загружаемых файлов
+
+Студия принимает картинки до 10 МБ и записи голоса до 25 МБ, а PHP по
+умолчанию пропускает файл не больше 2 МБ — загрузка молча не доходила.
+Настроено 12.10:
+
+- `/etc/php/8.3/fpm/conf.d/99-uncensia.ini`: `upload_max_filesize = 25M`,
+  `post_max_size = 32M`;
+- Nginx, `/etc/nginx/sites-available/uncensia`: `client_max_body_size 32M`.
+
+После правки: `systemctl reload php8.3-fpm nginx`.
+
