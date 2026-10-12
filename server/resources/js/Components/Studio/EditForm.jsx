@@ -125,6 +125,11 @@ export default function EditForm({
             scale: tool === 'upscale' ? Number(scale) : null,
             is_public: isPublic,
         });
+
+        // Запрос ушёл и виден в очереди — форма готова к следующему.
+        // Настройки остаются: менять их каждый раз незачем.
+        setPrompt('');
+        setFiles([]);
     };
 
     return (

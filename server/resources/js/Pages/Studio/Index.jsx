@@ -171,7 +171,7 @@ export default function StudioIndex({
      * Inertia отменял предыдущий запрос — отсюда были «прыжки» и
      * пропавшие результаты.
      */
-    const send = (url, values, { section, prompt, count = 1, form = false, after }) => {
+    const send = (url, values, { section, prompt, count = 1, form = false }) => {
         const ids = Array.from(
             { length: count },
             () => `local-${(counter.current += 1)}`,
@@ -196,7 +196,6 @@ export default function StudioIndex({
             preserveScroll: true,
             preserveState: true,
             forceFormData: form,
-            onSuccess: after,
             onFinish: () =>
                 setPending((previous) =>
                     previous.filter((item) => !ids.includes(item.id)),
@@ -211,14 +210,18 @@ export default function StudioIndex({
             count: values.variants ?? 1,
         });
 
-    const submitEdit = (values) =>
+    const submitEdit = (values) => {
         send('/studio/edit', values, {
             section: 'edit',
             prompt: values.prompt ?? 'Working on your image',
             // Файлы уходят как форма, иначе вложения не доедут.
             form: true,
-            after: () => setSources([]),
         });
+
+        // Выбранные картинки убираем сразу, а не когда работа
+        // досчитается: иначе форма выглядит неотправленной.
+        setSources([]);
+    };
 
     const submitAudio = (kind, values) =>
         send(`/studio/${kind}`, values, {
@@ -227,13 +230,15 @@ export default function StudioIndex({
             form: kind === 'voice-change',
         });
 
-    const submitVideo = (kind, values) =>
+    const submitVideo = (kind, values) => {
         send(`/studio/${kind}`, values, {
             section: 'video',
             prompt: values.prompt || 'Animating your image',
             form: kind === 'animate',
-            after: () => setPicture(null),
         });
+
+        setPicture(null);
+    };
 
     // Музыка, эффекты и ролики считаются у провайдера: пока есть
     // незаконченные, спрашиваем готовность, и результат появляется сам.

@@ -226,6 +226,11 @@ function MusicForm({
             lyrics: current?.lyrics && lyrics.trim() ? lyrics.trim() : null,
             duration: durationOptions.length ? Number(chosenDuration) : null,
         });
+
+        // Запрос ушёл и виден в очереди — форма готова к следующему.
+        // Настройки остаются: менять их каждый раз незачем.
+        setPrompt('');
+        setLyrics('');
     };
 
     return (
@@ -352,6 +357,9 @@ function SpeechForm({
                 voice,
                 speed: Number(speed),
             });
+
+            // Запрос ушёл — форма готова к следующему тексту.
+            setText('');
         }
     };
 
@@ -495,6 +503,7 @@ function ChangerForm({
 
         if (canSubmit) {
             onSubmit({ recording: file, voice });
+            setFile(null);
         }
     };
 
@@ -628,6 +637,8 @@ function EffectForm({
                 model,
                 duration: Number(chosenDuration),
             });
+
+            setPrompt('');
         }
     };
 

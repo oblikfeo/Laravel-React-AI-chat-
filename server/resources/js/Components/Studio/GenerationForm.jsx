@@ -88,6 +88,12 @@ export default function GenerationForm({
             variants,
             is_public: isPublic,
         });
+
+        // Запрос ушёл и виден в очереди — форма готова к следующему.
+        // Настройки остаются: менять их каждый раз незачем.
+        setPrompt('');
+        setNegative('');
+        setSeed('');
     };
 
     // Каждый вариант — отдельная работа и отдельное списание, поэтому

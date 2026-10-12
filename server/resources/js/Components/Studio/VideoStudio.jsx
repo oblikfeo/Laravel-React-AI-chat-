@@ -128,6 +128,11 @@ export default function VideoStudio({
                 aspect_ratio: chosenRatio,
             });
         }
+
+        // Запрос ушёл и виден в очереди — форма готова к следующему.
+        // Выбранную из галереи картинку убирает страница.
+        setPrompt('');
+        setFile(null);
     };
 
     const clearPicture = () => {
