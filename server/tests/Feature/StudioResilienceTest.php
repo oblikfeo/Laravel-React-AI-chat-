@@ -103,6 +103,39 @@ class StudioResilienceTest extends TestCase
             ->assertSessionMissing('error');
     }
 
+    /**
+     * Отказ модели по её правилам человек видит словами.
+     *
+     * 12.10 оживление картинки с известным персонажем модель
+     * отклонила, а в интерфейсе было только «не получилось».
+     */
+    public function test_person_is_told_why_the_work_failed(): void
+    {
+        $user = User::factory()->create();
+
+        $declined = Generation::create([
+            'user_id' => $user->id,
+            'kind' => Generation::KIND_IMAGE,
+            'operation' => Generation::OP_GENERATE,
+            'model_key' => 'fast',
+            'status' => Generation::STATUS_FAILED,
+            'failure_reason' => 'Провайдер отклонил запрос по своим правилам.',
+            'prompt' => 'Declined',
+            'aspect_ratio' => '1:1',
+        ]);
+
+        $this->assertStringContainsString('declined', $declined->failureNote());
+
+        $this->app->instance(ImageGenerator::class, new FakeImageGenerator());
+
+        // Причина из базы — по-русски и для нас — наружу не уходит.
+        $this->actingAs($user)
+            ->get('/studio')
+            ->assertInertia(fn ($page) => $page
+                ->where('generations.0.failureNote', $declined->failureNote())
+                ->missing('generations.0.failureReason'));
+    }
+
     /** Работа, запрос которой оборвался, не крутится вечно. */
     public function test_abandoned_work_is_closed(): void
     {

@@ -139,16 +139,30 @@ export default function StudioIndex({
     const [picture, setPicture] = useState(null);
     const [pickingPicture, setPickingPicture] = useState(false);
 
-    // Работа, принесённая из общей ленты: открываем правку с ней.
+    /*
+     * Работа, принесённая из общей ленты: открываем правку с ней.
+     *
+     * Только один раз. Адрес страницы хранит номер работы, и сервер
+     * присылает её заново с каждым ответом — в том числе на опрос
+     * готовности. Без этой отметки человека каждые несколько секунд
+     * перебрасывало обратно в правку, чем бы он ни занимался.
+     */
+    const broughtFromFeed = useRef(null);
+
     useEffect(() => {
-        if (!fromFeed) {
+        if (!fromFeed || broughtFromFeed.current === fromFeed.id) {
             return;
         }
+
+        broughtFromFeed.current = fromFeed.id;
 
         setSources([fromFeed]);
         setView('editor');
         setTab('edit');
     }, [fromFeed]);
+
+    // Отказ сервера принять запрос: слишком большой файл и подобное.
+    const [refusal, setRefusal] = useState(null);
 
     /*
      * Запросы, на которые сервер ещё не ответил.
@@ -190,12 +204,19 @@ export default function StudioIndex({
 
         setBusy(true);
         setTimeout(() => setBusy(false), 900);
+        setRefusal(null);
 
         router.post(url, values, {
             async: true,
             preserveScroll: true,
             preserveState: true,
             forceFormData: form,
+            // Запрос не принят: без сообщения заглушка в очереди
+            // просто исчезла бы, и человек не понял бы почему.
+            onError: (errors) =>
+                setRefusal(
+                    Object.values(errors)[0] ?? 'This request was not accepted.',
+                ),
             onFinish: () =>
                 setPending((previous) =>
                     previous.filter((item) => !ids.includes(item.id)),
@@ -484,6 +505,12 @@ export default function StudioIndex({
                                     onBrowse={() => setPickingPicture(true)}
                                     onSubmit={submitVideo}
                                 />
+                            )}
+
+                            {refusal && (
+                                <p className="mt-4 rounded-xl border border-rose-400/25 bg-rose-950/60 px-4 py-2.5 text-[13px] text-rose-100">
+                                    {refusal}
+                                </p>
                             )}
 
                             <WorkQueue items={queue} section={tab} />

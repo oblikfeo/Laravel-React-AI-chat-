@@ -14,6 +14,8 @@ class GenerationResource extends JsonResource
             'kind' => $this->kind,
             'operation' => $this->operation,
             'status' => $this->status,
+            // Почему не получилось — словами для человека.
+            'failureNote' => $this->failureNote(),
             'prompt' => $this->prompt,
             'negativePrompt' => $this->negative_prompt,
             'aspectRatio' => $this->aspect_ratio,

@@ -142,6 +142,30 @@ class Generation extends Model
     }
 
     /** Ждёт результата от провайдера. */
+    /**
+     * Почему работа не получилась — для интерфейса.
+     *
+     * Причина в базе написана для нас: по-русски и с подробностями
+     * провайдера. Человеку показываем короткую фразу о том, что ему
+     * делать дальше.
+     */
+    public function failureNote(): ?string
+    {
+        if ($this->status !== self::STATUS_FAILED) {
+            return null;
+        }
+
+        $reason = (string) $this->failure_reason;
+
+        return match (true) {
+            str_contains($reason, 'отклонил запрос') => 'The model declined this request. Try a different picture or description.',
+            str_contains($reason, 'не ответил вовремя') => 'This took too long and was stopped. Try again.',
+            str_contains($reason, 'Нет связи') => 'Connection problem on our side. Try again.',
+            str_contains($reason, 'Слишком много запросов') => 'The service is busy right now. Try again in a minute.',
+            default => 'Could not create this one. Try again.',
+        };
+    }
+
     public function isQueued(): bool
     {
         return $this->status === self::STATUS_QUEUED;

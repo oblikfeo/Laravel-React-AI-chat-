@@ -109,8 +109,8 @@ function QueueCard({ item, section }) {
 
                 {failed ? (
                     <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                        <span className="mr-1 text-[12px] text-rose-200/80">
-                            Could not create this one
+                        <span className="mr-1 w-full text-[12px] leading-snug text-rose-200/80">
+                            {item.failureNote ?? 'Could not create this one.'}
                         </span>
 
                         <Small label="Try again" icon={RotateCw} onClick={retry} />
