@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { router } from '@inertiajs/react';
 import AudioCard from '@/Components/Studio/AudioCard';
 import VideoCard from '@/Components/Studio/VideoCard';
@@ -12,56 +12,37 @@ import {
     Sparkles,
     Images,
     Music,
-    Mic,
-    Repeat,
-    AudioWaveform,
     Video,
-    ChevronDown,
+    Plus,
     Maximize2,
     X,
 } from 'lucide-react';
 
-/**
- * Как подписана галерея.
- *
- * У каждого режима звука свой материал, поэтому и галерея своя:
- * песни, озвучка, изменённые записи и эффекты не смешиваются.
- */
+/** Как подписана галерея каждого раздела. */
 const LOOKS = {
     image: {
         icon: Images,
-        title: 'Gallery',
-        one: 'work',
-        many: 'works',
-        empty: 'Your finished work will appear here.',
+        title: 'Images',
+        one: 'image',
+        many: 'images',
+        empty: 'Images you create will appear here.',
+        action: 'Create an image',
     },
-    music: {
+    edit: {
+        icon: Wand2,
+        title: 'Edits',
+        one: 'edit',
+        many: 'edits',
+        empty: 'Edited, combined and upscaled images will appear here.',
+        action: 'Edit an image',
+    },
+    audio: {
         icon: Music,
-        title: 'Tracks',
+        title: 'Audio',
         one: 'track',
         many: 'tracks',
-        empty: 'Music you create will appear here.',
-    },
-    speech: {
-        icon: Mic,
-        title: 'Voiceovers',
-        one: 'voiceover',
-        many: 'voiceovers',
-        empty: 'Your voiceovers will appear here.',
-    },
-    changer: {
-        icon: Repeat,
-        title: 'Converted',
-        one: 'recording',
-        many: 'recordings',
-        empty: 'Recordings in a new voice will appear here.',
-    },
-    effect: {
-        icon: AudioWaveform,
-        title: 'Effects',
-        one: 'effect',
-        many: 'effects',
-        empty: 'Sound effects you create will appear here.',
+        empty: 'Music, voiceovers and sound effects will appear here.',
+        action: 'Create audio',
     },
     video: {
         icon: Video,
@@ -69,137 +50,159 @@ const LOOKS = {
         one: 'video',
         many: 'videos',
         empty: 'Videos you create will appear here.',
+        action: 'Create a video',
     },
 };
 
+/** Виды звука: в галерее их можно смотреть вместе и по отдельности. */
+const AUDIO_KINDS = [
+    { key: 'all', label: 'All' },
+    { key: 'music', label: 'Music' },
+    { key: 'speech', label: 'Voice' },
+    { key: 'voice_change', label: 'Voice Changer' },
+    { key: 'effect', label: 'Sound Effects' },
+];
+
 /**
- * Галерея работ.
+ * Галерея раздела.
  *
- * Свёрнута по умолчанию: картинки, висящие под формой, отвлекают от
- * работы и занимают весь экран. В заголовке видно, сколько их всего,
- * и свежий результат разворачивает галерею сам.
+ * Живёт отдельно от редактора: под формой показывается только то, что
+ * сейчас создаётся, а готовое лежит здесь. Какую галерею показывать,
+ * выбирает переключатель разделов наверху страницы.
+ *
+ * Только что досчитанные работы подсвечены: человек пришёл сюда за
+ * ними и должен увидеть их сразу.
  */
-export default function GenerationGrid({
+export default function Gallery({
+    section,
     items,
+    highlighted = [],
+    onCreate,
     onReuse,
     onEdit,
-    highlight,
-    kind = 'image',
 }) {
-    const [open, setOpen] = useState(false);
     const [preview, setPreview] = useState(null);
-    const seen = useRef(null);
-    const ready = useRef(null);
+    const [audioKind, setAudioKind] = useState('all');
 
-    // Галерея открывается сама и когда появилась новая работа, и
-    // когда дождались готовой: человек нажал кнопку и должен увидеть
-    // результат, а не гадать, что произошло.
+    const look = LOOKS[section] ?? LOOKS.image;
+    const audio = section === 'audio';
+
+    // Свежая работа видна при любом выбранном виде звука.
     useEffect(() => {
-        const newest = items[0]?.id ?? null;
-        const done = items.filter((item) => item.status === 'ready').length;
-
-        const appeared =
-            newest !== null && seen.current !== null && newest !== seen.current;
-        const finished = ready.current !== null && done > ready.current;
-
-        if (appeared || finished) {
-            setOpen(true);
+        if (highlighted.length) {
+            setAudioKind('all');
         }
+    }, [highlighted.length]);
 
-        seen.current = newest;
-        ready.current = done;
-    }, [items]);
-
-    const readyCount = items.filter((item) => item.status === 'ready').length;
-    const look = LOOKS[kind] ?? LOOKS.image;
-    const audio = kind !== 'image' && kind !== 'video';
+    const shown =
+        audio && audioKind !== 'all'
+            ? items.filter((item) => item.operation === audioKind)
+            : items;
 
     return (
         <div className="mt-6">
-            <button
-                type="button"
-                onClick={() => setOpen((value) => !value)}
-                className="flex w-full items-center gap-3 rounded-2xl border border-white/[0.09] bg-slate-950/45 px-4 py-3 text-left transition hover:border-white/20 hover:bg-slate-950/60"
-            >
+            <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-white/[0.09] bg-slate-950/45 px-4 py-3 backdrop-blur-md">
                 <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.07] text-white/60">
                     <look.icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
                 </span>
 
                 <span className="min-w-0 flex-1">
-                    <span className="block text-[14px] font-medium text-white">
+                    <span className="block text-[15px] font-medium text-white">
                         {look.title}
                     </span>
-                    <span className="mt-0.5 block text-[12px] text-white/40">
-                        {readyCount
-                            ? `${readyCount} ${
-                                  readyCount === 1 ? look.one : look.many
+                    <span className="block text-[12px] text-white/40">
+                        {items.length
+                            ? `${items.length} ${
+                                  items.length === 1 ? look.one : look.many
                               } saved`
                             : 'Nothing saved yet'}
                     </span>
                 </span>
 
-                <ChevronDown
-                    className={`h-4 w-4 shrink-0 text-white/40 transition ${
-                        open ? 'rotate-180' : ''
-                    }`}
-                    strokeWidth={2}
-                />
-            </button>
+                <button
+                    type="button"
+                    onClick={onCreate}
+                    className="flex h-9 items-center gap-2 rounded-full border border-white/[0.14] px-4 text-[13px] text-white/75 transition hover:bg-white/10 hover:text-white"
+                >
+                    <Plus className="h-4 w-4" strokeWidth={1.75} />
+                    {look.action}
+                </button>
+            </div>
 
-            {open && (
-                <div className="mt-3">
-                    {items.length ? (
-                        <div
-                            className={`grid gap-3 ${
-                                audio
-                                    ? ''
-                                    : kind === 'video'
-                                      ? 'sm:grid-cols-2'
-                                      : 'sm:grid-cols-2 xl:grid-cols-3'
+            {audio && items.length > 0 && (
+                <div className="mt-3 flex w-fit max-w-full flex-wrap gap-1 rounded-2xl border border-white/[0.09] bg-slate-950/45 p-1 backdrop-blur-md">
+                    {AUDIO_KINDS.map(({ key, label }) => (
+                        <button
+                            key={key}
+                            type="button"
+                            onClick={() => setAudioKind(key)}
+                            className={`h-8 rounded-xl px-3.5 text-[13px] transition ${
+                                audioKind === key
+                                    ? 'bg-white/10 font-medium text-white ring-1 ring-white/15'
+                                    : 'text-white/55 hover:text-white'
                             }`}
                         >
-                            {items.map((item) =>
-                                item.kind === 'video' ? (
-                                    <VideoCard
-                                        key={item.id}
-                                        item={item}
-                                        fresh={item.id === highlight}
-                                    />
-                                ) : item.kind === 'audio' ? (
-                                    <AudioCard
-                                        key={item.id}
-                                        item={item}
-                                        fresh={item.id === highlight}
-                                    />
-                                ) : (
-                                <Card
-                                    key={item.id}
-                                    item={item}
-                                    audio={audio}
-                                    fresh={item.id === highlight}
-                                    onReuse={onReuse}
-                                    onEdit={onEdit}
-                                    onOpen={() => item.url && setPreview(item)}
-                                />
-                                ),
-                            )}
-                        </div>
-                    ) : (
-                        <div className="rounded-2xl border border-white/[0.07] bg-slate-950/40 px-6 py-12 text-center">
-                            <look.icon
-                                className="mx-auto h-7 w-7 text-white/20"
-                                strokeWidth={1.5}
-                            />
-                            <p className="mt-3 text-[15px] text-white/60">
-                                Nothing here yet
-                            </p>
-                            <p className="mt-1 text-sm text-white/35">
-                                {look.empty}
-                            </p>
-                        </div>
-                    )}
+                            {label}
+                        </button>
+                    ))}
                 </div>
             )}
+
+            <div className="mt-4">
+                {shown.length ? (
+                    <div
+                        className={`grid gap-3 ${
+                            audio
+                                ? 'lg:grid-cols-2'
+                                : section === 'video'
+                                  ? 'sm:grid-cols-2'
+                                  : 'sm:grid-cols-2 xl:grid-cols-3'
+                        }`}
+                    >
+                        {shown.map((item) => {
+                            const fresh = highlighted.includes(item.id);
+
+                            return (
+                                <div key={item.id} className="relative">
+                                    {item.kind === 'video' ? (
+                                        <VideoCard item={item} fresh={fresh} />
+                                    ) : item.kind === 'audio' ? (
+                                        <AudioCard item={item} fresh={fresh} />
+                                    ) : (
+                                        <Card
+                                            item={item}
+                                            fresh={fresh}
+                                            onReuse={onReuse}
+                                            onEdit={onEdit}
+                                            onOpen={() =>
+                                                item.url && setPreview(item)
+                                            }
+                                        />
+                                    )}
+
+                                    {fresh && (
+                                        <span className="keep-light pointer-events-none absolute -top-2 left-3 z-10 flex h-5 items-center gap-1 rounded-full bg-sky-400 px-2 text-[11px] font-semibold text-slate-950 shadow-lg shadow-sky-500/30">
+                                            <Sparkles className="h-3 w-3" strokeWidth={2.25} />
+                                            New
+                                        </span>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                ) : (
+                    <div className="rounded-2xl border border-white/[0.07] bg-slate-950/40 px-6 py-14 text-center">
+                        <look.icon
+                            className="mx-auto h-7 w-7 text-white/20"
+                            strokeWidth={1.5}
+                        />
+                        <p className="mt-3 text-[15px] text-white/60">
+                            Nothing here yet
+                        </p>
+                        <p className="mt-1 text-sm text-white/35">{look.empty}</p>
+                    </div>
+                )}
+            </div>
 
             {preview && (
                 <Lightbox item={preview} onClose={() => setPreview(null)} />
@@ -222,7 +225,7 @@ function Card({ item, fresh, audio, onReuse, onEdit, onOpen }) {
     const remove = () => {
         router.delete(`/studio/${item.id}`, {
             preserveScroll: true,
-            showProgress: false,
+            async: true,
         });
     };
 
@@ -230,7 +233,7 @@ function Card({ item, fresh, audio, onReuse, onEdit, onOpen }) {
         router.post(
             `/studio/${item.id}/retry`,
             {},
-            { preserveScroll: true, showProgress: false },
+            { preserveScroll: true, async: true },
         );
     };
 

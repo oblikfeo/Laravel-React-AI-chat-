@@ -88,14 +88,14 @@ export default function AudioCard({ item, fresh }) {
     const remove = () =>
         router.delete(`/studio/${item.id}`, {
             preserveScroll: true,
-            showProgress: false,
+            async: true,
         });
 
     const retry = () =>
         router.post(
             `/studio/${item.id}/retry`,
             {},
-            { preserveScroll: true, showProgress: false },
+            { preserveScroll: true, async: true },
         );
 
     return (
