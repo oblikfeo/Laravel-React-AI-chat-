@@ -102,6 +102,44 @@ class FeedTest extends TestCase
             ));
     }
 
+    /**
+     * Обычная модель рисует с фильтром провайдера: без него откровенное
+     * попадало в общую ленту в обход запрета на особую модель.
+     */
+    public function test_regular_model_draws_with_the_filter_on(): void
+    {
+        $generator = new FakeImageGenerator();
+        $this->app->instance(ImageGenerator::class, $generator);
+
+        $this->makeWork(User::factory()->create(), ['model' => 'fast']);
+
+        $this->assertTrue($generator->lastGeneration->safeMode);
+    }
+
+    public function test_uncensored_model_draws_without_the_filter(): void
+    {
+        $generator = new FakeImageGenerator();
+        $this->app->instance(ImageGenerator::class, $generator);
+
+        $this->makeWork(User::factory()->create(), ['model' => 'uncensored']);
+
+        $this->assertFalse($generator->lastGeneration->safeMode);
+    }
+
+    /** Правка идёт по загруженной картинке и фильтр не проходит. */
+    public function test_edited_work_is_not_in_the_feed(): void
+    {
+        $work = $this->makeWork(User::factory()->create());
+        $work->forceFill(['operation' => Generation::OP_EDIT])->save();
+
+        $this->actingAs(User::factory()->create())
+            ->get('/feed')
+            ->assertInertia(fn ($page) => $page->where(
+                'works.data',
+                fn ($items) => ! collect($items)->pluck('id')->contains($work->id),
+            ));
+    }
+
     /** Записи в ленту не попадают: она про картинки. */
     public function test_audio_is_not_in_the_feed(): void
     {

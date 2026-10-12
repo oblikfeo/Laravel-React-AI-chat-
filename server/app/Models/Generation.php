@@ -127,6 +127,9 @@ class Generation extends Model
         return $query
             ->where('is_public', true)
             ->where('kind', self::KIND_IMAGE)
+            // Только нарисованное с нуля: правка идёт по чужой
+            // загруженной картинке и фильтр провайдера не проходит.
+            ->where('operation', self::OP_GENERATE)
             ->where('status', self::STATUS_READY)
             ->whereNotNull('path')
             ->when($hidden, fn (Builder $q) => $q->whereNotIn('model_key', $hidden));

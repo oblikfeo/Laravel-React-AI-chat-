@@ -105,6 +105,10 @@ class CreateGeneration
                 stylePreset: config("studio.styles.{$generation->style}"),
                 supportsAspectRatio: (bool) ($model['aspect_ratio'] ?? false),
                 divisor: (int) ($model['divisor'] ?? 8),
+                // Откровенное рисует только наша особая модель, её
+                // работы в ленту не идут. Остальным включаем фильтр
+                // провайдера: иначе такое попадает в общую ленту.
+                safeMode: ! ($model['signature'] ?? false),
             ));
         } catch (GenerationFailed $exception) {
             Log::warning('Генерация изображения не удалась', [

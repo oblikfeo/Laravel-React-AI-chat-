@@ -51,7 +51,7 @@ class VeniceGenerator implements ImageGenerator
         ], static fn ($value) => $value !== null);
 
         // safe_mode=false отфильтровался бы как пустое значение, а он
-        // смысловой: наше предложение — модели без цензуры.
+        // смысловой: без фильтра работает только особая модель.
         $payload['safe_mode'] = $request->safeMode;
 
         // Соотношение сторон понимает не всякая модель: остальные
