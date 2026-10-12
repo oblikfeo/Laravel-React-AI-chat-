@@ -10,6 +10,7 @@ use App\Services\Studio\GenerationRequest;
 use App\Services\Studio\ImageGenerator;
 use App\Services\Studio\PromptTranslator;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 /**
  * Рисует по описанию.
@@ -110,7 +111,11 @@ class CreateGeneration
                 // провайдера: иначе такое попадает в общую ленту.
                 safeMode: ! ($model['signature'] ?? false),
             ));
-        } catch (GenerationFailed $exception) {
+        } catch (Throwable $caught) {
+            // Любой сбой, а не только отказ провайдера: иначе работа
+            // осталась бы «в процессе» навсегда, а страница упала бы.
+            $exception = GenerationFailed::from($caught);
+
             Log::warning('Генерация изображения не удалась', [
                 'generation_id' => $generation->id,
                 'message' => $exception->getMessage(),

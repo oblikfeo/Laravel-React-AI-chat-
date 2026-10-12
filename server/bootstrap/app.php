@@ -3,7 +3,13 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Session\TokenMismatchException;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -27,5 +33,23 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectGuestsTo(fn (Request $request) => route('auth'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // Последняя страховка. Если действие на странице (отправка
+        // формы, запуск генерации) упало с непредвиденной ошибкой,
+        // человек остаётся там, где был, и видит сообщение — а не
+        // окно с ошибкой 500 поверх работы. Сама ошибка при этом
+        // записывается в журнал как обычно.
+        $exceptions->render(function (Throwable $exception, Request $request) {
+            $expected = $exception instanceof HttpExceptionInterface
+                || $exception instanceof ValidationException
+                || $exception instanceof AuthenticationException
+                || $exception instanceof AuthorizationException
+                || $exception instanceof ModelNotFoundException
+                || $exception instanceof TokenMismatchException;
+
+            if ($expected || $request->isMethod('GET') || ! $request->header('X-Inertia')) {
+                return null;
+            }
+
+            return back()->with('error', 'Something went wrong on our side. Please try again.');
+        });
     })->create();

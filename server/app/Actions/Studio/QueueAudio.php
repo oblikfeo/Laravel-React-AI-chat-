@@ -11,6 +11,7 @@ use App\Services\Studio\GenerationFailed;
 use App\Services\Studio\MusicRequest;
 use App\Services\Studio\PromptTranslator;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 /**
  * Ставит долгую звуковую задачу в работу.
@@ -127,7 +128,11 @@ class QueueAudio
     {
         try {
             $job = $queue();
-        } catch (GenerationFailed $exception) {
+        } catch (Throwable $caught) {
+            // Любой сбой, а не только отказ провайдера: иначе работа
+            // осталась бы «в процессе» навсегда, а страница упала бы.
+            $exception = GenerationFailed::from($caught);
+
             Log::warning('Студия: звук не ушёл в работу', [
                 'generation_id' => $generation->id,
                 'operation' => $generation->operation,

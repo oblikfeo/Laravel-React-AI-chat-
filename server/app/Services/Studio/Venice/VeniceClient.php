@@ -3,6 +3,7 @@
 namespace App\Services\Studio\Venice;
 
 use App\Services\Studio\GenerationFailed;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
@@ -54,7 +55,7 @@ class VeniceClient
      */
     public function binary(string $path, array $payload): string
     {
-        $response = $this->request()->post($path, $payload);
+        $response = $this->send(fn () => $this->request()->post($path, $payload));
 
         $this->guard($response, $path);
 
@@ -74,7 +75,7 @@ class VeniceClient
 
     public function get(string $path, array $query = []): array
     {
-        $response = $this->request()->get($path, $query);
+        $response = $this->send(fn () => $this->request()->get($path, $query));
 
         $this->guard($response, $path);
 
@@ -83,7 +84,7 @@ class VeniceClient
 
     public function post(string $path, array $payload): array
     {
-        $response = $this->request()->post($path, $payload);
+        $response = $this->send(fn () => $this->request()->post($path, $payload));
 
         $this->guard($response, $path);
 
@@ -111,6 +112,28 @@ class VeniceClient
             Log::warning('Студия: на счёте провайдера мало средств', [
                 'balance' => $balance,
             ]);
+        }
+    }
+
+    /**
+     * Выполняет запрос и переводит обрыв связи в понятный сбой.
+     *
+     * Сеть до провайдера иногда пропадает на секунды — например, не
+     * отвечает DNS. Без этого такая секунда роняла страницу с ошибкой
+     * 500 вместо несостоявшейся работы с кнопкой «повторить».
+     *
+     * @param  callable(): Response  $call
+     */
+    private function send(callable $call): Response
+    {
+        try {
+            return $call();
+        } catch (ConnectionException $exception) {
+            Log::warning('Студия: нет связи с провайдером', [
+                'message' => mb_substr($exception->getMessage(), 0, 300),
+            ]);
+
+            throw GenerationFailed::temporary('Нет связи с провайдером.');
         }
     }
 

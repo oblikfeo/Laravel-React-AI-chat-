@@ -12,6 +12,7 @@ use App\Services\Studio\VideoStudio;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Throwable;
 
 /**
  * Ставит ролик в работу.
@@ -183,7 +184,11 @@ class QueueVideo
     {
         try {
             $job = $this->studio->queue($request());
-        } catch (GenerationFailed $exception) {
+        } catch (Throwable $caught) {
+            // Любой сбой, а не только отказ провайдера: иначе работа
+            // осталась бы «в процессе» навсегда, а страница упала бы.
+            $exception = GenerationFailed::from($caught);
+
             Log::warning('Студия: ролик не ушёл в работу', [
                 'generation_id' => $generation->id,
                 'operation' => $generation->operation,

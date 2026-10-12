@@ -34,7 +34,17 @@ class CollectStudioWork extends Command
             }
         }
 
-        $this->info("В работе: {$waiting->count()}, готово: {$finished}");
+        // Работа, которая так и не дошла до провайдера (запрос
+        // оборвался на полпути), иначе крутилась бы в интерфейсе вечно.
+        $abandoned = Generation::query()
+            ->where('status', Generation::STATUS_PENDING)
+            ->where('created_at', '<', now()->subMinutes(15))
+            ->update([
+                'status' => Generation::STATUS_FAILED,
+                'failure_reason' => 'Работа не была завершена.',
+            ]);
+
+        $this->info("В работе: {$waiting->count()}, готово: {$finished}, брошено: {$abandoned}");
 
         return self::SUCCESS;
     }
