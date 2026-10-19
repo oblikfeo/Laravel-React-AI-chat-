@@ -33,8 +33,17 @@ class StudioIntent
 
     public const AUDIO_EFFECT = 'effect';
 
-    /** Глаголы «сделать». */
-    private const MAKE = '(создай|сделай|сгенерируй|сгенерь|сочини|запиши|спой|сними|смонтируй|make|create|generate|compose|produce|record|render)';
+    /** Глаголы «сделать» в любой форме: сделай, сделать, сделаешь. */
+    private const MAKE = '(созда\w*|сдела\w*|сгенер\w*|сочин\w*|запиш\w*|записа\w*|спо[йе]\w*|спеть|сним\w*|снять|смонтир\w*|нарис\w*|make|create|generate|compose|produce|record|render|draw)';
+
+    /** Желание без глагола: «хочу видео», «нужна песня». */
+    private const WISH = "(хочу|хотел[аи]?\s+бы|нуж[нен]\w*|надо|давай|можешь|можно|сможешь|want|need|would\s+like|i'?d\s+like|can\s+you|could\s+you)";
+
+    /**
+     * Вопрос о том, как что-то сделать, — это вопрос, а не просьба:
+     * на «как сделать видео для тиктока» нужен ответ словами.
+     */
+    private const QUESTION = '/^\W*(как|почему|зачем|что\s+такое|какой|какая|какие|где|сколько|посоветуй|расскажи|объясни|how|why|what|which|where|explain|tell\s+me)\b/iu';
 
     /** Звук: что сделать. */
     private const MUSIC = '(музык|песн|трек|мелоди|бит\b|саундтрек|джингл|рингтон|music|song|track|melody|beat|soundtrack|jingle)';
@@ -65,10 +74,11 @@ class StudioIntent
     /** Увеличить, не меняя картинку. */
     private const UPSCALE = '/\b(увелич|улучши\s+качеств|повысь\s+разрешени|в\s+высок\w*\s+разрешени)|\b(upscale|enhance\s+(the\s+)?(quality|resolution)|higher\s+resolution)\b/iu';
 
-    /** Нарисовать новую: повелительное слово и то, что рисовать. */
+    /** Нарисовать новую: «нарисуй», «хочу картинку», «make an image». */
     private const IMAGE_WORDS = [
-        '/\b(нарисуй|сгенерируй|сгенерь|изобрази)/iu',
-        '/\b(создай|сделай)\b.{0,40}?\b(картинк|изображени|рисун|фото|арт|постер|логотип|аватар|иллюстрац|обо[ий]|портрет)/iu',
+        '/\b(нарису\w*|нарисова\w*|сгенер\w*|изобраз\w*)/iu',
+        '/\b(созда\w*|сдела\w*|хочу|нуж[нен]\w*|давай|можешь)\b.{0,40}?\b(картинк|изображени|рисун|фото|арт|постер|логотип|аватар|иллюстрац|обо[ий]|портрет)/iu',
+        "/\b(want|need|would\s+like|i'?d\s+like)\b.{0,40}?\b(image|picture|pic|photo|drawing|illustration|poster|logo|avatar|portrait|wallpaper)s?\b/iu",
         '/^\W*(please\s+)?(draw|paint|sketch)\b/iu',
         '/\b(can|could)\s+you\s+(draw|paint|sketch)\b/iu',
         '/\b(generate|create|make|render|design)\b.{0,40}?\b(image|picture|pic|photo|drawing|illustration|poster|logo|avatar|portrait|wallpaper|artwork)s?\b/iu',
@@ -87,42 +97,51 @@ class StudioIntent
             return null;
         }
 
+        // «Как сделать…» — вопрос для модели, если только к нему не
+        // приложена картинка, которую просят поправить.
+        if (preg_match(self::QUESTION, $text)) {
+            return $this->edit($text, $images);
+        }
+
         // Звук и видео проверяем раньше картинок: в «сгенерируй
         // музыку» глагол тот же, что в «сгенерируй собаку».
-        return $this->audio($text)
-            ?? $this->video($text, $images)
+        return $this->audioOrVideo($text, $images)
             ?? $this->image($text)
             ?? $this->edit($text, $images);
     }
 
-    private function audio(string $text): ?array
+    /**
+     * Звук или видео.
+     *
+     * Если названо и то и другое, решает то, что названо первым:
+     * «клип для песни» — видео, «музыка для ролика» — звук.
+     */
+    private function audioOrVideo(string $text, int $images): ?array
     {
         if (preg_match(self::SPEECH, $text)) {
             return $this->intent(self::AUDIO, self::AUDIO_SPEECH, $text);
         }
 
-        if ($this->made($text, self::MUSIC)) {
-            return $this->intent(self::AUDIO, self::AUDIO_MUSIC, $text);
-        }
-
-        if ($this->made($text, self::EFFECT)) {
-            return $this->intent(self::AUDIO, self::AUDIO_EFFECT, $text);
-        }
-
-        return null;
-    }
-
-    private function video(string $text, int $images): ?array
-    {
         if ($images > 0 && preg_match(self::ANIMATE, $text)) {
             return $this->intent(self::VIDEO, Generation::OP_ANIMATE, $text);
         }
 
-        if ($this->made($text, self::VIDEO_WORDS)) {
-            return $this->intent(self::VIDEO, $images > 0 ? Generation::OP_ANIMATE : Generation::OP_VIDEO, $text);
+        $found = array_filter([
+            self::AUDIO_MUSIC => $this->made($text, self::MUSIC),
+            self::AUDIO_EFFECT => $this->made($text, self::EFFECT),
+            self::VIDEO => $this->made($text, self::VIDEO_WORDS),
+        ], fn (?int $position) => $position !== null);
+
+        if (! $found) {
+            return null;
         }
 
-        return null;
+        asort($found);
+        $first = array_key_first($found);
+
+        return $first === self::VIDEO
+            ? $this->intent(self::VIDEO, $images > 0 ? Generation::OP_ANIMATE : Generation::OP_VIDEO, $text)
+            : $this->intent(self::AUDIO, $first, $text);
     }
 
     private function image(string $text): ?array
@@ -152,10 +171,20 @@ class StudioIntent
         return $this->intent(self::EDIT, $operation, $text);
     }
 
-    /** Есть ли глагол «сделать» и рядом с ним — то, что делать. */
-    private function made(string $text, string $what): bool
+    /**
+     * Где названо то, что просят сделать, — если рядом есть «сделать»
+     * или «хочу». Null — не просят.
+     */
+    private function made(string $text, string $what): ?int
     {
-        return (bool) preg_match('/\b'.self::MAKE.'\b.{0,40}?\b'.$what.'/iu', $text);
+        $found = preg_match(
+            '/\b('.self::MAKE.'|'.self::WISH.')\b.{0,40}?\b(?<what>'.$what.')/iu',
+            $text,
+            $match,
+            PREG_OFFSET_CAPTURE,
+        );
+
+        return $found ? $match['what'][1] : null;
     }
 
     /**

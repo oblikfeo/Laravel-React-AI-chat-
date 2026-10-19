@@ -277,6 +277,46 @@ class ChatImagesTest extends TestCase
         $this->assertNull($intent->detect('посоветуй хорошее видео про космос'));
     }
 
+    /** Просьба словами «хочу», «нужно», «можешь» — тоже просьба. */
+    public function test_wishes_are_requests(): void
+    {
+        $intent = new StudioIntent;
+
+        foreach ([
+            'хочу сделать видео' => ['video', Generation::OP_VIDEO],
+            'хочу видео с котом на пляже' => ['video', Generation::OP_VIDEO],
+            'можешь сделать ролик про космос?' => ['video', Generation::OP_VIDEO],
+            'I want to make a video' => ['video', Generation::OP_VIDEO],
+            'мне нужен клип для песни' => ['video', Generation::OP_VIDEO],
+            'сгенерируй музыку для ролика' => ['audio', 'music'],
+            'нужна музыка для вечеринки' => ['audio', 'music'],
+            'I need a song for my birthday' => ['audio', 'music'],
+            'хочу картинку с закатом' => ['image', Generation::OP_GENERATE],
+            'можешь нарисовать собаку?' => ['image', Generation::OP_GENERATE],
+            'I want a picture of a red fox' => ['image', Generation::OP_GENERATE],
+        ] as $text => [$mode, $operation]) {
+            $result = $intent->detect($text);
+
+            $this->assertSame($mode, $result['mode'] ?? null, $text);
+            $this->assertSame($operation, $result['operation'], $text);
+        }
+    }
+
+    /** Вопрос «как сделать» — вопрос, а не просьба. */
+    public function test_how_to_questions_stay_with_the_text_model(): void
+    {
+        $intent = new StudioIntent;
+
+        foreach ([
+            'как сделать видео для тиктока?',
+            'расскажи про музыку барокко',
+            'хочу понять квантовую физику',
+            'нужно написать письмо начальнику',
+        ] as $text) {
+            $this->assertNull($intent->detect($text), $text);
+        }
+    }
+
     /** Музыку чат не делает: отвечает карточкой со ссылкой в Студию. */
     public function test_music_request_gets_a_studio_card(): void
     {
