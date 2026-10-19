@@ -24,6 +24,12 @@ class MessageResource extends JsonResource
                 ])
                 ->values()
                 ->all(), []),
+            // Картинка, которой чат ответил.
+            'image' => $this->whenLoaded('generation', fn () => $this->generation?->isReady() ? [
+                'id' => $this->generation->id,
+                'url' => route('studio.file', $this->generation),
+                'prompt' => $this->generation->prompt,
+            ] : null),
             'created_at' => $this->created_at?->toIso8601String(),
         ];
     }

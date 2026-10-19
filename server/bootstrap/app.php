@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Foundation\Application;
+use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -38,6 +39,18 @@ return Application::configure(basePath: dirname(__DIR__))
         // человек остаётся там, где был, и видит сообщение — а не
         // окно с ошибкой 500 поверх работы. Сама ошибка при этом
         // записывается в журнал как обычно.
+        // Страница долго была открыта или форму отправили дважды, и
+        // защитный ключ формы устарел. Вместо экрана «Page Expired»
+        // возвращаем на ту же страницу с новым ключом: повторная
+        // отправка проходит. Так было у заказчика при входе 16.10.
+        $exceptions->respond(function (Response $response, Throwable $exception, Request $request) {
+            if ($response->getStatusCode() !== 419 || ! $request->header('X-Inertia')) {
+                return $response;
+            }
+
+            return back()->with('error', 'The page was open for a while. Please try again.');
+        });
+
         $exceptions->render(function (Throwable $exception, Request $request) {
             $expected = $exception instanceof HttpExceptionInterface
                 || $exception instanceof ValidationException

@@ -5,6 +5,7 @@ import MessageAttachments from '@/Components/Chat/MessageAttachments';
 import useTypewriter from '@/Components/Chat/useTypewriter';
 import ModelChangeMark from '@/Components/Chat/ModelChangeMark';
 import CharacterAvatar from '@/Components/Characters/CharacterAvatar';
+import ChatImage from '@/Components/Chat/ChatImage';
 
 /**
  * Одно сообщение диалога.
@@ -88,7 +89,10 @@ export default function MessageBubble({
                         : 'pt-1'
                 }`}
             >
-                <Markdown>{shown}</Markdown>
+                {/* Картинка из Студии: ответ без слов. */}
+                {message.image && <ChatImage image={message.image} />}
+
+                {shown && <Markdown>{shown}</Markdown>}
 
                 {failed && onRetry && (
                     <button

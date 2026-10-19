@@ -35,7 +35,7 @@ class ShowChatController extends Controller
                 ? CharacterCardResource::make($character)
                 : null,
             'messages' => MessageResource::collection(
-                $chat->messages()->with('attachments')->oldest('id')->get()
+                $chat->messages()->with(['attachments', 'generation'])->oldest('id')->get()
             ),
             // Последнее слово за пользователем — ответ ещё не получен,
             // страница запросит его сама и покажет индикатор набора.

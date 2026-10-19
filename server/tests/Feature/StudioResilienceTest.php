@@ -167,4 +167,30 @@ class StudioResilienceTest extends TestCase
         $this->assertSame(Generation::STATUS_FAILED, $old->fresh()->status);
         $this->assertSame(Generation::STATUS_PENDING, $recent->fresh()->status);
     }
+
+    /** Боты перебирают адреса с буквами вместо номера: это 404, не 500. */
+    public function test_non_numeric_ids_are_not_found(): void
+    {
+        $this->get('/studio/${i.id}/file')->assertNotFound();
+        // Такой адрес есть, но только для отправки формы.
+        $this->get('/chats/from-feed')->assertStatus(405);
+        $this->get('/attachments/abc')->assertNotFound();
+    }
+
+    /**
+     * Устаревшая форма возвращает на страницу с сообщением, а не на
+     * экран «Page Expired». Так было у заказчика при входе 16.10.
+     */
+    public function test_expired_form_returns_to_the_page(): void
+    {
+        \Illuminate\Support\Facades\Route::middleware('web')->post(
+            '/_expired',
+            fn () => throw new \Illuminate\Session\TokenMismatchException(),
+        );
+
+        $this->from('/auth')
+            ->post('/_expired', [], ['X-Inertia' => 'true'])
+            ->assertRedirect('/auth')
+            ->assertSessionHas('error');
+    }
 }

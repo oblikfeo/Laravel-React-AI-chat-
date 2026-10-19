@@ -27,11 +27,18 @@ class Message extends Model
         'role',
         'content',
         'model',
+        'generation_id',
     ];
 
     public function chat(): BelongsTo
     {
         return $this->belongsTo(Chat::class);
+    }
+
+    /** Картинка, которой чат ответил. */
+    public function generation(): BelongsTo
+    {
+        return $this->belongsTo(Generation::class);
     }
 
     public function attachments(): HasMany

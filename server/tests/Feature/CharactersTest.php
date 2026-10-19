@@ -510,7 +510,7 @@ class CharactersTest extends TestCase
 
         $this->actingAs($user)->post("/chats/{$chat->id}/reply");
 
-        $this->assertSame(config('ai.system_prompt'), $this->sentMessages[0]['content']);
+        $this->assertStringStartsWith(config('ai.system_prompt'), $this->sentMessages[0]['content']);
         $this->assertSame([], $this->sentOptions);
     }
 

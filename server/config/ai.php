@@ -70,6 +70,24 @@ return [
         .'and do not discuss the technology behind you.'
     ),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Картинки в чате
+    |--------------------------------------------------------------------------
+    |
+    | Добавляется к любой роли — и к нашему помощнику, и к персонажу.
+    | Картинки рисуют модели Студии, а не текстовая модель (см.
+    | ReplyWithImage). Без этого указания модель на просьбу убрать людей
+    | с фото отвечала «вот изображение» и ничего не прикладывала: так
+    | было на проверке у заказчика 16.10.
+    |
+    */
+
+    'images_note' => 'Pictures in this chat are drawn and edited by the app itself, not by you: '
+        .'when the user plainly asks to draw something or to change a picture, the picture appears without your reply. '
+        .'You never attach images yourself, so never write that you have created, edited or attached one. '
+        .'If the user wants a picture, suggest asking directly, for example "draw a red fox in the snow".',
+
     'timeout' => (int) env('AI_TIMEOUT', 60),
 
     /*

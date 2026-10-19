@@ -8,6 +8,8 @@ use App\Models\Message;
 use App\Services\Ai\AiChatProvider;
 use App\Services\Ai\ModelCatalog;
 use App\Services\Characters\CharacterPrompt;
+use App\Services\Chat\StudioIntent;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -25,6 +27,7 @@ class SendMessage
     public function __construct(
         private readonly AiChatProvider $provider,
         private readonly CharacterPrompt $characterPrompt,
+        private readonly StudioIntent $studioIntent,
     ) {
     }
 
@@ -64,14 +67,73 @@ class SendMessage
         return $message;
     }
 
-    /** Запрашивает ответ модели и сохраняет его. */
+    /**
+     * Отвечает на последнее сообщение.
+     *
+     * Просьбу нарисовать или поправить картинку выполняют модели
+     * Студии, всё остальное — текстовая модель чата.
+     */
     public function reply(Chat $chat): Message
     {
-        $reply = $this->askProvider($chat);
+        $reply = $this->replyWithImage($chat) ?? $this->askProvider($chat);
 
         $chat->forceFill(['last_message_at' => now()])->save();
 
         return $reply;
+    }
+
+    /**
+     * Картинка в ответ, если человек её просит.
+     */
+    private function replyWithImage(Chat $chat): ?Message
+    {
+        $question = $chat->messages()
+            ->with('attachments')
+            ->where('role', Message::ROLE_USER)
+            ->latest('id')
+            ->first();
+
+        if (! $question) {
+            return null;
+        }
+
+        $source = $this->sourceImage($chat, $question);
+        $intent = $this->studioIntent->detect($question->content, $source !== null);
+
+        if (! $intent) {
+            return null;
+        }
+
+        return app(ReplyWithImage::class)->handle($chat, $intent, $source);
+    }
+
+    /**
+     * Что править: картинка из этого сообщения или из прошлого ответа.
+     *
+     * «Убери фон» следующим сообщением относится к картинке, которую
+     * чат только что прислал. Более ранние картинки не трогаем:
+     * иначе правка случайно задела бы то, о чём человек уже забыл.
+     */
+    private function sourceImage(Chat $chat, Message $question): ?string
+    {
+        $attached = $question->attachments->first(fn (Attachment $a) => $a->isImage());
+
+        if ($attached) {
+            return Storage::disk($attached->disk)->get($attached->path);
+        }
+
+        $previous = $chat->messages()
+            ->with('generation')
+            ->where('role', Message::ROLE_ASSISTANT)
+            ->where('id', '<', $question->id)
+            ->latest('id')
+            ->first();
+
+        $generation = $previous?->generation;
+
+        return $generation?->isReady()
+            ? Storage::disk($generation->disk)->get($generation->path)
+            : null;
     }
 
     private function askProvider(Chat $chat): Message
@@ -151,7 +213,7 @@ class SendMessage
     private function buildContext(Chat $chat): array
     {
         $history = $chat->messages()
-            ->with('attachments')
+            ->with(['attachments', 'generation'])
             // Отметки о смене модели — для человека, не для модели.
             ->whereIn('role', [Message::ROLE_USER, Message::ROLE_ASSISTANT])
             ->latest('id')
@@ -176,9 +238,11 @@ class SendMessage
      */
     private function systemPrompt(Chat $chat): string
     {
-        return $chat->character
+        $role = $chat->character
             ? $this->characterPrompt->for($chat->character)
             : config('ai.system_prompt');
+
+        return $role."\n\n".config('ai.images_note');
     }
 
     /**
@@ -204,6 +268,15 @@ class SendMessage
      */
     private function formatMessage(Message $message): array
     {
+        // Ответ картинкой текста не содержит. Модели говорим словами,
+        // что было нарисовано: иначе она не поймёт, о чём дальше речь.
+        if ($message->generation) {
+            return [
+                'role' => $message->role,
+                'content' => '[Image shown to the user: '.$message->generation->prompt.']',
+            ];
+        }
+
         $attachments = $message->attachments;
 
         if ($attachments->isEmpty()) {
