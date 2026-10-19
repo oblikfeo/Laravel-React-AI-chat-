@@ -31,7 +31,7 @@ class StoreChatFromFeedController extends Controller
             ->first();
 
         if (! $work) {
-            throw new NotFoundHttpException();
+            throw new NotFoundHttpException;
         }
 
         $chat = $action->handle(

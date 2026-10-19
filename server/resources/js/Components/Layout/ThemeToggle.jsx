@@ -3,7 +3,7 @@ import { useTheme } from '@/Contexts/ThemeContext';
 
 /**
  * Переключатель темы: капсула с двумя иконками,
- * активная половина подсвечена (figma/1440w dark.jpg, правый верхний угол).
+ * активная половина подсвечена.
  */
 export default function ThemeToggle() {
     const { theme, setTheme } = useTheme();

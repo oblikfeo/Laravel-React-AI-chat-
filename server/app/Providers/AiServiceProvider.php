@@ -28,7 +28,7 @@ class AiServiceProvider extends ServiceProvider
                     'provider' => $name,
                 ]);
 
-                return new FakeProvider();
+                return new FakeProvider;
             }
 
             return new OpenAiCompatibleProvider(

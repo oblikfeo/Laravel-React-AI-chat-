@@ -6,7 +6,7 @@ import { Sparkles, Check, Image as ImageIcon, Lock } from 'lucide-react';
  * Выбор модели в поле ввода.
  *
  * Названия моделей у провайдера сюда не попадают: пользователь видит
- * только наши ярлыки, см. дизайн-систему, §12.
+ * только наши ярлыки.
  */
 export default function ModelPicker({ value, onChange }) {
     const { models = [], guest } = usePage().props;

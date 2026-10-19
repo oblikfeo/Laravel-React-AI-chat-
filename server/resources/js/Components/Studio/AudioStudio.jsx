@@ -13,8 +13,9 @@ import {
     Square,
     X,
 } from 'lucide-react';
-import { Panel, NotReady, Remaining, Price } from '@/Components/Studio/Controls';
+import { Panel, NotReady, SubmitBar } from '@/Components/Studio/Controls';
 import Dropdown from '@/Components/Studio/Dropdown';
+import ModeTiles from '@/Components/Studio/ModeTiles';
 import { priceOf } from '@/Components/Studio/price';
 
 /**
@@ -85,43 +86,7 @@ export default function AudioStudio({
 
     return (
         <div>
-            <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                {MODES.map(({ key, label, hint, icon: Icon }) => (
-                    <button
-                        key={key}
-                        type="button"
-                        onClick={() => onModeChange(key)}
-                        className={`flex flex-col items-start gap-2 rounded-2xl border p-3.5 text-left transition ${
-                            mode === key
-                                ? 'border-white/30 bg-white/[0.09] shadow-lg shadow-black/30'
-                                : 'border-white/[0.09] bg-slate-950/40 hover:border-white/20 hover:bg-white/[0.05]'
-                        }`}
-                    >
-                        <span
-                            className={`flex h-9 w-9 items-center justify-center rounded-xl transition ${
-                                mode === key
-                                    ? 'bg-white text-black'
-                                    : 'bg-white/[0.07] text-white/60'
-                            }`}
-                        >
-                            <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
-                        </span>
-
-                        <span className="min-w-0">
-                            <span
-                                className={`block text-[13px] font-medium ${
-                                    mode === key ? 'text-white' : 'text-white/75'
-                                }`}
-                            >
-                                {label}
-                            </span>
-                            <span className="mt-0.5 block text-[11px] leading-snug text-white/35">
-                                {hint}
-                            </span>
-                        </span>
-                    </button>
-                ))}
-            </div>
+            <ModeTiles items={MODES} value={mode} onChange={onModeChange} />
 
             {mode === 'music' && (
                 <MusicForm
@@ -309,7 +274,7 @@ function MusicForm({
                     </button>
                 )}
 
-                <Submit
+                <SubmitBar icon={Send}
                     busy={busy}
                     canSubmit={canSubmit}
                     limit={limit}
@@ -402,7 +367,7 @@ function SpeechForm({
                     icon={Gauge}
                 />
 
-                <Submit
+                <SubmitBar icon={Send}
                     busy={busy}
                     canSubmit={canSubmit}
                     limit={limit}
@@ -596,7 +561,7 @@ function ChangerForm({
                     icon={Mic}
                 />
 
-                <Submit busy={busy} canSubmit={canSubmit} limit={limit} />
+                <SubmitBar icon={Send} busy={busy} canSubmit={canSubmit} limit={limit} />
             </div>
         </Panel>
     );
@@ -678,7 +643,7 @@ function EffectForm({
                     />
                 )}
 
-                <Submit
+                <SubmitBar icon={Send}
                     busy={busy}
                     canSubmit={canSubmit}
                     limit={limit}
@@ -688,29 +653,6 @@ function EffectForm({
                 />
             </div>
         </Panel>
-    );
-}
-
-function Submit({ busy, canSubmit, limit, price = null }) {
-    return (
-        <div className="ml-auto flex items-center gap-3">
-            <Price value={price} />
-
-            <Remaining limit={limit} />
-
-            <button
-                type="submit"
-                disabled={!canSubmit}
-                className={`flex h-10 items-center gap-2 rounded-full px-5 text-[14px] font-semibold transition ${
-                    canSubmit
-                        ? 'bg-white text-black hover:bg-white/90'
-                        : 'cursor-not-allowed border border-white/[0.12] text-white/35'
-                }`}
-            >
-                <Send className="h-4 w-4" strokeWidth={2} />
-                {busy ? 'Sending…' : 'Create'}
-            </button>
-        </div>
     );
 }
 

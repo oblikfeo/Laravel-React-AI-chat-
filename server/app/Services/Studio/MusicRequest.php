@@ -14,6 +14,5 @@ class MusicRequest
         public readonly ?string $lyrics = null,
         public readonly ?int $duration = null,
         public readonly bool $instrumental = false,
-    ) {
-    }
+    ) {}
 }

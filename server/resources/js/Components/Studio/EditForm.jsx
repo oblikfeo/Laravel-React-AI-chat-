@@ -9,14 +9,9 @@ import {
     X,
     Crop,
 } from 'lucide-react';
-import {
-    Panel,
-    NotReady,
-    Remaining,
-    Visibility,
-    Price,
-} from '@/Components/Studio/Controls';
+import { Panel, NotReady, Visibility, SubmitBar } from '@/Components/Studio/Controls';
 import Dropdown from '@/Components/Studio/Dropdown';
+import ModeTiles from '@/Components/Studio/ModeTiles';
 
 /**
  * Инструменты правки.
@@ -135,43 +130,7 @@ export default function EditForm({
     return (
         <div>
             {/* Инструменты крупно: ради них на вкладку и заходят. */}
-            <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                {TOOLS.map(({ key, label, hint, icon: Icon }) => (
-                    <button
-                        key={key}
-                        type="button"
-                        onClick={() => setTool(key)}
-                        className={`flex flex-col items-start gap-2 rounded-2xl border p-3.5 text-left transition ${
-                            tool === key
-                                ? 'border-white/30 bg-white/[0.09] shadow-lg shadow-black/30'
-                                : 'border-white/[0.09] bg-slate-950/40 hover:border-white/20 hover:bg-white/[0.05]'
-                        }`}
-                    >
-                        <span
-                            className={`flex h-9 w-9 items-center justify-center rounded-xl transition ${
-                                tool === key
-                                    ? 'bg-white text-black'
-                                    : 'bg-white/[0.07] text-white/60'
-                            }`}
-                        >
-                            <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
-                        </span>
-
-                        <span className="min-w-0">
-                            <span
-                                className={`block text-[13px] font-medium ${
-                                    tool === key ? 'text-white' : 'text-white/75'
-                                }`}
-                            >
-                                {label}
-                            </span>
-                            <span className="mt-0.5 block text-[11px] leading-snug text-white/35">
-                                {hint}
-                            </span>
-                        </span>
-                    </button>
-                ))}
-            </div>
+            <ModeTiles items={TOOLS} value={tool} onChange={setTool} />
 
             <Panel onSubmit={submit}>
                 {!available && <NotReady />}
@@ -321,31 +280,16 @@ export default function EditForm({
 
                     <Visibility value={isPublic} onChange={setIsPublic} />
 
-                    <div className="ml-auto flex items-center gap-3">
-                        {/* У увеличения цена зависит от кратности. */}
-                        <Price
-                            value={
-                                tool === 'upscale'
-                                    ? prices.upscale?.[scale]
-                                    : prices[tool]
-                            }
-                        />
-
-                        <Remaining limit={limit} />
-
-                        <button
-                            type="submit"
-                            disabled={!canSubmit}
-                            className={`flex h-10 items-center gap-2 rounded-full px-5 text-[14px] font-semibold transition ${
-                                canSubmit
-                                    ? 'bg-white text-black hover:bg-white/90'
-                                    : 'cursor-not-allowed border border-white/[0.12] text-white/35'
-                            }`}
-                        >
-                            <current.icon className="h-4 w-4" strokeWidth={2} />
-                            {busy ? 'Working…' : 'Apply'}
-                        </button>
-                    </div>
+                    {/* У увеличения цена зависит от кратности. */}
+                    <SubmitBar
+                        price={tool === 'upscale' ? prices.upscale?.[scale] : prices[tool]}
+                        limit={limit}
+                        canSubmit={canSubmit}
+                        busy={busy}
+                        label="Apply"
+                        busyLabel="Working…"
+                        icon={current.icon}
+                    />
                 </div>
             </Panel>
         </div>

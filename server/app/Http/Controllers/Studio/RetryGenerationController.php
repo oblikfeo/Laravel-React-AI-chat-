@@ -11,6 +11,7 @@ use App\Models\Generation;
 use App\Models\Guest;
 use App\Models\User;
 use App\Services\Guests\CurrentGuest;
+use App\Services\Guests\GenerationOwnership;
 use App\Services\Studio\AudioStudio;
 use App\Services\Studio\ImageGenerator;
 use App\Services\Studio\StudioLimiter;
@@ -32,8 +33,7 @@ class RetryGenerationController extends Controller
         private readonly ImageGenerator $generator,
         private readonly AudioStudio $audioStudio,
         private readonly VideoStudio $videoStudio,
-    ) {
-    }
+    ) {}
 
     /**
      * Повторяет работу.
@@ -49,8 +49,8 @@ class RetryGenerationController extends Controller
         $user = $request->user();
         $guest = CurrentGuest::get($request);
 
-        if (! $this->owns($generation, $request)) {
-            throw new AccessDeniedHttpException();
+        if (! GenerationOwnership::owns($request, $generation)) {
+            throw new AccessDeniedHttpException;
         }
 
         if ($generation->kind === Generation::KIND_VIDEO) {
@@ -135,18 +135,5 @@ class RetryGenerationController extends Controller
         }
 
         return back();
-    }
-
-    private function owns(Generation $generation, Request $request): bool
-    {
-        if ($user = $request->user()) {
-            return $generation->user_id === $user->id;
-        }
-
-        $guest = CurrentGuest::get($request);
-
-        return $guest !== null
-            && $generation->guest_id === $guest->id
-            && $generation->user_id === null;
     }
 }

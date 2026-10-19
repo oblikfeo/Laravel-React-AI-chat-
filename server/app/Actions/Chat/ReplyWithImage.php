@@ -18,8 +18,8 @@ use App\Services\Studio\StudioLimiter;
  * дневной лимит общий, работа сохраняется в галерее. В ленту картинка
  * из чата не попадает — человек делал её для себя.
  *
- * Ответ — сама картинка, без слов, как у Venice. Слова появляются,
- * только если что-то не получилось.
+ * Ответ — сама картинка, без слов. Текст появляется, только если
+ * что-то не получилось.
  */
 class ReplyWithImage
 {
@@ -28,8 +28,7 @@ class ReplyWithImage
         private readonly EditImage $edit,
         private readonly StudioLimiter $limiter,
         private readonly ImageGenerator $generator,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array{mode: string, operation: string, prompt: string}  $intent

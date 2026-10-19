@@ -24,6 +24,7 @@ interface VideoStudio
      *
      * @param  string|null  $downloadUrl  адрес файла, если провайдер
      *                                    сообщил его при постановке
+     *
      * @throws GenerationFailed
      */
     public function retrieve(

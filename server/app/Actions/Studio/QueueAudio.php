@@ -25,8 +25,7 @@ class QueueAudio
     public function __construct(
         private readonly AudioStudio $studio,
         private readonly PromptTranslator $translator,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array<string, mixed>  $input

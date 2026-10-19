@@ -7,8 +7,8 @@ use App\Services\Guests\GuestResolver;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Throwable;
 use Symfony\Component\HttpFoundation\Response;
+use Throwable;
 
 /**
  * Опознаёт посетителя без учётной записи и выдаёт ему куку.
@@ -17,9 +17,7 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class IdentifyGuest
 {
-    public function __construct(private readonly GuestResolver $resolver)
-    {
-    }
+    public function __construct(private readonly GuestResolver $resolver) {}
 
     public function handle(Request $request, Closure $next): Response
     {
@@ -50,8 +48,7 @@ class IdentifyGuest
         // каждого закрытия браузера.
         //
         // Кладём в заголовки напрямую: файлы отдаются потоком, а у
-        // потокового ответа метода withCookie нет — на нём падала
-        // выдача картинок гостю.
+        // потокового ответа метода withCookie нет.
         $response->headers->setCookie(cookie(
             name: config('guests.cookie_name'),
             value: $guest->token,

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Generation;
+use App\Models\Guest;
 use App\Models\User;
 use App\Services\Studio\ImageGenerator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -107,7 +108,7 @@ class StudioTest extends TestCase
 
         // Гость узнаётся по куке: без неё каждый запрос был бы новым
         // посетителем, и лимит не накапливался бы.
-        $token = \App\Models\Guest::first()->token;
+        $token = Guest::first()->token;
 
         $this->withCookie(config('guests.cookie_name'), $token)
             ->post('/studio', $payload)

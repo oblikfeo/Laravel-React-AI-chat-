@@ -27,7 +27,7 @@ class StudioToolsTest extends TestCase
 
         Storage::fake('local');
 
-        $this->generator = new FakeImageGenerator();
+        $this->generator = new FakeImageGenerator;
         $this->app->instance(ImageGenerator::class, $this->generator);
     }
 

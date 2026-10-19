@@ -4,7 +4,7 @@ import { Check, X } from 'lucide-react';
 import { plans as allPlans } from '@/Constants/plans';
 
 /**
- * Баннер выбора тарифа (figma/5.png).
+ * Баннер выбора тарифа.
  *
  * Показывается поверх любой страницы, поэтому не знает, откуда вызван:
  * состоянием управляет usePlans, см. Contexts/PlansContext.
@@ -45,7 +45,7 @@ export default function PlansDialog({ open, onClose }) {
                 }
             }}
         >
-            {/* Туманность (figma/2.png): собственный фон баннера.
+            {/* Туманность: собственный фон баннера.
                 Снизу гасим её в цвет подложки, чтобы карточки не
                 спорили с картинкой, а текст оставался читаемым. */}
             <div

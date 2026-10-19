@@ -38,8 +38,7 @@ class FakeImageGenerator implements ImageGenerator
     public function __construct(
         private readonly bool $available = true,
         private readonly bool $fails = false,
-    ) {
-    }
+    ) {}
 
     public function isAvailable(): bool
     {

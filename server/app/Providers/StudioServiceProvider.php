@@ -29,7 +29,7 @@ class StudioServiceProvider extends ServiceProvider
             $apiKey = config('studio.api_key');
 
             if (blank($apiKey)) {
-                return new UnavailableGenerator();
+                return new UnavailableGenerator;
             }
 
             return new VeniceGenerator(new VeniceClient(
@@ -43,7 +43,7 @@ class StudioServiceProvider extends ServiceProvider
             $apiKey = config('studio.api_key');
 
             if (blank($apiKey)) {
-                return new UnavailableAudioStudio();
+                return new UnavailableAudioStudio;
             }
 
             return new VeniceAudioStudio($this->queue($apiKey));
@@ -53,7 +53,7 @@ class StudioServiceProvider extends ServiceProvider
             $apiKey = config('studio.api_key');
 
             if (blank($apiKey)) {
-                return new UnavailableVideoStudio();
+                return new UnavailableVideoStudio;
             }
 
             return new VeniceVideoStudio($this->queue($apiKey));

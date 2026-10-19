@@ -15,7 +15,7 @@ import GenerationForm from '@/Components/Studio/GenerationForm';
 import EditForm from '@/Components/Studio/EditForm';
 import AudioStudio from '@/Components/Studio/AudioStudio';
 import VideoStudio from '@/Components/Studio/VideoStudio';
-import Gallery from '@/Components/Studio/GenerationGrid';
+import Gallery from '@/Components/Studio/Gallery';
 import WorkQueue from '@/Components/Studio/WorkQueue';
 import AssetPicker from '@/Components/Studio/AssetPicker';
 
@@ -45,8 +45,7 @@ const NOUNS = {
  * К какому разделу относится работа.
  *
  * Правило одно на всю страницу: по нему работа попадает и в очередь
- * своего раздела, и в его галерею. Раньше вкладки делили работы каждая
- * по-своему, и чужое всплывало не там.
+ * своего раздела, и в его галерею.
  */
 function sectionOf(item) {
     if (item.kind === 'audio') {
@@ -144,8 +143,8 @@ export default function StudioIndex({
      *
      * Только один раз. Адрес страницы хранит номер работы, и сервер
      * присылает её заново с каждым ответом — в том числе на опрос
-     * готовности. Без этой отметки человека каждые несколько секунд
-     * перебрасывало обратно в правку, чем бы он ни занимался.
+     * готовности. Без этой отметки страница каждые несколько секунд
+     * возвращала бы человека в правку.
      */
     const broughtFromFeed = useRef(null);
 
@@ -182,8 +181,7 @@ export default function StudioIndex({
      *
      * Запросы идут параллельно: пока рисуется одна картинка, можно
      * запустить следующую или уйти в другой раздел. Обычный переход
-     * Inertia отменял предыдущий запрос — отсюда были «прыжки» и
-     * пропавшие результаты.
+     * Inertia отменил бы предыдущий запрос вместе с его результатом.
      */
     const send = (url, values, { section, prompt, count = 1, form = false }) => {
         const ids = Array.from(

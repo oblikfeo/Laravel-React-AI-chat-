@@ -15,8 +15,7 @@ class QueueResult
         public readonly ?string $mime = null,
         public readonly ?string $status = null,
         public readonly ?int $expectedMs = null,
-    ) {
-    }
+    ) {}
 
     public static function pending(string $status, ?int $expectedMs = null): self
     {

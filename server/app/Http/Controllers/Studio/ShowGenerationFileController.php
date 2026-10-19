@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Studio;
 
 use App\Http\Controllers\Controller;
 use App\Models\Generation;
-use App\Services\Guests\CurrentGuest;
+use App\Services\Guests\GenerationOwnership;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use League\Flysystem\Local\LocalFilesystemAdapter;
@@ -22,13 +22,13 @@ class ShowGenerationFileController extends Controller
     public function __invoke(Request $request, Generation $generation): Response
     {
         if (! $generation->isReady()) {
-            throw new AccessDeniedHttpException();
+            throw new AccessDeniedHttpException;
         }
 
         // Работу видит владелец, а чужую — только если её показали в
         // общей ленте. Скрытая остаётся закрытой для всех остальных.
-        if (! $this->owns($generation, $request) && ! $this->inFeed($generation)) {
-            throw new AccessDeniedHttpException();
+        if (! GenerationOwnership::owns($request, $generation) && ! $this->inFeed($generation)) {
+            throw new AccessDeniedHttpException;
         }
 
         $download = $request->boolean('download');
@@ -80,18 +80,5 @@ class ShowGenerationFileController extends Controller
             ->inFeed()
             ->whereKey($generation->id)
             ->exists();
-    }
-
-    private function owns(Generation $generation, Request $request): bool
-    {
-        if ($user = $request->user()) {
-            return $generation->user_id === $user->id;
-        }
-
-        $guest = CurrentGuest::get($request);
-
-        return $guest !== null
-            && $generation->guest_id === $guest->id
-            && $generation->user_id === null;
     }
 }

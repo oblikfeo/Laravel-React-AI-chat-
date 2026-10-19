@@ -41,9 +41,7 @@ class CharactersTest extends TestCase
         // до модели дошла именно роль персонажа.
         $this->app->instance(AiChatProvider::class, new class($this) implements AiChatProvider
         {
-            public function __construct(private readonly CharactersTest $test)
-            {
-            }
+            public function __construct(private readonly CharactersTest $test) {}
 
             public function isConfigured(): bool
             {

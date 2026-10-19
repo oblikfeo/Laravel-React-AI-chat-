@@ -15,7 +15,6 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI', '/auth/google/callback'),
     ],
 
-
     /*
     |--------------------------------------------------------------------------
     | Third Party Services

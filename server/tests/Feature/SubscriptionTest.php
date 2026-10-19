@@ -40,7 +40,7 @@ class SubscriptionTest extends TestCase
         $user = User::factory()->create();
         $payment = $this->pendingPayment($user);
 
-        (new ActivateSubscription())->handle($payment);
+        (new ActivateSubscription)->handle($payment);
 
         $this->assertSame('pro', $user->fresh()->plan);
         $this->assertSame(Payment::STATUS_SUCCEEDED, $payment->fresh()->status);
@@ -52,7 +52,7 @@ class SubscriptionTest extends TestCase
         $user = User::factory()->create();
         $payment = $this->pendingPayment($user, period: 'monthly');
 
-        (new ActivateSubscription())->handle($payment);
+        (new ActivateSubscription)->handle($payment);
 
         $ends = $user->fresh()->activeSubscription()->ends_at;
 
@@ -68,7 +68,7 @@ class SubscriptionTest extends TestCase
         $user = User::factory()->create();
         $payment = $this->pendingPayment($user, period: 'yearly');
 
-        (new ActivateSubscription())->handle($payment);
+        (new ActivateSubscription)->handle($payment);
 
         $this->assertEqualsWithDelta(
             now()->addYear()->timestamp,
@@ -84,7 +84,7 @@ class SubscriptionTest extends TestCase
     {
         $user = User::factory()->create();
         $payment = $this->pendingPayment($user);
-        $action = new ActivateSubscription();
+        $action = new ActivateSubscription;
 
         $action->handle($payment);
         $first = $user->fresh()->activeSubscription()->ends_at;
@@ -99,10 +99,10 @@ class SubscriptionTest extends TestCase
     {
         $user = User::factory()->create();
         $payment = $this->pendingPayment($user);
-        (new ActivateSubscription())->handle($payment);
+        (new ActivateSubscription)->handle($payment);
 
         $subscription = $user->fresh()->activeSubscription();
-        (new CancelSubscription())->handle($subscription);
+        (new CancelSubscription)->handle($subscription);
 
         // Тариф остаётся: оплаченный срок не сгорает.
         $this->assertSame('pro', $user->fresh()->plan);
@@ -113,7 +113,7 @@ class SubscriptionTest extends TestCase
     {
         $user = User::factory()->create();
         $payment = $this->pendingPayment($user);
-        (new ActivateSubscription())->handle($payment);
+        (new ActivateSubscription)->handle($payment);
 
         $user->activeSubscription()->forceFill([
             'ends_at' => now()->subDay(),

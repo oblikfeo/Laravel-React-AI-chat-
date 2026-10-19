@@ -1,15 +1,18 @@
 <?php
 
-use Illuminate\Foundation\Application;
-use Symfony\Component\HttpFoundation\Response;
-use Illuminate\Foundation\Configuration\Exceptions;
-use Illuminate\Foundation\Configuration\Middleware;
+use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\IdentifyGuest;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Foundation\Application;
+use Illuminate\Foundation\Configuration\Exceptions;
+use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
 use Illuminate\Session\TokenMismatchException;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -20,9 +23,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
-            \App\Http\Middleware\IdentifyGuest::class,
-            \App\Http\Middleware\HandleInertiaRequests::class,
-            \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
+            IdentifyGuest::class,
+            HandleInertiaRequests::class,
+            AddLinkHeadersForPreloadedAssets::class,
         ]);
 
         // Приложение работает за Nginx. Без этого Laravel считает
@@ -42,7 +45,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Страница долго была открыта или форму отправили дважды, и
         // защитный ключ формы устарел. Вместо экрана «Page Expired»
         // возвращаем на ту же страницу с новым ключом: повторная
-        // отправка проходит. Так было у заказчика при входе 16.10.
+        // отправка проходит.
         $exceptions->respond(function (Response $response, Throwable $exception, Request $request) {
             if ($response->getStatusCode() !== 419 || ! $request->header('X-Inertia')) {
                 return $response;

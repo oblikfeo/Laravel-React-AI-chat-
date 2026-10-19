@@ -2,7 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Models\Attachment;
+use App\Models\Chat;
 use App\Models\Generation;
+use App\Models\Guest;
 use App\Models\User;
 use App\Services\Studio\ImageGenerator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -26,7 +29,7 @@ class FeedTest extends TestCase
 
         Storage::fake('local');
 
-        $this->app->instance(ImageGenerator::class, new FakeImageGenerator());
+        $this->app->instance(ImageGenerator::class, new FakeImageGenerator);
     }
 
     /** Создаёт работу указанного человека. */
@@ -104,11 +107,11 @@ class FeedTest extends TestCase
 
     /**
      * Обычная модель рисует с фильтром провайдера: без него откровенное
-     * попадало в общую ленту в обход запрета на особую модель.
+     * попадало бы в общую ленту в обход запрета на особую модель.
      */
     public function test_regular_model_draws_with_the_filter_on(): void
     {
-        $generator = new FakeImageGenerator();
+        $generator = new FakeImageGenerator;
         $this->app->instance(ImageGenerator::class, $generator);
 
         $this->makeWork(User::factory()->create(), ['model' => 'fast']);
@@ -118,7 +121,7 @@ class FeedTest extends TestCase
 
     public function test_uncensored_model_draws_without_the_filter(): void
     {
-        $generator = new FakeImageGenerator();
+        $generator = new FakeImageGenerator;
         $this->app->instance(ImageGenerator::class, $generator);
 
         $this->makeWork(User::factory()->create(), ['model' => 'uncensored']);
@@ -270,12 +273,12 @@ class FeedTest extends TestCase
             ->post('/chats/from-feed', ['generation_id' => $work->id])
             ->assertRedirect();
 
-        $chat = \App\Models\Chat::first();
+        $chat = Chat::first();
 
         $this->assertNotNull($chat);
         $this->assertSame($reader->id, $chat->user_id);
 
-        $attachment = \App\Models\Attachment::first();
+        $attachment = Attachment::first();
 
         $this->assertNotNull($attachment);
         Storage::disk('local')->assertExists($attachment->path);
@@ -320,8 +323,8 @@ class FeedTest extends TestCase
     /**
      * Гость должен получать файлы.
      *
-     * Посредник, опознающий гостя, ставил куку способом, которого у
-     * потокового ответа нет, — и выдача картинок падала с ошибкой.
+     * Посредник, опознающий гостя, ставит куку и потоковому ответу, в
+     * котором файл отдаётся.
      */
     public function test_guest_receives_a_file(): void
     {
@@ -335,7 +338,7 @@ class FeedTest extends TestCase
 
         $this->assertNotNull($work->guest_id);
 
-        $token = \App\Models\Guest::first()->token;
+        $token = Guest::first()->token;
 
         $this->withCookie(config('guests.cookie_name'), $token)
             ->get("/studio/{$work->id}/file")
@@ -352,7 +355,7 @@ class FeedTest extends TestCase
         ]);
 
         $work = Generation::latest('id')->first();
-        $token = \App\Models\Guest::first()->token;
+        $token = Guest::first()->token;
 
         $this->withCookie(config('guests.cookie_name'), $token)
             ->get("/studio/{$work->id}/file?small=1")

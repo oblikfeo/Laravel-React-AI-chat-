@@ -30,6 +30,7 @@ interface AudioStudio
      * Ставит смену голоса в работу.
      *
      * @param  string  $recording  содержимое исходной записи
+     *
      * @throws GenerationFailed
      */
     public function queueVoiceChange(

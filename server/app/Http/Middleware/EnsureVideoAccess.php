@@ -19,8 +19,7 @@ class EnsureVideoAccess
     public function __construct(
         private readonly VideoStudio $studio,
         private readonly VideoLimiter $limiter,
-    ) {
-    }
+    ) {}
 
     public function handle(Request $request, Closure $next): Response
     {

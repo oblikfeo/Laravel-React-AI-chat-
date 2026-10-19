@@ -11,8 +11,7 @@ class PaymentNotification
         public readonly string $paymentId,
         public readonly string $status,
         public readonly array $payload = [],
-    ) {
-    }
+    ) {}
 
     public function isSucceeded(): bool
     {

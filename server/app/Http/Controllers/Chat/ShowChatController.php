@@ -22,7 +22,7 @@ class ShowChatController extends Controller
     public function __invoke(Request $request, Chat $chat, RequestReply $reply): Response
     {
         if (! ChatOwnership::owns($request, $chat)) {
-            throw new AccessDeniedHttpException();
+            throw new AccessDeniedHttpException;
         }
 
         $character = $chat->character?->load('user:id,name');

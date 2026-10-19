@@ -22,8 +22,7 @@ class CreateSpeech
     public function __construct(
         private readonly ImageGenerator $generator,
         private readonly StoreGenerationFile $files,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array<string, mixed>  $input

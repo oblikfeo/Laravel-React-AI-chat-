@@ -17,8 +17,7 @@ class CollectVideo
     public function __construct(
         private readonly VideoStudio $studio,
         private readonly StoreGenerationFile $files,
-    ) {
-    }
+    ) {}
 
     public function handle(Generation $generation): Generation
     {

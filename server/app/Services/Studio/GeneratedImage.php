@@ -12,8 +12,7 @@ class GeneratedImage
         public readonly string $mime = 'image/png',
         public readonly ?int $width = null,
         public readonly ?int $height = null,
-    ) {
-    }
+    ) {}
 
     public function extension(): string
     {

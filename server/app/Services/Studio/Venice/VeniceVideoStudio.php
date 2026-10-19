@@ -9,14 +9,10 @@ use App\Services\Studio\VideoStudio;
 
 /**
  * Видео на Venice AI.
- *
- * Разбор возможностей провайдера — в docs/STUDIO-API.md.
  */
 class VeniceVideoStudio implements VideoStudio
 {
-    public function __construct(private readonly VeniceQueue $queue)
-    {
-    }
+    public function __construct(private readonly VeniceQueue $queue) {}
 
     public function isAvailable(): bool
     {

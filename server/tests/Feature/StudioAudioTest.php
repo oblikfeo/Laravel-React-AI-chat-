@@ -30,7 +30,7 @@ class StudioAudioTest extends TestCase
 
         Storage::fake('local');
 
-        $this->studio = new FakeAudioStudio();
+        $this->studio = new FakeAudioStudio;
         $this->app->instance(AudioStudio::class, $this->studio);
     }
 
@@ -249,10 +249,8 @@ class StudioAudioTest extends TestCase
     }
 
     /**
-     * Повтор звука должен звать звуковые инструменты.
-     *
-     * Раньше он слепо звал рисование и падал на ключе модели, которой
-     * среди картинок нет.
+     * Повтор звука зовёт звуковые инструменты, а не рисование: ключа
+     * звуковой модели среди картинок нет.
      */
     public function test_audio_can_be_repeated(): void
     {

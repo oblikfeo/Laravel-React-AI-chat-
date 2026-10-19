@@ -10,7 +10,9 @@ use App\Services\Studio\Venice\VeniceClient;
 use App\Services\Studio\Venice\VeniceGenerator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Session\TokenMismatchException;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 use Tests\Support\FakeImageGenerator;
@@ -19,10 +21,8 @@ use Tests\TestCase;
 /**
  * Что бы ни сломалось, человек не видит страницу ошибки.
  *
- * 12.10 у сервера на секунды пропал DNS, запрос к провайдеру не ушёл,
- * и вместо несостоявшейся картинки открылось окно с ошибкой 500 —
- * прямо на показе заказчику. Эти тесты про то, чтобы так больше не
- * было: сбой превращается в работу с пометкой «не получилось».
+ * Сбой провайдера, сети или кода превращается в работу с пометкой
+ * «не получилось» или в сообщение на той же странице.
  */
 class StudioResilienceTest extends TestCase
 {
@@ -37,7 +37,7 @@ class StudioResilienceTest extends TestCase
         Storage::fake('local');
     }
 
-    /** Тот самый случай: провайдер недоступен по сети. */
+    /** Провайдер недоступен по сети. */
     public function test_lost_connection_does_not_break_the_page(): void
     {
         $this->app->instance(ImageGenerator::class, new VeniceGenerator(
@@ -95,7 +95,7 @@ class StudioResilienceTest extends TestCase
     /** Ошибки проверки формы страховка не трогает. */
     public function test_validation_errors_still_reach_the_form(): void
     {
-        $this->app->instance(ImageGenerator::class, new FakeImageGenerator());
+        $this->app->instance(ImageGenerator::class, new FakeImageGenerator);
 
         $this->actingAs(User::factory()->create())
             ->post('/studio', ['prompt' => ''], ['X-Inertia' => 'true'])
@@ -104,10 +104,8 @@ class StudioResilienceTest extends TestCase
     }
 
     /**
-     * Отказ модели по её правилам человек видит словами.
-     *
-     * 12.10 оживление картинки с известным персонажем модель
-     * отклонила, а в интерфейсе было только «не получилось».
+     * Отказ модели по её правилам человек видит словами, а не общим
+     * «не получилось».
      */
     public function test_person_is_told_why_the_work_failed(): void
     {
@@ -126,7 +124,7 @@ class StudioResilienceTest extends TestCase
 
         $this->assertStringContainsString('declined', $declined->failureNote());
 
-        $this->app->instance(ImageGenerator::class, new FakeImageGenerator());
+        $this->app->instance(ImageGenerator::class, new FakeImageGenerator);
 
         // Причина из базы — по-русски и для нас — наружу не уходит.
         $this->actingAs($user)
@@ -179,13 +177,13 @@ class StudioResilienceTest extends TestCase
 
     /**
      * Устаревшая форма возвращает на страницу с сообщением, а не на
-     * экран «Page Expired». Так было у заказчика при входе 16.10.
+     * экран «Page Expired».
      */
     public function test_expired_form_returns_to_the_page(): void
     {
-        \Illuminate\Support\Facades\Route::middleware('web')->post(
+        Route::middleware('web')->post(
             '/_expired',
-            fn () => throw new \Illuminate\Session\TokenMismatchException(),
+            fn () => throw new TokenMismatchException,
         );
 
         $this->from('/auth')

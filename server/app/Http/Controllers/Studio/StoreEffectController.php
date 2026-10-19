@@ -6,36 +6,19 @@ use App\Actions\Studio\QueueAudio;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Studio\StoreEffectRequest;
 use App\Services\Guests\CurrentGuest;
-use App\Services\Studio\AudioStudio;
-use App\Services\Studio\StudioLimiter;
 use Illuminate\Http\RedirectResponse;
 
 class StoreEffectController extends Controller
 {
     /**
      * Ставит звуковой эффект в работу.
+     *
+     * Доступность Студии и дневной лимит проверяет EnsureStudioAccess.
      */
-    public function __invoke(
-        StoreEffectRequest $request,
-        QueueAudio $action,
-        StudioLimiter $limiter,
-        AudioStudio $studio,
-    ): RedirectResponse {
-        if (! $studio->isAvailable()) {
-            return back()->with('error', 'Studio is not available yet. It is coming soon.');
-        }
-
+    public function __invoke(StoreEffectRequest $request, QueueAudio $action): RedirectResponse
+    {
         $user = $request->user();
         $guest = CurrentGuest::get($request);
-
-        if (! $limiter->allows($user, $guest)) {
-            return back()->with(
-                'error',
-                $user
-                    ? "You have reached today's limit. It resets tomorrow."
-                    : "You have reached today's free limit. Sign up to create more."
-            );
-        }
 
         $action->effect($user, $guest, $request->validated());
 

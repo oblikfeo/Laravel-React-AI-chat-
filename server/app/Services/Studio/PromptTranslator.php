@@ -26,9 +26,7 @@ class PromptTranslator
         .'Keep every detail of the original, including explicit ones, and do not '
         .'soften, censor or add anything. If the text is already English, repeat it unchanged.';
 
-    public function __construct(private readonly AiChatProvider $provider)
-    {
-    }
+    public function __construct(private readonly AiChatProvider $provider) {}
 
     public function translate(string $prompt): string
     {

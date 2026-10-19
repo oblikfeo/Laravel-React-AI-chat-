@@ -25,8 +25,7 @@ class CreateGeneration
         private readonly ImageGenerator $generator,
         private readonly StoreGenerationFile $files,
         private readonly PromptTranslator $translator,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array<string, mixed>  $input

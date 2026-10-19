@@ -21,7 +21,7 @@ class ReplyController extends Controller
     public function __invoke(Request $request, Chat $chat, RequestReply $action): RedirectResponse
     {
         if (! ChatOwnership::owns($request, $chat)) {
-            throw new AccessDeniedHttpException();
+            throw new AccessDeniedHttpException;
         }
 
         $action->handle($chat);

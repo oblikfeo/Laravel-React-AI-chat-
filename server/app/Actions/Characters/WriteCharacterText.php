@@ -15,11 +15,10 @@ use RuntimeException;
 class WriteCharacterText
 {
     public const DESCRIPTION = 'description';
+
     public const INSTRUCTIONS = 'instructions';
 
-    public function __construct(private readonly AiChatProvider $provider)
-    {
-    }
+    public function __construct(private readonly AiChatProvider $provider) {}
 
     /**
      * @param  array{name?: ?string, description?: ?string, instructions?: ?string}  $draft

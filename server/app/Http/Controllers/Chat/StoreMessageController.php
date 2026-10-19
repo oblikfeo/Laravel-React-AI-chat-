@@ -6,8 +6,8 @@ use App\Actions\Chat\SendMessage;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Chat\StoreMessageRequest;
 use App\Models\Chat;
-use App\Services\Guests\CurrentGuest;
 use App\Services\Guests\ChatOwnership;
+use App\Services\Guests\CurrentGuest;
 use App\Services\Guests\GuestLimiter;
 use Illuminate\Http\RedirectResponse;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -27,7 +27,7 @@ class StoreMessageController extends Controller
         GuestLimiter $limiter,
     ): RedirectResponse {
         if (! ChatOwnership::owns($request, $chat)) {
-            throw new AccessDeniedHttpException();
+            throw new AccessDeniedHttpException;
         }
 
         $guest = CurrentGuest::get($request);

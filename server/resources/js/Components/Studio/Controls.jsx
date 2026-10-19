@@ -133,3 +133,40 @@ export function Thumbnails({ files, onRemove }) {
         </div>
     );
 }
+
+/**
+ * Запуск работы: цена, остаток лимита и кнопка.
+ *
+ * Одинаковый у всех инструментов Студии: человек видит цену и остаток
+ * до того, как нажмёт.
+ */
+export function SubmitBar({
+    price = null,
+    limit = null,
+    canSubmit,
+    busy = false,
+    icon: Icon,
+    label = 'Create',
+    busyLabel = 'Sending…',
+}) {
+    return (
+        <div className="ml-auto flex items-center gap-3">
+            <Price value={price} />
+
+            {limit && <Remaining limit={limit} />}
+
+            <button
+                type="submit"
+                disabled={!canSubmit}
+                className={`flex h-10 items-center gap-2 rounded-full px-5 text-[14px] font-semibold transition ${
+                    canSubmit
+                        ? 'bg-white text-black hover:bg-white/90'
+                        : 'cursor-not-allowed border border-white/[0.12] text-white/35'
+                }`}
+            >
+                <Icon className="h-4 w-4" strokeWidth={2} />
+                {busy ? busyLabel : label}
+            </button>
+        </div>
+    );
+}

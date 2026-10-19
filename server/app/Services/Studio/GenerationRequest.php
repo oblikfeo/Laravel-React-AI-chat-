@@ -36,6 +36,5 @@ class GenerationRequest
         public readonly bool $supportsAspectRatio = false,
         /** Кратность размеров, которую требует модель. */
         public readonly int $divisor = 8,
-    ) {
-    }
+    ) {}
 }

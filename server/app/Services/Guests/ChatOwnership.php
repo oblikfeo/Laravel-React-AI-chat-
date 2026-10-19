@@ -3,7 +3,6 @@
 namespace App\Services\Guests;
 
 use App\Models\Chat;
-use App\Services\Guests\CurrentGuest;
 use Illuminate\Http\Request;
 
 /**

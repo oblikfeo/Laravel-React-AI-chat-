@@ -13,6 +13,5 @@ class EffectRequest
         public readonly ?int $duration = null,
         /** Склеить начало с концом, чтобы звучало без шва. */
         public readonly bool $loop = false,
-    ) {
-    }
+    ) {}
 }

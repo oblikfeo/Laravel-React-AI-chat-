@@ -18,8 +18,7 @@ class CollectAudio
     public function __construct(
         private readonly AudioStudio $studio,
         private readonly StoreGenerationFile $files,
-    ) {
-    }
+    ) {}
 
     public function handle(Generation $generation): Generation
     {

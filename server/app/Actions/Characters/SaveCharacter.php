@@ -24,8 +24,7 @@ class SaveCharacter
     public function __construct(
         private readonly Thumbnailer $thumbnailer,
         private readonly DocumentText $documents,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array<string, mixed>  $input  проверенные поля формы

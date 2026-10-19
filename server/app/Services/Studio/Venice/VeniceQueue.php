@@ -24,8 +24,7 @@ class VeniceQueue
         private readonly string $baseUrl,
         private readonly string $apiKey,
         private readonly int $timeout = 60,
-    ) {
-    }
+    ) {}
 
     /**
      * Ставит музыку или эффект в очередь.

@@ -23,7 +23,7 @@ class ShowCharacterAvatarController extends Controller
     public function __invoke(Request $request, Character $character): StreamedResponse
     {
         if (! $character->avatar_path) {
-            throw new NotFoundHttpException();
+            throw new NotFoundHttpException;
         }
 
         // Персонажа могли убрать из каталога уже после того, как
@@ -31,7 +31,7 @@ class ShowCharacterAvatarController extends Controller
         // остаётся виден.
         if (! Gate::forUser($request->user())->allows('view', $character)
             && ! $this->talksTo($request, $character)) {
-            throw new NotFoundHttpException();
+            throw new NotFoundHttpException;
         }
 
         return Storage::disk($character->avatar_disk ?? 'local')->response(

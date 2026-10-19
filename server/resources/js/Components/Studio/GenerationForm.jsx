@@ -10,13 +10,7 @@ import {
     Copy,
     SlidersHorizontal,
 } from 'lucide-react';
-import {
-    Panel,
-    NotReady,
-    Remaining,
-    Visibility,
-    Price,
-} from '@/Components/Studio/Controls';
+import { Panel, NotReady, Visibility, SubmitBar } from '@/Components/Studio/Controls';
 import { priceOf } from '@/Components/Studio/price';
 import Dropdown from '@/Components/Studio/Dropdown';
 
@@ -178,33 +172,17 @@ export default function GenerationForm({
 
                 <Visibility value={isPublic} onChange={setIsPublic} />
 
-                <div className="ml-auto flex items-center gap-3">
-                    <Price
-                        value={priceOf(
-                            models.find((item) => item.key === model)?.price,
-                            { count: variants },
-                        )}
-                    />
-
-                    <Remaining limit={limit} />
-
-                    <button
-                        type="submit"
-                        disabled={!canSubmit}
-                        className={`flex h-10 items-center gap-2 rounded-full px-5 text-[14px] font-semibold transition ${
-                            canSubmit
-                                ? 'bg-white text-black hover:bg-white/90'
-                                : 'cursor-not-allowed border border-white/[0.12] text-white/35'
-                        }`}
-                    >
-                        {variants > 1 ? (
-                            <Images className="h-4 w-4" strokeWidth={2} />
-                        ) : (
-                            <Sparkles className="h-4 w-4" strokeWidth={2} />
-                        )}
-                        {busy ? 'Creating…' : 'Create'}
-                    </button>
-                </div>
+                <SubmitBar
+                    price={priceOf(
+                        models.find((item) => item.key === model)?.price,
+                        { count: variants },
+                    )}
+                    limit={limit}
+                    canSubmit={canSubmit}
+                    busy={busy}
+                    busyLabel="Creating…"
+                    icon={variants > 1 ? Images : Sparkles}
+                />
             </div>
 
             {advanced && (

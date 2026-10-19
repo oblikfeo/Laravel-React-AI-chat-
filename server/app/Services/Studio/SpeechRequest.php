@@ -13,6 +13,5 @@ class SpeechRequest
         public readonly ?string $voice = null,
         public readonly float $speed = 1.0,
         public readonly string $format = 'mp3',
-    ) {
-    }
+    ) {}
 }

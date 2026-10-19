@@ -10,8 +10,7 @@ class GeneratedAudio
     public function __construct(
         public readonly string $contents,
         public readonly string $mime = 'audio/mpeg',
-    ) {
-    }
+    ) {}
 
     public function extension(): string
     {

@@ -18,6 +18,5 @@ class VideoRequest
         /** Содержимое картинки, которую нужно оживить. */
         public readonly ?string $image = null,
         public readonly string $imageMime = 'image/png',
-    ) {
-    }
+    ) {}
 }

@@ -25,6 +25,7 @@ interface ImageGenerator
      * вариантов одной идеи.
      *
      * @return array<int, GeneratedImage>
+     *
      * @throws GenerationFailed
      */
     public function generate(GenerationRequest $request): array;
@@ -39,7 +40,8 @@ interface ImageGenerator
     /**
      * Собирает одно изображение из нескольких.
      *
-     * @param array<int, string> $images содержимое файлов
+     * @param  array<int, string>  $images  содержимое файлов
+     *
      * @throws GenerationFailed
      */
     public function combine(array $images, string $prompt, ?string $aspectRatio = null): GeneratedImage;

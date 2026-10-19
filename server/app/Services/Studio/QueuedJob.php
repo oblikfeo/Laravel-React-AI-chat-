@@ -13,6 +13,5 @@ class QueuedJob
         public readonly ?int $expectedMs = null,
         /** Где будет лежать готовый файл, если провайдер назвал адрес. */
         public readonly ?string $downloadUrl = null,
-    ) {
-    }
+    ) {}
 }

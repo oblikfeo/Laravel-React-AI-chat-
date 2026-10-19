@@ -14,9 +14,7 @@ use App\Models\Message;
  */
 class RequestReply
 {
-    public function __construct(private readonly SendMessage $sendMessage)
-    {
-    }
+    public function __construct(private readonly SendMessage $sendMessage) {}
 
     /** Нужен ли ответ: последнее слово должно быть за пользователем. */
     public function isPending(Chat $chat): bool

@@ -10,14 +10,10 @@ use App\Services\Studio\QueueResult;
 
 /**
  * Звуковые инструменты на Venice AI.
- *
- * Разбор возможностей провайдера — в docs/STUDIO-API.md.
  */
 class VeniceAudioStudio implements AudioStudio
 {
-    public function __construct(private readonly VeniceQueue $queue)
-    {
-    }
+    public function __construct(private readonly VeniceQueue $queue) {}
 
     public function isAvailable(): bool
     {

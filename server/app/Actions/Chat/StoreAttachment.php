@@ -19,9 +19,7 @@ class StoreAttachment
     /** Сколько символов документа отправляем модели. */
     private const TEXT_LIMIT = 40000;
 
-    public function __construct(private readonly DocumentText $documents)
-    {
-    }
+    public function __construct(private readonly DocumentText $documents) {}
 
     public function handle(Message $message, UploadedFile $file): Attachment
     {

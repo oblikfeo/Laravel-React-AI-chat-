@@ -8,8 +8,8 @@ use Illuminate\Validation\Rules\Password;
 class RegisterRequest extends FormRequest
 {
     /**
-     * Регистрация строго в три поля: имя, почта, пароль.
-     * Подтверждающих полей нет по требованию заказчика.
+     * Регистрация в три поля: имя, почта, пароль, без поля
+     * подтверждения пароля.
      */
     public function rules(): array
     {

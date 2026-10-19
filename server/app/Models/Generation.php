@@ -18,26 +18,39 @@ class Generation extends Model
 
     /** Задача принята провайдером и ещё считается. */
     public const STATUS_QUEUED = 'queued';
+
     public const STATUS_READY = 'ready';
+
     public const STATUS_FAILED = 'failed';
 
     public const KIND_IMAGE = 'image';
+
     public const KIND_AUDIO = 'audio';
+
     public const KIND_VIDEO = 'video';
 
     /** Инструменты Студии. */
     public const OP_GENERATE = 'generate';
+
     public const OP_EDIT = 'edit';
+
     public const OP_COMBINE = 'combine';
+
     public const OP_UPSCALE = 'upscale';
+
     public const OP_BACKGROUND = 'background_remove';
+
     public const OP_SPEECH = 'speech';
+
     public const OP_MUSIC = 'music';
+
     public const OP_EFFECT = 'effect';
+
     public const OP_VOICE_CHANGE = 'voice_change';
 
     /** Ролик по описанию и оживление картинки. */
     public const OP_VIDEO = 'video';
+
     public const OP_ANIMATE = 'animate';
 
     protected $fillable = [

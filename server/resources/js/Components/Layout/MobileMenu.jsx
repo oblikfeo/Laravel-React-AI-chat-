@@ -8,7 +8,7 @@ import UserCard from '@/Components/Layout/UserCard';
 import ChatList from '@/Components/Layout/ChatList';
 
 /**
- * Мобильное меню: полноэкранный оверлей (figma/Arcana mobile homepage.png).
+ * Мобильное меню: полноэкранный оверлей.
  * Пункты и порядок те же, что в десктопном сайдбаре.
  */
 export default function MobileMenu({ open, onClose, current, activeChatId }) {

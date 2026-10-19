@@ -19,6 +19,7 @@ use App\Models\Generation;
 class StudioIntent
 {
     public const IMAGE = 'image';
+
     public const EDIT = 'edit';
 
     /** Что сделать с картинкой. */
@@ -27,6 +28,7 @@ class StudioIntent
 
     /** Убрать фон. */
     private const BACKGROUND = '/(\bфон|\bbackground\b)/iu';
+
     private const REMOVE = '/\b(убер|убра|удал|сотр|вырез|без\b)|\b(remove|erase|delete|cut\s+out|without|no)\b/iu';
 
     /** Увеличить, не меняя картинку. */

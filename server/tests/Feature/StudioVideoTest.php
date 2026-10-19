@@ -4,12 +4,18 @@ namespace Tests\Feature;
 
 use App\Models\Generation;
 use App\Models\User;
+use App\Services\Studio\AudioStudio;
 use App\Services\Studio\GenerationFailed;
 use App\Services\Studio\ImageGenerator;
+use App\Services\Studio\Venice\VeniceQueue;
+use App\Services\Studio\Venice\VeniceVideoStudio;
 use App\Services\Studio\VideoStudio;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
+use Tests\Support\FakeAudioStudio;
 use Tests\Support\FakeImageGenerator;
 use Tests\Support\FakeVideoStudio;
 use Tests\TestCase;
@@ -32,9 +38,9 @@ class StudioVideoTest extends TestCase
 
         Storage::fake('local');
 
-        $this->studio = new FakeVideoStudio();
+        $this->studio = new FakeVideoStudio;
         $this->app->instance(VideoStudio::class, $this->studio);
-        $this->app->instance(ImageGenerator::class, new FakeImageGenerator());
+        $this->app->instance(ImageGenerator::class, new FakeImageGenerator);
     }
 
     private function paid(string $plan = 'pro'): User
@@ -279,10 +285,10 @@ class StudioVideoTest extends TestCase
     {
         config(['studio.base_url' => 'https://provider.test/api/v1']);
 
-        $queue = new \App\Services\Studio\Venice\VeniceQueue('https://provider.test/api/v1', 'key', 5);
-        $this->app->instance(VideoStudio::class, new \App\Services\Studio\Venice\VeniceVideoStudio($queue));
+        $queue = new VeniceQueue('https://provider.test/api/v1', 'key', 5);
+        $this->app->instance(VideoStudio::class, new VeniceVideoStudio($queue));
 
-        \Illuminate\Support\Facades\Http::fake(fn () => throw new \Illuminate\Http\Client\ConnectionException('timeout'));
+        Http::fake(fn () => throw new ConnectionException('timeout'));
 
         $user = $this->paid();
 
@@ -435,6 +441,8 @@ class StudioVideoTest extends TestCase
     /** Музыка стоит денег за секунду: длину держим в границах модели. */
     public function test_music_cannot_be_longer_than_the_model_allows(): void
     {
+        $this->app->instance(AudioStudio::class, new FakeAudioStudio);
+
         $this->actingAs($this->paid())
             ->post('/studio/music', [
                 'prompt' => 'Calm piano for a rainy evening',

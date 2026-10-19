@@ -25,7 +25,7 @@ class StartCharacterChatController extends Controller
 
         // Закрытого персонажа не выдаём даже существованием.
         if (! Gate::forUser($user)->allows('view', $character)) {
-            throw new NotFoundHttpException();
+            throw new NotFoundHttpException;
         }
 
         $guest = CurrentGuest::get($request);

@@ -17,9 +17,7 @@ use Illuminate\Support\Facades\DB;
  */
 class StartSubscription
 {
-    public function __construct(private readonly PaymentGateway $gateway)
-    {
-    }
+    public function __construct(private readonly PaymentGateway $gateway) {}
 
     public function handle(User $user, string $plan, string $period, string $returnUrl): ?string
     {

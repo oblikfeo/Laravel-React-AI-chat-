@@ -19,8 +19,7 @@ class OpenAiCompatibleProvider implements AiChatProvider
         private readonly string $model,
         private readonly int $timeout,
         private readonly int $maxTokens = 1024,
-    ) {
-    }
+    ) {}
 
     public function isConfigured(): bool
     {

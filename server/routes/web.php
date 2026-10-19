@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Billing\HandleWebhookController;
+use App\Http\Controllers\Billing\ReturnController;
+use App\Http\Controllers\Billing\StoreSubscriptionController;
 use App\Http\Controllers\Characters\DestroyCharacterController;
 use App\Http\Controllers\Characters\IndexCharactersController;
 use App\Http\Controllers\Characters\ShowCharacterAvatarController;
@@ -16,28 +19,26 @@ use App\Http\Controllers\Chat\ShowChatController;
 use App\Http\Controllers\Chat\StoreChatController;
 use App\Http\Controllers\Chat\StoreMessageController;
 use App\Http\Controllers\Chat\UpdateChatModelController;
-use App\Http\Controllers\Billing\HandleWebhookController;
-use App\Http\Controllers\Billing\ReturnController;
-use App\Http\Controllers\Billing\StoreSubscriptionController;
+use App\Http\Controllers\Feed\ShowFeedController;
+use App\Http\Controllers\Feed\StoreChatFromFeedController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Settings\UpdatePasswordController;
+use App\Http\Controllers\Settings\UpdateProfileController;
+use App\Http\Controllers\Studio\CollectQueuedController;
 use App\Http\Controllers\Studio\DestroyGenerationController;
 use App\Http\Controllers\Studio\EditGenerationController;
 use App\Http\Controllers\Studio\RetryGenerationController;
 use App\Http\Controllers\Studio\ShowGenerationFileController;
 use App\Http\Controllers\Studio\ShowStudioController;
-use App\Http\Controllers\Studio\StoreGenerationController;
-use App\Http\Controllers\Feed\ShowFeedController;
-use App\Http\Controllers\Feed\StoreChatFromFeedController;
-use App\Http\Controllers\Studio\CollectQueuedController;
 use App\Http\Controllers\Studio\StoreAnimationController;
-use App\Http\Controllers\Studio\StoreVideoController;
-use App\Http\Middleware\EnsureVideoAccess;
 use App\Http\Controllers\Studio\StoreEffectController;
+use App\Http\Controllers\Studio\StoreGenerationController;
 use App\Http\Controllers\Studio\StoreMusicController;
-use App\Http\Controllers\Studio\StoreVoiceChangeController;
 use App\Http\Controllers\Studio\StoreSpeechController;
-use App\Http\Controllers\Settings\UpdateProfileController;
+use App\Http\Controllers\Studio\StoreVideoController;
+use App\Http\Controllers\Studio\StoreVoiceChangeController;
+use App\Http\Middleware\EnsureStudioAccess;
+use App\Http\Middleware\EnsureVideoAccess;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Support\Facades\Route;
 
@@ -86,18 +87,22 @@ Route::group([], function () {
     // Студия открыта и гостю: попробовать до регистрации, с малым
     // дневным лимитом, см. config/studio.php.
     Route::get('studio', ShowStudioController::class)->name('studio');
-    Route::post('studio', StoreGenerationController::class)
-        ->name('studio.store');
-    Route::post('studio/edit', EditGenerationController::class)
-        ->name('studio.edit');
-    Route::post('studio/speech', StoreSpeechController::class)
-        ->name('studio.speech');
-    Route::post('studio/music', StoreMusicController::class)
-        ->name('studio.music');
-    Route::post('studio/effect', StoreEffectController::class)
-        ->name('studio.effect');
-    Route::post('studio/voice-change', StoreVoiceChangeController::class)
-        ->name('studio.voice-change');
+    Route::middleware(EnsureStudioAccess::class.':image')->group(function () {
+        Route::post('studio', StoreGenerationController::class)
+            ->name('studio.store');
+        Route::post('studio/edit', EditGenerationController::class)
+            ->name('studio.edit');
+        Route::post('studio/speech', StoreSpeechController::class)
+            ->name('studio.speech');
+    });
+    Route::middleware(EnsureStudioAccess::class.':audio')->group(function () {
+        Route::post('studio/music', StoreMusicController::class)
+            ->name('studio.music');
+        Route::post('studio/effect', StoreEffectController::class)
+            ->name('studio.effect');
+        Route::post('studio/voice-change', StoreVoiceChangeController::class)
+            ->name('studio.voice-change');
+    });
     // Звук и видео считаются долго: страница спрашивает готовность,
     // пока работа не появится в галерее.
     Route::post('studio/collect', CollectQueuedController::class)

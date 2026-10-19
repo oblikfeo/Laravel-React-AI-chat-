@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Generation;
 use App\Models\User;
 use App\Services\Ai\AiChatProvider;
 use App\Services\Ai\AiResponse;
@@ -27,7 +28,7 @@ class StudioPromptTest extends TestCase
 
         Storage::fake('local');
 
-        $this->generator = new FakeImageGenerator();
+        $this->generator = new FakeImageGenerator;
         $this->app->instance(ImageGenerator::class, $this->generator);
     }
 
@@ -36,9 +37,7 @@ class StudioPromptTest extends TestCase
     {
         $this->app->bind(AiChatProvider::class, fn () => new class($answer) implements AiChatProvider
         {
-            public function __construct(private readonly string $answer)
-            {
-            }
+            public function __construct(private readonly string $answer) {}
 
             public function isConfigured(): bool
             {
@@ -98,7 +97,7 @@ class StudioPromptTest extends TestCase
 
         $this->assertSame(
             'хочу увидеть голую собаку',
-            \App\Models\Generation::first()->prompt,
+            Generation::first()->prompt,
         );
     }
 
@@ -130,8 +129,8 @@ class StudioPromptTest extends TestCase
             ->assertRedirect();
 
         $this->assertSame(
-            \App\Models\Generation::STATUS_READY,
-            \App\Models\Generation::first()->status,
+            Generation::STATUS_READY,
+            Generation::first()->status,
         );
     }
 }

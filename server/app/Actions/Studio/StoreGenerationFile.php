@@ -15,9 +15,7 @@ use Illuminate\Support\Str;
  */
 class StoreGenerationFile
 {
-    public function __construct(private readonly Thumbnailer $thumbnailer)
-    {
-    }
+    public function __construct(private readonly Thumbnailer $thumbnailer) {}
 
     public function store(
         Generation $generation,

@@ -110,7 +110,7 @@ class ChatFlowTest extends TestCase
 
     /**
      * Чат открыт и без учётной записи: гость получает ограниченный
-     * доступ, см. GuestTest. Раньше здесь была переадресация на вход.
+     * доступ, см. GuestTest.
      */
     public function test_guest_can_create_chat(): void
     {

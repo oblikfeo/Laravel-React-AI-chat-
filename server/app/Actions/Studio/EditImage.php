@@ -26,11 +26,10 @@ class EditImage
         private readonly ImageGenerator $generator,
         private readonly StoreGenerationFile $files,
         private readonly PromptTranslator $translator,
-    ) {
-    }
+    ) {}
 
     /**
-     * @param  array<int, string>  $sources содержимое исходных файлов
+     * @param  array<int, string>  $sources  содержимое исходных файлов
      * @param  array<string, mixed>  $input
      */
     public function handle(?User $user, ?Guest $guest, array $sources, array $input): Generation

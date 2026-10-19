@@ -21,8 +21,7 @@ class YooKassaGateway implements PaymentGateway
     public function __construct(
         private readonly ?string $shopId,
         private readonly ?string $secretKey,
-    ) {
-    }
+    ) {}
 
     public function isConfigured(): bool
     {

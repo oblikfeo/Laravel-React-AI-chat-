@@ -14,7 +14,7 @@ use App\Services\Studio\SpeechRequest;
  * Инструменты Студии на Venice AI.
  *
  * Один ключ закрывает весь раздел: рисование, правку, увеличение,
- * удаление фона и озвучку. Подробности в docs/STUDIO-API.md.
+ * удаление фона и озвучку.
  *
  * Форматы ответа у провайдера разные: рисование отдаёт JSON со
  * списком, остальные инструменты — готовый файл телом ответа.
@@ -26,8 +26,7 @@ class VeniceGenerator implements ImageGenerator
 
     public function __construct(
         private readonly VeniceClient $client,
-    ) {
-    }
+    ) {}
 
     public function isAvailable(): bool
     {

@@ -11,8 +11,8 @@ interface AiChatProvider
      * @param  string|null  $model  Название модели у провайдера.
      *                              Пусто — берётся из настроек.
      * @param  array<string, mixed>  $options  Тонкие настройки ответа.
-     *                              Сейчас это temperature: её задаёт
-     *                              автор персонажа.
+     *                                         Сейчас это temperature: её задаёт
+     *                                         автор персонажа.
      */
     public function complete(array $messages, ?string $model = null, array $options = []): AiResponse;
 

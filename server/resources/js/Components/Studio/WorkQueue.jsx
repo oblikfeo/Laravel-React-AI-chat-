@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { router } from '@inertiajs/react';
 import {
     Image as ImageIcon,
     Wand2,
@@ -9,7 +8,8 @@ import {
     RotateCw,
     X,
 } from 'lucide-react';
-import { Stars } from '@/Components/Studio/AudioCard';
+import Stars from '@/Components/Studio/Stars';
+import { removeWork, retryWork } from '@/Components/Studio/workActions';
 
 /** Значок и название по разделу. */
 const LOOKS = {
@@ -57,18 +57,6 @@ function QueueCard({ item, section }) {
     const failed = item.status === 'failed';
     const look = LOOKS[section] ?? LOOKS.image;
 
-    const remove = () =>
-        router.delete(`/studio/${item.id}`, {
-            async: true,
-            preserveScroll: true,
-        });
-
-    const retry = () =>
-        router.post(
-            `/studio/${item.id}/retry`,
-            {},
-            { async: true, preserveScroll: true },
-        );
 
     return (
         <div
@@ -113,8 +101,8 @@ function QueueCard({ item, section }) {
                             {item.failureNote ?? 'Could not create this one.'}
                         </span>
 
-                        <Small label="Try again" icon={RotateCw} onClick={retry} />
-                        <Small label="Dismiss" icon={X} onClick={remove} />
+                        <Small label="Try again" icon={RotateCw} onClick={() => retryWork(item)} />
+                        <Small label="Dismiss" icon={X} onClick={() => removeWork(item)} />
                     </div>
                 ) : (
                     <p className="mt-1.5 flex items-center gap-2 text-[12px]">

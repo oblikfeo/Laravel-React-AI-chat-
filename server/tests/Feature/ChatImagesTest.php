@@ -17,12 +17,11 @@ use Tests\Support\FakeImageGenerator;
 use Tests\TestCase;
 
 /**
- * Картинки прямо в чате, как у Venice.
+ * Картинки прямо в чате.
  *
  * «Нарисуй собаку» — в ответ картинка. «Убери фон» следующим
  * сообщением — та же картинка без фона. Без слов и без перехода в
- * Студию. Так заказчик проверял чат 16.10 и получил отказ и ответ
- * «вот изображение» без изображения.
+ * Студию.
  */
 class ChatImagesTest extends TestCase
 {
@@ -42,14 +41,12 @@ class ChatImagesTest extends TestCase
 
         Storage::fake('local');
 
-        $this->images = new FakeImageGenerator();
+        $this->images = new FakeImageGenerator;
         $this->app->instance(ImageGenerator::class, $this->images);
 
         $this->app->instance(AiChatProvider::class, new class($this) implements AiChatProvider
         {
-            public function __construct(private readonly ChatImagesTest $test)
-            {
-            }
+            public function __construct(private readonly ChatImagesTest $test) {}
 
             public function isConfigured(): bool
             {
@@ -113,7 +110,7 @@ class ChatImagesTest extends TestCase
         $this->assertFalse($this->lastReply($chat)->generation->is_public);
     }
 
-    /** Ровно сценарий заказчика: нарисовать, затем убрать фон. */
+    /** Нарисовать, затем убрать фон следующим сообщением. */
     public function test_follow_up_removes_the_background_of_the_last_picture(): void
     {
         $user = User::factory()->create();
@@ -128,7 +125,7 @@ class ChatImagesTest extends TestCase
         $this->assertSame(0, $this->asked);
     }
 
-    /** Фото заказчика с просьбой убрать людей — правка по описанию. */
+    /** Своё фото с просьбой убрать людей — правка по описанию. */
     public function test_attached_photo_is_edited_by_description(): void
     {
         $photo = UploadedFile::fake()->createWithContent(
@@ -237,7 +234,7 @@ class ChatImagesTest extends TestCase
 
     public function test_intent_examples(): void
     {
-        $intent = new StudioIntent();
+        $intent = new StudioIntent;
 
         $this->assertSame('image', $intent->detect('Create an image of Trump in the guise of Kim Jong Un.', false)['mode']);
         $this->assertSame('image', $intent->detect('нарисуй кота', true)['mode']);

@@ -10,7 +10,7 @@ const ACCEPT = 'image/jpeg,image/png,image/webp,image/gif,application/pdf,'
 const MAX_FILES = 5;
 
 /**
- * Поле ввода промпта — центральный элемент главной (figma/1440w dark.jpg).
+ * Поле ввода промпта — центральный элемент главной.
  * Стеклянная панель со скруглением 24px, панель действий снизу.
  */
 export default function PromptComposer({

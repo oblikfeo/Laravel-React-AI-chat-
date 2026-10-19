@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Studio;
 
 use App\Http\Controllers\Controller;
 use App\Models\Generation;
-use App\Services\Guests\CurrentGuest;
+use App\Services\Guests\GenerationOwnership;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -17,8 +17,8 @@ class DestroyGenerationController extends Controller
      */
     public function __invoke(Request $request, Generation $generation): RedirectResponse
     {
-        if (! $this->owns($generation, $request)) {
-            throw new AccessDeniedHttpException();
+        if (! GenerationOwnership::owns($request, $generation)) {
+            throw new AccessDeniedHttpException;
         }
 
         // Файл удаляем тоже: иначе хранилище забьётся тем, что никому
@@ -36,18 +36,5 @@ class DestroyGenerationController extends Controller
         $generation->delete();
 
         return back();
-    }
-
-    private function owns(Generation $generation, Request $request): bool
-    {
-        if ($user = $request->user()) {
-            return $generation->user_id === $user->id;
-        }
-
-        $guest = CurrentGuest::get($request);
-
-        return $guest !== null
-            && $generation->guest_id === $guest->id
-            && $generation->user_id === null;
     }
 }

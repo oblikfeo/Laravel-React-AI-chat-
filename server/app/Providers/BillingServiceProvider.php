@@ -24,10 +24,10 @@ class BillingServiceProvider extends ServiceProvider
                     shopId: $settings['shop_id'] ?? null,
                     secretKey: $settings['secret_key'] ?? null,
                 ),
-                default => new UnconfiguredGateway(),
+                default => new UnconfiguredGateway,
             };
 
-            return $gateway->isConfigured() ? $gateway : new UnconfiguredGateway();
+            return $gateway->isConfigured() ? $gateway : new UnconfiguredGateway;
         });
     }
 }

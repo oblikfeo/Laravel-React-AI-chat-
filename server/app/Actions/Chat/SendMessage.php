@@ -9,9 +9,9 @@ use App\Services\Ai\AiChatProvider;
 use App\Services\Ai\ModelCatalog;
 use App\Services\Characters\CharacterPrompt;
 use App\Services\Chat\StudioIntent;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Throwable;
 
@@ -28,11 +28,10 @@ class SendMessage
         private readonly AiChatProvider $provider,
         private readonly CharacterPrompt $characterPrompt,
         private readonly StudioIntent $studioIntent,
-    ) {
-    }
+    ) {}
 
     /**
-     * @param  array<int, \Illuminate\Http\UploadedFile>  $files
+     * @param  array<int, UploadedFile>  $files
      */
     public function handle(Chat $chat, string $content, array $files = []): Message
     {

@@ -20,7 +20,7 @@ class UpdateChatModelController extends Controller
     public function __invoke(Request $request, Chat $chat): RedirectResponse
     {
         if (! ChatOwnership::owns($request, $chat)) {
-            throw new AccessDeniedHttpException();
+            throw new AccessDeniedHttpException;
         }
 
         // Гостю доступна одна модель, менять ему нечего.

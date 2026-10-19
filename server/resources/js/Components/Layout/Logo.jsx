@@ -31,8 +31,8 @@ export function LogoMark({ className = 'h-8 w-8' }) {
             <circle cx="15.5" cy="20.5" r="3.2" fill={`url(#${gradientId})`} />
             <path
                 d="M24 5.5l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z"
-                // Искра берёт цвет текста: белая на светлом фоне
-                // пропадала.
+                // Искра берёт цвет текста: белая на светлом фоне не
+                // видна.
                 className="side-title"
                 fill="currentColor"
             />

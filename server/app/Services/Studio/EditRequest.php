@@ -14,6 +14,5 @@ class EditRequest
         public readonly ?string $providerModel = null,
         public readonly ?string $aspectRatio = null,
         public readonly bool $safeMode = false,
-    ) {
-    }
+    ) {}
 }

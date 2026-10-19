@@ -27,8 +27,7 @@ class QueueVideo
         private readonly VideoStudio $studio,
         private readonly PromptTranslator $translator,
         private readonly Thumbnailer $thumbnailer,
-    ) {
-    }
+    ) {}
 
     /**
      * Ролик по описанию.

@@ -21,7 +21,7 @@ class ShowAttachmentController extends Controller
     public function __invoke(Request $request, Attachment $attachment): StreamedResponse
     {
         if (! ChatOwnership::owns($request, $attachment->message->chat)) {
-            throw new AccessDeniedHttpException();
+            throw new AccessDeniedHttpException;
         }
 
         return Storage::disk($attachment->disk)->response(

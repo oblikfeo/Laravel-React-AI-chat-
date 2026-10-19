@@ -17,8 +17,7 @@ class CollectQueued
     public function __construct(
         private readonly CollectAudio $audio,
         private readonly CollectVideo $video,
-    ) {
-    }
+    ) {}
 
     public function handle(Generation $generation): Generation
     {
