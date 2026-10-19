@@ -46,7 +46,10 @@ class StudioIntent
     private const QUESTION = '/^\W*(как|почему|зачем|что\s+такое|какой|какая|какие|где|сколько|посоветуй|расскажи|объясни|how|why|what|which|where|explain|tell\s+me)\b/iu';
 
     /** Звук: что сделать. */
-    private const MUSIC = '(музык|песн|трек|мелоди|бит\b|саундтрек|джингл|рингтон|music|song|track|melody|beat|soundtrack|jingle)';
+    private const MUSIC = '(музык|песн|трек|мелоди|бит\b|саундтрек|джингл|рингтон|аудио|рэп|гимн|music|song|track|melody|beat|soundtrack|jingle|audio|rap|anthem)';
+
+    /** Голос: озвучка, подкаст, голосовое. */
+    private const VOICE = '(голос|озвучк|подкаст|диктор|voice|podcast|narration|speech)';
 
     private const EFFECT = '(звуков\w*\s+эффект|звук\b|звука\b|звуки\b|sound\s*effects?|sfx|\bsound\b)';
 
@@ -55,6 +58,9 @@ class StudioIntent
 
     /** Видео: что сделать. */
     private const VIDEO_WORDS = '(видео|ролик|клип|мульт|анимаци|video|clip|movie|animation)';
+
+    /** Ссылка на картинку, которая уже есть: «из неё», «этой фото». */
+    private const REFERENCE = '/(?<!\w)(эт[оуаи]\w*|е[ёе]|его|него|н[её]е|из\s+(фото|картинк|изображени)|this|it|the\s+(photo|picture|image))(?!\w)/iu';
 
     /** Оживить картинку. */
     private const ANIMATE = '/\b(оживи|анимируй)|\b(animate|bring\s+(this|it|the\s+\w+)\s+to\s+life)\b/iu';
@@ -74,16 +80,21 @@ class StudioIntent
     /** Увеличить, не меняя картинку. */
     private const UPSCALE = '/\b(увелич|улучши\s+качеств|повысь\s+разрешени|в\s+высок\w*\s+разрешени)|\b(upscale|enhance\s+(the\s+)?(quality|resolution)|higher\s+resolution)\b/iu';
 
-    /** Нарисовать новую: «нарисуй», «хочу картинку», «make an image». */
-    private const IMAGE_WORDS = [
-        '/\b(нарису\w*|нарисова\w*|сгенер\w*|изобраз\w*)/iu',
-        '/\b(созда\w*|сдела\w*|хочу|нуж[нен]\w*|давай|можешь)\b.{0,40}?\b(картинк|изображени|рисун|фото|арт|постер|логотип|аватар|иллюстрац|обо[ий]|портрет)/iu',
-        "/\b(want|need|would\s+like|i'?d\s+like)\b.{0,40}?\b(image|picture|pic|photo|drawing|illustration|poster|logo|avatar|portrait|wallpaper)s?\b/iu",
-        '/^\W*(please\s+)?(draw|paint|sketch)\b/iu',
-        '/\b(can|could)\s+you\s+(draw|paint|sketch)\b/iu',
-        '/\b(generate|create|make|render|design)\b.{0,40}?\b(image|picture|pic|photo|drawing|illustration|poster|logo|avatar|portrait|wallpaper|artwork)s?\b/iu',
-        '/^\W*(an?\s+)?(image|picture|photo)\s+of\b/iu',
-    ];
+    /** Рисовать: этот глагол сам по себе означает картинку. */
+    private const DRAW = "/\b(нарису\w*|нарисова\w*|изобраз\w*)|^\W*(please\s+)?(draw|paint|sketch)\b|\b(can|could)\s+you\s+(draw|paint|sketch)\b|^\W*(an?\s+)?(image|picture|photo)\s+of\b/iu";
+
+    /** Картинка: что нарисовать. */
+    private const IMAGE_NOUNS = '(картинк|изображени|рисун|фото|арт|постер|логотип|аватар|иллюстрац|обо[ий]|портрет|баннер|стикер|image|picture|pic\b|photo|drawing|illustration|poster|logo|avatar|portrait|wallpaper|artwork|banner|sticker)';
+
+    /** «Сгенерируй» без уточнения: картинка, если просят не текст. */
+    private const GENERATE = '/\b(сгенер\w*|generate)\b/iu';
+
+    /**
+     * Текст: «сгенерируй пароль», «сгенерируй стих», «generate code» —
+     * это работа текстовой модели, а не рисование.
+     */
+    private const TEXT_NOUNS = '(текст|стих|рассказ|истори|сказк|стать|пост(?!ер)|письм|сообщени|код|скрипт|функци|программ|парол|им[яе]н?|назван|иде[июйя]|список|план|рецепт|резюме|сценари|диалог|ответ|вопрос|тест|задач|шутк|анекдот|тост|поздравлен|слоган|описани|отзыв|таблиц|json|sql|регуляр|промпт|номер|числ|документ|презентаци|отч[её]т|эссе|реферат|перевод|ключ|токен|данн|пример|слов|фраз|загадк|кроссворд|никнейм|ник\b|хештег|хэштег|заголов|подпис'
+        .'|text|poem|story|essay|article|post(?!er)|email|letter|message|code|script|function|program|password|name|title|idea|list|plan|recipe|resume|cv\b|summary|dialogue|answer|question|quiz|joke|toast|slogan|description|review|table|json|sql|regex|prompt|number|report|translation|key|token|data|example|word|phrase|riddle|tagline|caption|bio\b|nickname|hashtag|headline|uuid)';
 
     /**
      * @param  int  $images  сколько картинок можно взять в работу
@@ -97,10 +108,11 @@ class StudioIntent
             return null;
         }
 
-        // «Как сделать…» — вопрос для модели, если только к нему не
-        // приложена картинка, которую просят поправить.
+        // «Как сделать…», «расскажи…» — вопрос для модели, даже если в
+        // диалоге есть картинка: «как убрать фон в фотошопе?» — не
+        // просьба убрать фон.
         if (preg_match(self::QUESTION, $text)) {
-            return $this->edit($text, $images);
+            return null;
         }
 
         // Звук и видео проверяем раньше картинок: в «сгенерируй
@@ -127,6 +139,7 @@ class StudioIntent
         }
 
         $found = array_filter([
+            self::AUDIO_SPEECH => $this->made($text, self::VOICE),
             self::AUDIO_MUSIC => $this->made($text, self::MUSIC),
             self::AUDIO_EFFECT => $this->made($text, self::EFFECT),
             self::VIDEO => $this->made($text, self::VIDEO_WORDS),
@@ -139,20 +152,26 @@ class StudioIntent
         asort($found);
         $first = array_key_first($found);
 
-        return $first === self::VIDEO
-            ? $this->intent(self::VIDEO, $images > 0 ? Generation::OP_ANIMATE : Generation::OP_VIDEO, $text)
-            : $this->intent(self::AUDIO, $first, $text);
+        if ($first !== self::VIDEO) {
+            return $this->intent(self::AUDIO, $first, $text);
+        }
+
+        // Ролик из картинки — только если о ней и речь: «сделай из неё
+        // видео». Иначе «хочу видео с котом» после картинки с собакой
+        // оживил бы собаку.
+        $animate = $images > 0 && preg_match(self::REFERENCE, $text);
+
+        return $this->intent(self::VIDEO, $animate ? Generation::OP_ANIMATE : Generation::OP_VIDEO, $text);
     }
 
     private function image(string $text): ?array
     {
-        foreach (self::IMAGE_WORDS as $pattern) {
-            if (preg_match($pattern, $text)) {
-                return $this->intent(self::IMAGE, Generation::OP_GENERATE, $text);
-            }
-        }
+        $drawn = preg_match(self::DRAW, $text)
+            || $this->made($text, self::IMAGE_NOUNS) !== null
+            // «Сгенерируй закат» — картинка, «сгенерируй пароль» — нет.
+            || (preg_match(self::GENERATE, $text) && $this->made($text, self::TEXT_NOUNS) === null);
 
-        return null;
+        return $drawn ? $this->intent(self::IMAGE, Generation::OP_GENERATE, $text) : null;
     }
 
     private function edit(string $text, int $images): ?array

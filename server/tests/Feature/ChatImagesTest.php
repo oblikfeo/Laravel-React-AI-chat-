@@ -8,7 +8,6 @@ use App\Models\Message;
 use App\Models\User;
 use App\Services\Ai\AiChatProvider;
 use App\Services\Ai\AiResponse;
-use App\Services\Chat\StudioIntent;
 use App\Services\Studio\ImageGenerator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -232,89 +231,26 @@ class ChatImagesTest extends TestCase
                 ->has('messages.1.image.url'));
     }
 
-    public function test_intent_examples(): void
+    /** «Сгенерируй аудио» — карточка Студии, а не нарисованная картинка. */
+    public function test_generate_audio_is_not_drawn(): void
     {
-        $intent = new StudioIntent;
+        $chat = $this->say(User::factory()->create(), 'сгенерируй аудио');
 
-        $this->assertSame('image', $intent->detect('Create an image of Trump in the guise of Kim Jong Un.')['mode']);
-        $this->assertSame('image', $intent->detect('нарисуй кота', 1)['mode']);
-        $this->assertSame(Generation::OP_BACKGROUND, $intent->detect('remove the background', 1)['operation']);
-        $this->assertSame(Generation::OP_UPSCALE, $intent->detect('увеличь качество', 1)['operation']);
-        $this->assertSame(Generation::OP_EDIT, $intent->detect('сделай небо закатным', 1)['operation']);
-        $this->assertSame(Generation::OP_COMBINE, $intent->detect('объедини эти фото в одно', 2)['operation']);
-        $this->assertNull($intent->detect('Объясни теорию относительности', 1));
-        $this->assertNull($intent->detect('удали дубликаты из списка'));
+        $reply = $this->lastReply($chat);
+
+        $this->assertNull($reply->generation_id);
+        $this->assertNull($this->images->lastGeneration);
+        $this->assertSame('audio', $reply->studio_link['tab']);
     }
 
-    /** «Сгенерируй» — тот же глагол, что у картинок, но это музыка. */
-    public function test_audio_requests_are_recognised(): void
+    /** «Сгенерируй пароль» — ответ текстом, а не картинка. */
+    public function test_generate_password_is_answered_in_text(): void
     {
-        $intent = new StudioIntent;
+        $chat = $this->say(User::factory()->create(), 'сгенерируй пароль');
 
-        foreach ([
-            'сгенерируй музыку для вечеринки' => 'music',
-            'создай песню про лето' => 'music',
-            'generate a song about summer' => 'music',
-            'озвучь: добро пожаловать' => 'speech',
-            'сделай звук открывающейся двери' => 'effect',
-        ] as $text => $kind) {
-            $result = $intent->detect($text);
-
-            $this->assertSame('audio', $result['mode'] ?? null, $text);
-            $this->assertSame($kind, $result['operation'], $text);
-        }
-
-        $this->assertNull($intent->detect('Какая песня была самой популярной в 1999 году?'));
-    }
-
-    public function test_video_requests_are_recognised(): void
-    {
-        $intent = new StudioIntent;
-
-        $this->assertSame(Generation::OP_VIDEO, $intent->detect('сгенерируй видео с котом')['operation']);
-        $this->assertSame(Generation::OP_VIDEO, $intent->detect('make a video of a dog running')['operation']);
-        $this->assertSame(Generation::OP_ANIMATE, $intent->detect('оживи это фото', 1)['operation']);
-        $this->assertNull($intent->detect('посоветуй хорошее видео про космос'));
-    }
-
-    /** Просьба словами «хочу», «нужно», «можешь» — тоже просьба. */
-    public function test_wishes_are_requests(): void
-    {
-        $intent = new StudioIntent;
-
-        foreach ([
-            'хочу сделать видео' => ['video', Generation::OP_VIDEO],
-            'хочу видео с котом на пляже' => ['video', Generation::OP_VIDEO],
-            'можешь сделать ролик про космос?' => ['video', Generation::OP_VIDEO],
-            'I want to make a video' => ['video', Generation::OP_VIDEO],
-            'мне нужен клип для песни' => ['video', Generation::OP_VIDEO],
-            'сгенерируй музыку для ролика' => ['audio', 'music'],
-            'нужна музыка для вечеринки' => ['audio', 'music'],
-            'I need a song for my birthday' => ['audio', 'music'],
-            'хочу картинку с закатом' => ['image', Generation::OP_GENERATE],
-            'можешь нарисовать собаку?' => ['image', Generation::OP_GENERATE],
-            'I want a picture of a red fox' => ['image', Generation::OP_GENERATE],
-        ] as $text => [$mode, $operation]) {
-            $result = $intent->detect($text);
-
-            $this->assertSame($mode, $result['mode'] ?? null, $text);
-            $this->assertSame($operation, $result['operation'], $text);
-        }
-    }
-
-    /** Вопрос «как сделать» — вопрос, а не просьба. */
-    public function test_how_to_questions_stay_with_the_text_model(): void
-    {
-        $intent = new StudioIntent;
-
-        foreach ([
-            'как сделать видео для тиктока?',
-            'расскажи про музыку барокко',
-            'хочу понять квантовую физику',
-            'нужно написать письмо начальнику',
-        ] as $text) {
-            $this->assertNull($intent->detect($text), $text);
-        }
+        $this->assertNull($this->lastReply($chat)->generation_id);
+        $this->assertNull($this->images->lastGeneration);
+        $this->assertSame(1, $this->asked);
     }
 
     /** Музыку чат не делает: отвечает карточкой со ссылкой в Студию. */

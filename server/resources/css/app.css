@@ -917,6 +917,173 @@
         }
     }
 
+    /*
+     * Карточка «сделать в Студии» в чате.
+     *
+     * Это приглашение в платную часть продукта, поэтому она живая:
+     * по рамке бежит цветной луч, по стеклу проходит блик, а в
+     * значке играет эквалайзер или пульсирует кнопка воспроизведения.
+     */
+    .promo-border {
+        position: relative;
+        isolation: isolate;
+    }
+
+    .promo-border::before {
+        content: '';
+        position: absolute;
+        inset: -1px;
+        z-index: -1;
+        border-radius: inherit;
+        padding: 1.5px;
+        background: conic-gradient(
+            from var(--work-angle, 0deg),
+            rgb(167 139 250 / 0.9),
+            rgb(56 189 248 / 0.9),
+            rgb(244 114 182 / 0.8),
+            rgb(167 139 250 / 0.9)
+        );
+        -webkit-mask:
+            linear-gradient(#000 0 0) content-box,
+            linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor;
+        mask:
+            linear-gradient(#000 0 0) content-box,
+            linear-gradient(#000 0 0);
+        mask-composite: exclude;
+        animation: work-angle 6s linear infinite;
+        pointer-events: none;
+    }
+
+    .promo-border::after {
+        content: '';
+        position: absolute;
+        inset: -1px;
+        z-index: -2;
+        border-radius: inherit;
+        box-shadow:
+            0 0 40px -12px rgb(139 92 246 / 0.55),
+            0 0 60px -20px rgb(56 189 248 / 0.45);
+        pointer-events: none;
+    }
+
+    /*
+     * Цвета карточки свои, а не из общей палитры: карточка тёмная в
+     * обеих темах, как баннер тарифа, и правила светлой темы её не
+     * перекрашивают.
+     */
+    .promo-card {
+        background: linear-gradient(135deg, #1b1440 0%, #0f172a 50%, #0b2540 100%);
+        color: #fff;
+    }
+
+    .promo-muted {
+        color: rgb(255 255 255 / 0.62);
+    }
+
+    .promo-faint {
+        color: rgb(255 255 255 / 0.45);
+    }
+
+    .promo-badge {
+        background: rgb(255 255 255 / 0.1);
+        color: rgb(186 230 253);
+    }
+
+    .promo-chip {
+        border: 1px solid rgb(255 255 255 / 0.1);
+        background: rgb(255 255 255 / 0.06);
+        color: rgb(255 255 255 / 0.78);
+    }
+
+    .promo-quote {
+        border: 1px solid rgb(255 255 255 / 0.1);
+        background: rgb(0 0 0 / 0.3);
+        color: rgb(255 255 255 / 0.88);
+    }
+
+    .promo-pro {
+        border: 1px solid rgb(252 211 77 / 0.4);
+        background: rgb(252 211 77 / 0.1);
+        color: rgb(254 243 199);
+    }
+
+    .promo-pro:hover {
+        background: rgb(252 211 77 / 0.2);
+    }
+
+    .promo-sheen {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        border-radius: inherit;
+        pointer-events: none;
+    }
+
+    .promo-sheen::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        bottom: -50%;
+        width: 35%;
+        background: linear-gradient(
+            100deg,
+            transparent,
+            rgb(255 255 255 / 0.09),
+            transparent
+        );
+        transform: translateX(-160%) rotate(12deg);
+        animation: promo-sheen 5.5s ease-in-out infinite;
+    }
+
+    @keyframes promo-sheen {
+        0%,
+        55% {
+            transform: translateX(-160%) rotate(12deg);
+        }
+        100% {
+            transform: translateX(420%) rotate(12deg);
+        }
+    }
+
+    @keyframes eq-bar {
+        0%,
+        100% {
+            transform: scaleY(0.3);
+        }
+        50% {
+            transform: scaleY(1);
+        }
+    }
+
+    @keyframes promo-ring {
+        0% {
+            transform: scale(0.85);
+            opacity: 0.7;
+        }
+        100% {
+            transform: scale(1.6);
+            opacity: 0;
+        }
+    }
+
+    @keyframes promo-glow {
+        0%,
+        100% {
+            box-shadow: 0 8px 28px -10px rgb(139 92 246 / 0.7);
+        }
+        50% {
+            box-shadow: 0 8px 36px -6px rgb(56 189 248 / 0.8);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .promo-border::before,
+        .promo-sheen::before {
+            animation: none;
+        }
+    }
+
     /* Значок дышит, пока модель думает: видно, что мы живы. */
     @keyframes logo-pulse {
         0%,
