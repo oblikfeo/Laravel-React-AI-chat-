@@ -28,7 +28,14 @@ class Message extends Model
         'content',
         'model',
         'generation_id',
+        'intent',
+        'studio_link',
     ];
+
+    protected function casts(): array
+    {
+        return ['studio_link' => 'array'];
+    }
 
     public function chat(): BelongsTo
     {

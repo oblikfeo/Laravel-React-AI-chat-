@@ -236,12 +236,138 @@ class ChatImagesTest extends TestCase
     {
         $intent = new StudioIntent;
 
-        $this->assertSame('image', $intent->detect('Create an image of Trump in the guise of Kim Jong Un.', false)['mode']);
-        $this->assertSame('image', $intent->detect('нарисуй кота', true)['mode']);
-        $this->assertSame(Generation::OP_BACKGROUND, $intent->detect('remove the background', true)['operation']);
-        $this->assertSame(Generation::OP_UPSCALE, $intent->detect('увеличь качество', true)['operation']);
-        $this->assertSame(Generation::OP_EDIT, $intent->detect('сделай небо закатным', true)['operation']);
-        $this->assertNull($intent->detect('Объясни теорию относительности', true));
-        $this->assertNull($intent->detect('удали дубликаты из списка', false));
+        $this->assertSame('image', $intent->detect('Create an image of Trump in the guise of Kim Jong Un.')['mode']);
+        $this->assertSame('image', $intent->detect('нарисуй кота', 1)['mode']);
+        $this->assertSame(Generation::OP_BACKGROUND, $intent->detect('remove the background', 1)['operation']);
+        $this->assertSame(Generation::OP_UPSCALE, $intent->detect('увеличь качество', 1)['operation']);
+        $this->assertSame(Generation::OP_EDIT, $intent->detect('сделай небо закатным', 1)['operation']);
+        $this->assertSame(Generation::OP_COMBINE, $intent->detect('объедини эти фото в одно', 2)['operation']);
+        $this->assertNull($intent->detect('Объясни теорию относительности', 1));
+        $this->assertNull($intent->detect('удали дубликаты из списка'));
+    }
+
+    /** «Сгенерируй» — тот же глагол, что у картинок, но это музыка. */
+    public function test_audio_requests_are_recognised(): void
+    {
+        $intent = new StudioIntent;
+
+        foreach ([
+            'сгенерируй музыку для вечеринки' => 'music',
+            'создай песню про лето' => 'music',
+            'generate a song about summer' => 'music',
+            'озвучь: добро пожаловать' => 'speech',
+            'сделай звук открывающейся двери' => 'effect',
+        ] as $text => $kind) {
+            $result = $intent->detect($text);
+
+            $this->assertSame('audio', $result['mode'] ?? null, $text);
+            $this->assertSame($kind, $result['operation'], $text);
+        }
+
+        $this->assertNull($intent->detect('Какая песня была самой популярной в 1999 году?'));
+    }
+
+    public function test_video_requests_are_recognised(): void
+    {
+        $intent = new StudioIntent;
+
+        $this->assertSame(Generation::OP_VIDEO, $intent->detect('сгенерируй видео с котом')['operation']);
+        $this->assertSame(Generation::OP_VIDEO, $intent->detect('make a video of a dog running')['operation']);
+        $this->assertSame(Generation::OP_ANIMATE, $intent->detect('оживи это фото', 1)['operation']);
+        $this->assertNull($intent->detect('посоветуй хорошее видео про космос'));
+    }
+
+    /** Музыку чат не делает: отвечает карточкой со ссылкой в Студию. */
+    public function test_music_request_gets_a_studio_card(): void
+    {
+        $chat = $this->say(User::factory()->create(), 'Сгенерируй музыку для вечеринки');
+
+        $reply = $this->lastReply($chat);
+
+        $this->assertNull($reply->generation_id);
+        $this->assertSame('audio', $reply->studio_link['tab']);
+        $this->assertSame('music', $reply->studio_link['operation']);
+        $this->assertSame(0, $this->asked);
+        $this->assertNull($this->images->lastGeneration);
+    }
+
+    public function test_video_card_opens_the_studio_with_the_request(): void
+    {
+        $user = User::factory()->create();
+        $chat = $this->say($user, 'Сделай видео с собакой на пляже');
+
+        $this->actingAs($user)
+            ->get("/chats/{$chat->id}")
+            ->assertInertia(fn ($page) => $page
+                ->where('messages.1.studioLink.tab', 'video')
+                ->where('messages.1.studioLink.url', fn ($url) => str_contains($url, 'compose=video')));
+    }
+
+    /** Оживить картинку из прошлого ответа: Студия откроется с ней. */
+    public function test_animate_card_carries_the_last_picture(): void
+    {
+        $user = User::factory()->create();
+
+        $chat = $this->say($user, 'Нарисуй собаку');
+        $this->say($user, 'Оживи её', $chat);
+
+        $link = $this->lastReply($chat)->studio_link;
+        $picture = $chat->messages()->whereNotNull('generation_id')->first()->generation_id;
+
+        $this->assertSame(Generation::OP_ANIMATE, $link['operation']);
+        $this->assertSame($picture, $link['work']);
+    }
+
+    /** Две приложенные картинки и «объедини» — объединение. */
+    public function test_two_photos_are_combined(): void
+    {
+        $photo = fn (string $name) => UploadedFile::fake()->createWithContent(
+            $name,
+            base64_decode(FakeImageGenerator::PIXEL),
+        );
+
+        $chat = $this->say(
+            User::factory()->create(),
+            'Объедини эти фото в одно',
+            files: [$photo('a.png'), $photo('b.png')],
+        );
+
+        $this->assertSame(Generation::OP_COMBINE, $this->lastReply($chat)->generation->operation);
+        $this->assertCount(2, $this->images->lastCombine);
+    }
+
+    /** Пока ждём ответа, чат знает, что рисуется картинка. */
+    public function test_request_kind_is_remembered_on_the_message(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->post('/chats', ['message' => 'Нарисуй собаку']);
+        $question = Message::where('role', Message::ROLE_USER)->first();
+
+        $this->assertSame('image', $question->intent);
+    }
+
+    public function test_studio_opens_with_a_chat_picture(): void
+    {
+        $user = User::factory()->create();
+        $chat = $this->say($user, 'Нарисуй собаку');
+        $work = $this->lastReply($chat)->generation_id;
+
+        $this->actingAs($user)
+            ->get("/studio?compose=edit&work={$work}")
+            ->assertInertia(fn ($page) => $page
+                ->where('compose.tab', 'edit')
+                ->where('compose.work.id', $work));
+    }
+
+    /** Чужую работу по номеру в Студию не подставить. */
+    public function test_studio_ignores_someone_elses_picture(): void
+    {
+        $chat = $this->say(User::factory()->create(), 'Нарисуй собаку');
+        $work = $this->lastReply($chat)->generation_id;
+
+        $this->actingAs(User::factory()->create())
+            ->get("/studio?compose=edit&work={$work}")
+            ->assertInertia(fn ($page) => $page->where('compose.work', null));
     }
 }

@@ -304,9 +304,9 @@ class FeedTest extends TestCase
         $work = $this->makeWork(User::factory()->create());
 
         $this->actingAs(User::factory()->create())
-            ->get("/studio?from_feed={$work->id}")
+            ->get("/studio?compose=edit&work={$work->id}")
             ->assertOk()
-            ->assertInertia(fn ($page) => $page->where('fromFeed.id', $work->id));
+            ->assertInertia(fn ($page) => $page->where('compose.work.id', $work->id));
     }
 
     /** Скрытая работа в Студию по ссылке не подставляется. */
@@ -315,9 +315,9 @@ class FeedTest extends TestCase
         $work = $this->makeWork(User::factory()->create(), ['is_public' => false]);
 
         $this->actingAs(User::factory()->create())
-            ->get("/studio?from_feed={$work->id}")
+            ->get("/studio?compose=edit&work={$work->id}")
             ->assertOk()
-            ->assertInertia(fn ($page) => $page->where('fromFeed', null));
+            ->assertInertia(fn ($page) => $page->where('compose.work', null));
     }
 
     /**

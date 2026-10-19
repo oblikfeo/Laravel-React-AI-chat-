@@ -8,6 +8,7 @@ use App\Models\Generation;
 use App\Services\Guests\CurrentGuest;
 use App\Services\Studio\ImageGenerator;
 use App\Services\Studio\StudioCatalog;
+use App\Services\Studio\StudioCompose;
 use App\Services\Studio\StudioLimiter;
 use App\Services\Studio\VideoLimiter;
 use Illuminate\Http\Request;
@@ -24,25 +25,16 @@ class ShowStudioController extends Controller
         StudioLimiter $limiter,
         VideoLimiter $videoLimiter,
         ImageGenerator $generator,
+        StudioCompose $compose,
     ): Response {
         $user = $request->user();
         $guest = CurrentGuest::get($request);
 
         $remaining = $limiter->remaining($user, $guest);
 
-        // Работа, принесённая из общей ленты: открываем Студию сразу
-        // с ней и на вкладке правки.
-        $fromFeed = $request->integer('from_feed')
-            ? Generation::query()
-                ->inFeed()
-                ->whereKey($request->integer('from_feed'))
-                ->first()
-            : null;
-
         return Inertia::render('Studio/Index', [
-            'fromFeed' => $fromFeed
-                ? new GenerationResource($fromFeed)
-                : null,
+            // С чем открыть Студию, если пришли из чата или ленты.
+            'compose' => $compose->fromRequest($request, $user, $guest),
             'generations' => GenerationResource::collection(
                 Generation::query()
                     ->ownedBy($user, $guest)

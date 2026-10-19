@@ -18,6 +18,7 @@ use App\Http\Controllers\Chat\ShowAttachmentController;
 use App\Http\Controllers\Chat\ShowChatController;
 use App\Http\Controllers\Chat\StoreChatController;
 use App\Http\Controllers\Chat\StoreMessageController;
+use App\Http\Controllers\Chat\TranscribeVoiceController;
 use App\Http\Controllers\Chat\UpdateChatModelController;
 use App\Http\Controllers\Feed\ShowFeedController;
 use App\Http\Controllers\Feed\StoreChatFromFeedController;
@@ -66,6 +67,11 @@ Route::group([], function () {
 
     Route::get('attachments/{attachment}', ShowAttachmentController::class)
         ->name('attachments.show');
+
+    // Голосовой ввод: запись с микрофона превращается в текст.
+    Route::post('voice/transcribe', TranscribeVoiceController::class)
+        ->middleware('throttle:20,1')
+        ->name('voice.transcribe');
 
     // Общая лента: что люди согласились показать.
     Route::get('feed', ShowFeedController::class)->name('feed');

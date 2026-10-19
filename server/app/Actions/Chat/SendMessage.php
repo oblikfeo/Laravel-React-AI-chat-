@@ -8,10 +8,10 @@ use App\Models\Message;
 use App\Services\Ai\AiChatProvider;
 use App\Services\Ai\ModelCatalog;
 use App\Services\Characters\CharacterPrompt;
+use App\Services\Chat\ChatImages;
 use App\Services\Chat\StudioIntent;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Throwable;
 
@@ -61,6 +61,16 @@ class SendMessage
             app(StoreAttachment::class)->handle($message, $file);
         }
 
+        // Пока ждём ответа, чат показывает анимацию того, что делается.
+        $intent = $this->studioIntent->detect(
+            $content,
+            ChatImages::for($chat, $message->load('attachments'))->count(),
+        );
+
+        if ($intent) {
+            $message->forceFill(['intent' => $intent['mode']])->save();
+        }
+
         $chat->forceFill(['last_message_at' => now()])->save();
 
         return $message;
@@ -74,7 +84,7 @@ class SendMessage
      */
     public function reply(Chat $chat): Message
     {
-        $reply = $this->replyWithImage($chat) ?? $this->askProvider($chat);
+        $reply = $this->replyWithStudio($chat) ?? $this->askProvider($chat);
 
         $chat->forceFill(['last_message_at' => now()])->save();
 
@@ -82,9 +92,12 @@ class SendMessage
     }
 
     /**
-     * Картинка в ответ, если человек её просит.
+     * Ответ инструментом Студии, если человек просит то, что она делает.
+     *
+     * Картинку чат рисует или правит сам, на звук и видео отвечает
+     * карточкой со ссылкой в Студию.
      */
-    private function replyWithImage(Chat $chat): ?Message
+    private function replyWithStudio(Chat $chat): ?Message
     {
         $question = $chat->messages()
             ->with('attachments')
@@ -96,43 +109,16 @@ class SendMessage
             return null;
         }
 
-        $source = $this->sourceImage($chat, $question);
-        $intent = $this->studioIntent->detect($question->content, $source !== null);
+        $images = ChatImages::for($chat, $question);
+        $intent = $this->studioIntent->detect($question->content, $images->count());
 
-        if (! $intent) {
-            return null;
-        }
-
-        return app(ReplyWithImage::class)->handle($chat, $intent, $source);
-    }
-
-    /**
-     * Что править: картинка из этого сообщения или из прошлого ответа.
-     *
-     * «Убери фон» следующим сообщением относится к картинке, которую
-     * чат только что прислал. Более ранние картинки не трогаем:
-     * иначе правка случайно задела бы то, о чём человек уже забыл.
-     */
-    private function sourceImage(Chat $chat, Message $question): ?string
-    {
-        $attached = $question->attachments->first(fn (Attachment $a) => $a->isImage());
-
-        if ($attached) {
-            return Storage::disk($attached->disk)->get($attached->path);
-        }
-
-        $previous = $chat->messages()
-            ->with('generation')
-            ->where('role', Message::ROLE_ASSISTANT)
-            ->where('id', '<', $question->id)
-            ->latest('id')
-            ->first();
-
-        $generation = $previous?->generation;
-
-        return $generation?->isReady()
-            ? Storage::disk($generation->disk)->get($generation->path)
-            : null;
+        return match ($intent['mode'] ?? null) {
+            StudioIntent::IMAGE, StudioIntent::EDIT => app(ReplyWithImage::class)
+                ->handle($chat, $intent, $images->contents()),
+            StudioIntent::AUDIO, StudioIntent::VIDEO => app(ReplyWithStudioLink::class)
+                ->handle($chat, $intent, $images),
+            default => null,
+        };
     }
 
     private function askProvider(Chat $chat): Message

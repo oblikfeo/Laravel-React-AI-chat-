@@ -32,9 +32,9 @@ class ReplyWithImage
 
     /**
      * @param  array{mode: string, operation: string, prompt: string}  $intent
-     * @param  string|null  $source  содержимое картинки, которую правим
+     * @param  array<int, string>  $sources  содержимое картинок, которые правим
      */
-    public function handle(Chat $chat, array $intent, ?string $source): Message
+    public function handle(Chat $chat, array $intent, array $sources): Message
     {
         $user = $chat->user;
         $guest = $user ? null : $chat->guest;
@@ -49,10 +49,12 @@ class ReplyWithImage
                 : "You've reached today's free image limit. Sign up to create more.");
         }
 
-        $generation = $intent['mode'] === StudioIntent::EDIT && $source !== null
-            ? $this->edit->handle($user, $guest, [$source], [
+        $described = in_array($intent['operation'], [Generation::OP_EDIT, Generation::OP_COMBINE], true);
+
+        $generation = $intent['mode'] === StudioIntent::EDIT && $sources
+            ? $this->edit->handle($user, $guest, $sources, [
                 'operation' => $intent['operation'],
-                'prompt' => $intent['operation'] === Generation::OP_EDIT ? $intent['prompt'] : null,
+                'prompt' => $described ? $intent['prompt'] : null,
                 'model' => $this->modelFor($chat),
                 'is_public' => false,
             ])

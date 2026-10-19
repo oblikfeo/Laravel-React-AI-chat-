@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react';
-import { Plus, Mic, ArrowUp } from 'lucide-react';
+import { Plus, Mic, ArrowUp, Square, Loader2, X } from 'lucide-react';
 import ModelPicker from '@/Components/Home/ModelPicker';
 import AttachedFiles from '@/Components/Home/AttachedFiles';
+import useVoiceInput from '@/Components/Home/useVoiceInput';
 
 /** Что принимаем: должно совпадать с правилами на сервере. */
 const ACCEPT = 'image/jpeg,image/png,image/webp,image/gif,application/pdf,'
@@ -21,7 +22,7 @@ export default function PromptComposer({
     onModelChange,
     files = [],
     onFilesChange,
-    placeholder = 'Generate or animate videos...',
+    placeholder = 'Ask anything or describe an image…',
     busy = false,
     autoFocus = false,
     minRows = 3,
@@ -29,6 +30,12 @@ export default function PromptComposer({
 }) {
     const textareaRef = useRef(null);
     const fileRef = useRef(null);
+
+    // Распознанная речь дописывается к уже набранному тексту.
+    const voice = useVoiceInput((text) => {
+        onChange(value.trim() ? `${value.trim()} ${text}` : text);
+        textareaRef.current?.focus();
+    });
 
     useEffect(() => {
         const node = textareaRef.current;
@@ -117,6 +124,20 @@ export default function PromptComposer({
                 className="w-full resize-none border-0 bg-transparent p-0 text-[17px] leading-relaxed text-white placeholder:text-white/45 focus:outline-none focus:ring-0"
             />
 
+            {voice.error && (
+                <p className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-rose-400/25 bg-rose-950/50 px-3 py-2 text-[13px] text-rose-100">
+                    {voice.error}
+                    <button
+                        type="button"
+                        onClick={voice.dismissError}
+                        aria-label="Dismiss"
+                        className="shrink-0 rounded-md p-0.5 text-rose-200/70 transition hover:text-white"
+                    >
+                        <X className="h-3.5 w-3.5" strokeWidth={2} />
+                    </button>
+                </p>
+            )}
+
             <div className="mt-4 flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                     <input
@@ -154,13 +175,40 @@ export default function PromptComposer({
                 </div>
 
                 <div className="flex items-center gap-2">
-                    <button
-                        type="button"
-                        aria-label="Voice input"
-                        className="flex h-10 w-10 items-center justify-center rounded-full text-white/70 transition hover:bg-white/10 hover:text-white"
-                    >
-                        <Mic className="h-5 w-5" strokeWidth={1.75} />
-                    </button>
+                    {voice.state === 'recording' && (
+                        <span className="flex items-center gap-2 text-[13px] tabular-nums text-rose-200">
+                            <span className="h-2 w-2 animate-pulse rounded-full bg-rose-400" />
+                            {Math.floor(voice.seconds / 60)}:
+                            {String(voice.seconds % 60).padStart(2, '0')}
+                        </span>
+                    )}
+
+                    {voice.state === 'transcribing' && (
+                        <span className="text-[13px] text-white/50">Listening…</span>
+                    )}
+
+                    {voice.supported && (
+                        <button
+                            type="button"
+                            onClick={voice.toggle}
+                            disabled={voice.state === 'transcribing'}
+                            aria-label={voice.state === 'recording' ? 'Stop recording' : 'Dictate a message'}
+                            title={voice.state === 'recording' ? 'Stop recording' : 'Dictate a message'}
+                            className={`flex h-10 w-10 items-center justify-center rounded-full transition ${
+                                voice.state === 'recording'
+                                    ? 'keep-light bg-rose-500 text-white shadow-lg shadow-rose-500/30 hover:bg-rose-400'
+                                    : 'text-white/70 hover:bg-white/10 hover:text-white disabled:opacity-60'
+                            }`}
+                        >
+                            {voice.state === 'recording' ? (
+                                <Square className="h-4 w-4" strokeWidth={2.5} fill="currentColor" />
+                            ) : voice.state === 'transcribing' ? (
+                                <Loader2 className="h-5 w-5 animate-spin" strokeWidth={1.75} />
+                            ) : (
+                                <Mic className="h-5 w-5" strokeWidth={1.75} />
+                            )}
+                        </button>
+                    )}
 
                     <button
                         type="submit"

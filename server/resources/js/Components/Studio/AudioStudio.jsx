@@ -81,6 +81,7 @@ export default function AudioStudio({
     limit,
     mode,
     onModeChange,
+    incoming = null,
     onSubmit,
 }) {
 
@@ -90,6 +91,7 @@ export default function AudioStudio({
 
             {mode === 'music' && (
                 <MusicForm
+                    incoming={incoming}
                     models={musicModels}
                     defaultModel={defaultMusicModel}
                     maxLyrics={maxLyrics}
@@ -102,6 +104,7 @@ export default function AudioStudio({
 
             {mode === 'speech' && (
                 <SpeechForm
+                    incoming={incoming}
                     models={speechModels}
                     voices={voices}
                     defaultModel={defaultSpeechModel}
@@ -127,6 +130,7 @@ export default function AudioStudio({
 
             {mode === 'effect' && (
                 <EffectForm
+                    incoming={incoming}
                     models={effectModels}
                     defaultModel={defaultEffectModel}
                     available={available}
@@ -147,9 +151,19 @@ function MusicForm({
     available,
     busy,
     limit,
+    incoming = null,
     onSubmit,
 }) {
     const [prompt, setPrompt] = useState('');
+
+    // Просьба, принесённая из чата или ленты: заполняем форму.
+    useEffect(() => {
+        if (!incoming) {
+            return;
+        }
+
+        setPrompt(incoming.prompt ?? '');
+    }, [incoming]);
     const [model, setModel] = useState(defaultModel);
     const [lyrics, setLyrics] = useState('');
     const [showLyrics, setShowLyrics] = useState(false);
@@ -297,9 +311,19 @@ function SpeechForm({
     available,
     busy,
     limit,
+    incoming = null,
     onSubmit,
 }) {
     const [text, setText] = useState('');
+
+    // Просьба, принесённая из чата или ленты: заполняем форму.
+    useEffect(() => {
+        if (!incoming) {
+            return;
+        }
+
+        setText(spoken(incoming.prompt));
+    }, [incoming]);
     const [model, setModel] = useState(defaultModel);
     const [voice, setVoice] = useState(defaultVoice);
     const [speed, setSpeed] = useState('1');
@@ -574,9 +598,19 @@ function EffectForm({
     available,
     busy,
     limit,
+    incoming = null,
     onSubmit,
 }) {
     const [prompt, setPrompt] = useState('');
+
+    // Просьба, принесённая из чата или ленты: заполняем форму.
+    useEffect(() => {
+        if (!incoming) {
+            return;
+        }
+
+        setPrompt(incoming.prompt ?? '');
+    }, [incoming]);
     const [model, setModel] = useState(defaultModel);
     const [duration, setDuration] = useState(null);
 
@@ -690,4 +724,15 @@ function stepsBetween(min, max) {
     return candidates
         .filter((value) => value >= min && value <= max)
         .map((value) => ({ key: String(value), label: formatSeconds(value) }));
+}
+
+/**
+ * Что озвучить из просьбы в чате: текст после двоеточия, если он есть.
+ *
+ * «Озвучь: добро пожаловать» — читать нужно «добро пожаловать».
+ */
+function spoken(prompt = '') {
+    const index = prompt.indexOf(':');
+
+    return index >= 0 ? prompt.slice(index + 1).trim() : prompt;
 }

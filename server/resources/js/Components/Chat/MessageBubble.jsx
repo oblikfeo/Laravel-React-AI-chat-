@@ -6,6 +6,7 @@ import useTypewriter from '@/Components/Chat/useTypewriter';
 import ModelChangeMark from '@/Components/Chat/ModelChangeMark';
 import CharacterAvatar from '@/Components/Characters/CharacterAvatar';
 import ChatImage from '@/Components/Chat/ChatImage';
+import StudioLinkCard from '@/Components/Chat/StudioLinkCard';
 
 /**
  * Одно сообщение диалога.
@@ -91,6 +92,9 @@ export default function MessageBubble({
             >
                 {/* Картинка из Студии: ответ без слов. */}
                 {message.image && <ChatImage image={message.image} />}
+
+                {/* Звук и видео делает Студия: карточка ведёт туда. */}
+                {message.studioLink && <StudioLinkCard link={message.studioLink} />}
 
                 {shown && <Markdown>{shown}</Markdown>}
 

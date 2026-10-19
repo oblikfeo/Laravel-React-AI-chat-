@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from '@inertiajs/react';
 import {
     Clapperboard,
@@ -67,6 +67,7 @@ export default function VideoStudio({
     picture,
     onClearPicture,
     onBrowse,
+    incoming = null,
     onSubmit,
 }) {
     const [mode, setMode] = useState('text');
@@ -76,6 +77,20 @@ export default function VideoStudio({
     const [resolution, setResolution] = useState(null);
     const [ratio, setRatio] = useState(null);
     const [file, setFile] = useState(null);
+
+    // Просьба, принесённая из чата или ленты: заполняем форму.
+    useEffect(() => {
+        if (!incoming) {
+            return;
+        }
+
+        setMode(incoming.mode === 'animate' || incoming.files?.length ? 'image' : 'text');
+        setPrompt(incoming.prompt ?? '');
+
+        if (incoming.files?.length) {
+            setFile(incoming.files[0]);
+        }
+    }, [incoming]);
     const fileRef = useRef(null);
 
     const current = models.find((item) => item.key === model) ?? models[0];

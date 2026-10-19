@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Services\Ai\SpeechToText;
+use App\Services\Ai\UnavailableSpeechToText;
+use App\Services\Ai\VeniceSpeechToText;
 use App\Services\Studio\AudioStudio;
 use App\Services\Studio\ImageGenerator;
 use App\Services\Studio\UnavailableAudioStudio;
@@ -57,6 +60,20 @@ class StudioServiceProvider extends ServiceProvider
             }
 
             return new VeniceVideoStudio($this->queue($apiKey));
+        });
+
+        $this->app->singleton(SpeechToText::class, function () {
+            $apiKey = config('studio.api_key');
+
+            if (blank($apiKey)) {
+                return new UnavailableSpeechToText;
+            }
+
+            return new VeniceSpeechToText(
+                baseUrl: config('studio.base_url'),
+                apiKey: $apiKey,
+                model: config('ai.transcription.model'),
+            );
         });
     }
 

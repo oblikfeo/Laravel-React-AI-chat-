@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
     Wand2,
     Layers,
@@ -71,6 +71,7 @@ export default function EditForm({
     sources = [],
     onRemoveSource,
     onBrowse,
+    incoming = null,
     onSubmit,
 }) {
     const [tool, setTool] = useState('edit');
@@ -78,6 +79,20 @@ export default function EditForm({
     const [ratio, setRatio] = useState('1:1');
     const [scale, setScale] = useState(String(upscaleScales[0] ?? 2));
     const [files, setFiles] = useState([]);
+
+    // Просьба, принесённая из чата или ленты: заполняем форму.
+    useEffect(() => {
+        if (!incoming) {
+            return;
+        }
+
+        setTool('edit');
+        setPrompt(incoming.prompt ?? '');
+
+        if (incoming.files?.length) {
+            setFiles(incoming.files);
+        }
+    }, [incoming]);
     const [isPublic, setIsPublic] = useState(true);
     const fileRef = useRef(null);
 

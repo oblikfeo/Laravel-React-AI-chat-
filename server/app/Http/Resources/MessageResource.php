@@ -30,6 +30,20 @@ class MessageResource extends JsonResource
                 'url' => route('studio.file', $this->generation),
                 'prompt' => $this->generation->prompt,
             ] : null),
+            'intent' => $this->intent,
+            // Карточка «сделать это в Студии»: форма там уже заполнена.
+            'studioLink' => $this->studio_link ? [
+                'tab' => $this->studio_link['tab'],
+                'operation' => $this->studio_link['operation'],
+                'prompt' => $this->studio_link['prompt'],
+                'url' => route('studio', array_filter([
+                    'compose' => $this->studio_link['tab'],
+                    'mode' => $this->studio_link['operation'],
+                    'prompt' => $this->studio_link['prompt'],
+                    'attachment' => $this->studio_link['attachment'] ?? null,
+                    'work' => $this->studio_link['work'] ?? null,
+                ])),
+            ] : null,
             'created_at' => $this->created_at?->toIso8601String(),
         ];
     }

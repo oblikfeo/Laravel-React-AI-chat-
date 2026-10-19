@@ -111,7 +111,7 @@ export default function StudioIndex({
     maxCombine,
     studioReady,
     limit,
-    fromFeed,
+    compose,
 }) {
     const [view, setView] = useState(() =>
         remembered('view', ['gallery', 'editor'], 'editor'),
@@ -139,26 +139,73 @@ export default function StudioIndex({
     const [pickingPicture, setPickingPicture] = useState(false);
 
     /*
-     * Работа, принесённая из общей ленты: открываем правку с ней.
+     * С чем открыть Студию, если пришли из чата или ленты: раздел,
+     * режим, описание и картинка.
      *
-     * Только один раз. Адрес страницы хранит номер работы, и сервер
-     * присылает её заново с каждым ответом — в том числе на опрос
+     * Только один раз. Адрес страницы хранит эти данные, и сервер
+     * присылает их заново с каждым ответом — в том числе на опрос
      * готовности. Без этой отметки страница каждые несколько секунд
-     * возвращала бы человека в правку.
+     * сбрасывала бы форму и раздел.
      */
-    const broughtFromFeed = useRef(null);
+    const [incoming, setIncoming] = useState(null);
+    const composed = useRef(null);
 
     useEffect(() => {
-        if (!fromFeed || broughtFromFeed.current === fromFeed.id) {
+        if (!compose) {
             return;
         }
 
-        broughtFromFeed.current = fromFeed.id;
+        const key = JSON.stringify([
+            compose.tab,
+            compose.mode,
+            compose.prompt,
+            compose.work?.id,
+            compose.attachment?.url,
+        ]);
 
-        setSources([fromFeed]);
+        if (composed.current === key) {
+            return;
+        }
+
+        composed.current = key;
+
         setView('editor');
-        setTab('edit');
-    }, [fromFeed]);
+        setTab(compose.tab);
+
+        if (compose.tab === 'audio') {
+            setAudioMode(['music', 'speech', 'effect'].includes(compose.mode) ? compose.mode : 'music');
+        }
+
+        if (compose.tab === 'image') {
+            setPreset({ prompt: compose.prompt });
+
+            return;
+        }
+
+        if (compose.work) {
+            if (compose.tab === 'video') {
+                setPicture(compose.work);
+            } else {
+                setSources([compose.work]);
+            }
+        }
+
+        const deliver = (files = []) =>
+            setIncoming({ key, prompt: compose.prompt, mode: compose.mode, files });
+
+        // Фото из чата приходит ссылкой: забираем его и кладём в форму
+        // как обычный загруженный файл.
+        if (compose.attachment) {
+            fetch(compose.attachment.url, { credentials: 'same-origin' })
+                .then((response) => response.blob())
+                .then((blob) =>
+                    deliver([new File([blob], compose.attachment.name, { type: compose.attachment.mime })]),
+                )
+                .catch(() => deliver());
+        } else {
+            deliver();
+        }
+    }, [compose]);
 
     // Отказ сервера принять запрос: слишком большой файл и подобное.
     const [refusal, setRefusal] = useState(null);
@@ -468,6 +515,7 @@ export default function StudioIndex({
                                         )
                                     }
                                     onBrowse={() => setBrowsing(true)}
+                                    incoming={incoming}
                                     onSubmit={submitEdit}
                                 />
                             )}
@@ -486,6 +534,7 @@ export default function StudioIndex({
                                     maxLyrics={maxLyrics}
                                     mode={audioMode}
                                     onModeChange={setAudioMode}
+                                    incoming={incoming}
                                     onSubmit={submitAudio}
                                 />
                             )}
@@ -501,6 +550,7 @@ export default function StudioIndex({
                                     picture={picture}
                                     onClearPicture={() => setPicture(null)}
                                     onBrowse={() => setPickingPicture(true)}
+                                    incoming={incoming}
                                     onSubmit={submitVideo}
                                 />
                             )}

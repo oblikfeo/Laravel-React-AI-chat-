@@ -10,7 +10,7 @@ import { X, Wand2, MessageSquare, Download } from 'lucide-react';
 export default function FeedViewer({ item, onClose }) {
     const edit = () =>
         router.visit('/studio', {
-            data: { from_feed: item.id },
+            data: { compose: 'edit', work: item.id },
         });
 
     const toChat = () =>

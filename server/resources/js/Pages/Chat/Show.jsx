@@ -4,6 +4,7 @@ import MainLayout from '@/Layouts/MainLayout';
 import PromptComposer from '@/Components/Home/PromptComposer';
 import MessageBubble from '@/Components/Chat/MessageBubble';
 import TypingIndicator from '@/Components/Chat/TypingIndicator';
+import ImageWorking from '@/Components/Chat/ImageWorking';
 import GuestNotice from '@/Components/Layout/GuestNotice';
 import CharacterAvatar from '@/Components/Characters/CharacterAvatar';
 
@@ -53,6 +54,10 @@ export default function ChatShow({ chat, messages, awaitingReply, character }) {
         : messages;
 
     const waiting = Boolean(pending) || awaitingReply;
+
+    // Пока рисуется картинка, вместо точек набора — её заготовка.
+    const lastQuestion = [...list].reverse().find((m) => m.role === 'user');
+    const drawing = ['image', 'edit'].includes(lastQuestion?.intent);
 
     const countRef = useRef(list.length);
 
@@ -195,7 +200,12 @@ export default function ChatShow({ chat, messages, awaitingReply, character }) {
                                 );
                             })}
 
-                            {waiting && <TypingIndicator character={character} />}
+                            {waiting &&
+                                (drawing ? (
+                                    <ImageWorking editing={lastQuestion.intent === 'edit'} />
+                                ) : (
+                                    <TypingIndicator character={character} />
+                                ))}
 
                             <div ref={bottomRef} />
                         </div>
