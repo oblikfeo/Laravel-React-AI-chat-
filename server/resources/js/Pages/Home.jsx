@@ -47,7 +47,9 @@ export default function Home() {
         <>
             <Head title="Uncensia" />
 
-            <div className="flex flex-1 flex-col items-center justify-center overflow-y-auto scrollbar-thin px-4 pb-16 pt-4 sm:px-6">
+            {/* Справа отступ на ширину свёрнутой панели слева: так блок
+                стоит по центру экрана, точно над планетой фона. */}
+            <div className="flex flex-1 flex-col items-center justify-center overflow-y-auto scrollbar-thin px-4 pb-16 pt-4 sm:px-6 lg:pr-[96px]">
                 <div className="w-full max-w-[720px]">
                     <h1 className="text-center text-[56px] font-light leading-none tracking-tight text-white sm:text-7xl lg:text-8xl">
                         uncensia

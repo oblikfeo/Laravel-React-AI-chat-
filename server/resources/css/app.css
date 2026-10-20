@@ -797,6 +797,58 @@
         background-color: rgb(var(--accent));
         color: rgb(255 255 255);
     }
+
+    /*
+     * Фон с планетой (холмами в светлой теме).
+     *
+     * До 16:9 картинка закрывает экран и держится за нижний край. На
+     * экране шире она по ширине больше не растёт: иначе вырастает в
+     * высоту, обрезается сверху, и горизонт уезжает под заголовок.
+     * Размер замирает на том, что был при 16:9, края картинки плавно
+     * гаснут в цвет подложки. У луга по бокам ещё лежит та же картинка,
+     * растянутая и размытая, — трава продолжается до краёв экрана. У
+     * планеты подложки нет: размытая, она рисует вторую дугу.
+     *
+     * --ratio — соотношение сторон картинки.
+     */
+    .scene-image,
+    .scene-fill {
+        position: absolute;
+        inset: 0;
+        background-position: bottom;
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+
+    .scene-fill {
+        display: none;
+    }
+
+    @media (min-aspect-ratio: 16/9) {
+        .scene-image {
+            top: auto;
+            left: 50%;
+            right: auto;
+            width: 177.78vh;
+            height: calc(177.78vh / var(--ratio));
+            transform: translateX(-50%);
+            background-size: 100% 100%;
+            --fade: clamp(0px, calc(100vw - 177.78vh), 22%);
+            -webkit-mask-image: linear-gradient(to right, transparent, #000 var(--fade), #000 calc(100% - var(--fade)), transparent);
+            mask-image: linear-gradient(to right, transparent, #000 var(--fade), #000 calc(100% - var(--fade)), transparent);
+        }
+
+        .scene-fill {
+            display: block;
+            top: auto;
+            left: -80px;
+            right: -80px;
+            bottom: -80px;
+            height: calc(177.78vh / var(--ratio) + 80px);
+            background-size: 100% 100%;
+            filter: blur(40px);
+        }
+    }
 }
 
 @layer utilities {
