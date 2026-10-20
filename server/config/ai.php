@@ -104,7 +104,7 @@ return [
     */
 
     'router' => [
-        'model' => env('AI_ROUTER_MODEL', 'mistral-small-3-2-24b-instruct'),
+        'model' => env('AI_ROUTER_MODEL', 'gemma-4-uncensored'),
         'timeout' => (int) env('AI_ROUTER_TIMEOUT', 6),
         'min_confidence' => (float) env('AI_ROUTER_MIN_CONFIDENCE', 0.55),
     ],
