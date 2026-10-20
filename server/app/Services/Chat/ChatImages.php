@@ -51,6 +51,12 @@ class ChatImages
         return $images;
     }
 
+    /** Сколько картинок приложено к самому сообщению. */
+    public function attached(): int
+    {
+        return count($this->attachments);
+    }
+
     public function count(): int
     {
         return $this->attachments ? count($this->attachments) : ($this->generationId ? 1 : 0);

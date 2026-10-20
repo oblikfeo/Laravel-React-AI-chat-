@@ -9,6 +9,8 @@ use App\Models\User;
 use App\Services\Ai\AiChatProvider;
 use App\Services\Ai\OpenAiCompatibleProvider;
 use App\Services\Characters\CharacterPrompt;
+use App\Services\Chat\Routing\ChatRouter;
+use App\Services\Chat\Routing\UnavailableRouter;
 use App\Services\Chat\StudioIntent;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
@@ -50,7 +52,7 @@ class AiProviderTest extends TestCase
 
         $chat = Chat::factory()->for(User::factory())->create();
 
-        (new SendMessage($provider, new CharacterPrompt, new StudioIntent))->handle($chat, 'Вопрос');
+        (new SendMessage($provider, new CharacterPrompt, new ChatRouter(new UnavailableRouter, new StudioIntent)))->handle($chat, 'Вопрос');
 
         $this->assertSame(2, $chat->messages()->count());
         $this->assertSame(
@@ -75,7 +77,7 @@ class AiProviderTest extends TestCase
 
         $chat = Chat::factory()->for(User::factory())->create();
 
-        (new SendMessage($provider, new CharacterPrompt, new StudioIntent))->handle($chat, 'Вопрос');
+        (new SendMessage($provider, new CharacterPrompt, new ChatRouter(new UnavailableRouter, new StudioIntent)))->handle($chat, 'Вопрос');
 
         // Вопрос сохранён, а вместо ответа — понятное пояснение.
         $this->assertSame(2, $chat->messages()->count());
@@ -93,7 +95,7 @@ class AiProviderTest extends TestCase
 
         $chat = Chat::factory()->for(User::factory())->create();
 
-        (new SendMessage($this->app->make(AiChatProvider::class), new CharacterPrompt, new StudioIntent))
+        (new SendMessage($this->app->make(AiChatProvider::class), new CharacterPrompt, new ChatRouter(new UnavailableRouter, new StudioIntent)))
             ->handle($chat, 'Вопрос');
 
         $reply = $chat->messages()->latest('id')->first()->content;

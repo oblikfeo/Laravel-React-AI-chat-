@@ -1,0 +1,1382 @@
+[
+ {
+  "message": "нарисуй собаку",
+  "expect": "image"
+ },
+ {
+  "message": "Нарисуй кота в космосе",
+  "expect": "image"
+ },
+ {
+  "message": "можешь нарисовать собаку?",
+  "expect": "image"
+ },
+ {
+  "message": "изобрази закат над морем",
+  "expect": "image"
+ },
+ {
+  "message": "сгенерируй собаку",
+  "expect": "image"
+ },
+ {
+  "message": "сгенерируй закат над горами",
+  "expect": "image"
+ },
+ {
+  "message": "создай фото собаки",
+  "expect": "image"
+ },
+ {
+  "message": "сделай картинку с котом",
+  "expect": "image"
+ },
+ {
+  "message": "хочу картинку с закатом",
+  "expect": "image"
+ },
+ {
+  "message": "нужен логотип для кофейни",
+  "expect": "image"
+ },
+ {
+  "message": "создай логотип для кафе",
+  "expect": "image"
+ },
+ {
+  "message": "сделай аватарку в стиле аниме",
+  "expect": "image"
+ },
+ {
+  "message": "создай кота на траве",
+  "expect": "image"
+ },
+ {
+  "message": "создай дракона над замком",
+  "expect": "image"
+ },
+ {
+  "message": "сделай мне кота в шляпе",
+  "expect": "image"
+ },
+ {
+  "message": "покажи, как выглядит киберпанк-город ночью",
+  "expect": "image"
+ },
+ {
+  "message": "нарисуй мне что-нибудь красивое",
+  "expect": "image"
+ },
+ {
+  "message": "хочу обои на рабочий стол с горами",
+  "expect": "image"
+ },
+ {
+  "message": "сделай постер для вечеринки в стиле 80-х",
+  "expect": "image"
+ },
+ {
+  "message": "генерируй девушку в красном платье на пляже",
+  "expect": "image"
+ },
+ {
+  "message": "фото уютной кофейни зимой",
+  "expect": "image"
+ },
+ {
+  "message": "портрет старика-моряка маслом",
+  "expect": "image"
+ },
+ {
+  "message": "аниме девочка с мечом",
+  "expect": "image"
+ },
+ {
+  "message": "реалистичный тигр в джунглях",
+  "expect": "image"
+ },
+ {
+  "message": "девушка в бикини на пляже",
+  "expect": "image"
+ },
+ {
+  "message": "обнажённая девушка в стиле ренессанса",
+  "expect": "image"
+ },
+ {
+  "message": "сделай стикер с котиком для телеграма",
+  "expect": "image"
+ },
+ {
+  "message": "иллюстрация к сказке про колобка",
+  "expect": "image"
+ },
+ {
+  "message": "а можно картинку, где собака едет на велосипеде?",
+  "expect": "image"
+ },
+ {
+  "message": "красный спорткар на трассе, ночь, неон",
+  "expect": "image"
+ },
+ {
+  "message": "draw a red fox in the snow",
+  "expect": "image"
+ },
+ {
+  "message": "Draw me a castle",
+  "expect": "image"
+ },
+ {
+  "message": "can you draw a dragon?",
+  "expect": "image"
+ },
+ {
+  "message": "generate a cat in space",
+  "expect": "image"
+ },
+ {
+  "message": "create an image of a dog",
+  "expect": "image"
+ },
+ {
+  "message": "Create an image of Trump in the guise of Kim Jong Un.",
+  "expect": "image"
+ },
+ {
+  "message": "make a picture of a sunset",
+  "expect": "image"
+ },
+ {
+  "message": "I want a picture of a red fox",
+  "expect": "image"
+ },
+ {
+  "message": "an image of a lighthouse at night",
+  "expect": "image"
+ },
+ {
+  "message": "generate a poster for a jazz night",
+  "expect": "image"
+ },
+ {
+  "message": "show me what a medieval village looks like",
+  "expect": "image"
+ },
+ {
+  "message": "a photorealistic portrait of a woman with freckles",
+  "expect": "image"
+ },
+ {
+  "message": "logo for a coffee shop called Bean There",
+  "expect": "image"
+ },
+ {
+  "message": "pixel art of a knight",
+  "expect": "image"
+ },
+ {
+  "message": "wallpaper with northern lights",
+  "expect": "image"
+ },
+ {
+  "message": "I need an avatar for discord, a wolf",
+  "expect": "image"
+ },
+ {
+  "message": "cute cartoon cat eating ramen",
+  "expect": "image"
+ },
+ {
+  "message": "make me an anime girl with silver hair",
+  "expect": "image"
+ },
+ {
+  "message": "нарисуй другую собаку",
+  "expect": "image",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "а теперь нарисуй кота",
+  "expect": "image",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "draw a completely different landscape",
+  "expect": "image",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "сделай ещё одну картинку, но с лисой",
+  "expect": "image",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "сгенерируй аудио",
+  "expect": "music"
+ },
+ {
+  "message": "сгенерируй музыку для вечеринки",
+  "expect": "music"
+ },
+ {
+  "message": "сгенерируй музыку для ролика",
+  "expect": "music"
+ },
+ {
+  "message": "создай песню про лето",
+  "expect": "music"
+ },
+ {
+  "message": "хочу песню про лето",
+  "expect": "music"
+ },
+ {
+  "message": "нужна музыка для вечеринки",
+  "expect": "music"
+ },
+ {
+  "message": "сделай трек в стиле lo-fi",
+  "expect": "music"
+ },
+ {
+  "message": "сочини мелодию для заставки",
+  "expect": "music"
+ },
+ {
+  "message": "сделай рэп про программистов",
+  "expect": "music"
+ },
+ {
+  "message": "хочу бит для рэпа",
+  "expect": "music"
+ },
+ {
+  "message": "нужен джингл для подкаста",
+  "expect": "music"
+ },
+ {
+  "message": "сделай саундтрек к хоррор-игре",
+  "expect": "music"
+ },
+ {
+  "message": "создай спокойную музыку для медитации",
+  "expect": "music"
+ },
+ {
+  "message": "запиши песню про мою кошку Мурку",
+  "expect": "music"
+ },
+ {
+  "message": "хочу эпичную оркестровую музыку",
+  "expect": "music"
+ },
+ {
+  "message": "generate a song about summer",
+  "expect": "music"
+ },
+ {
+  "message": "I need a song for my birthday",
+  "expect": "music"
+ },
+ {
+  "message": "make some music for my video",
+  "expect": "music"
+ },
+ {
+  "message": "create an audio jingle",
+  "expect": "music"
+ },
+ {
+  "message": "compose a piano melody",
+  "expect": "music"
+ },
+ {
+  "message": "make a techno track",
+  "expect": "music"
+ },
+ {
+  "message": "I want a lullaby for my baby",
+  "expect": "music"
+ },
+ {
+  "message": "generate background music for a cafe",
+  "expect": "music"
+ },
+ {
+  "message": "сделай звук открывающейся двери",
+  "expect": "sound_effect"
+ },
+ {
+  "message": "нужен звуковой эффект взрыва",
+  "expect": "sound_effect"
+ },
+ {
+  "message": "звук дождя по крыше",
+  "expect": "sound_effect"
+ },
+ {
+  "message": "сгенерируй звук шагов по снегу",
+  "expect": "sound_effect"
+ },
+ {
+  "message": "хочу звук лазерного выстрела",
+  "expect": "sound_effect"
+ },
+ {
+  "message": "звук мяуканья кота",
+  "expect": "sound_effect"
+ },
+ {
+  "message": "generate a sound effect of rain",
+  "expect": "sound_effect"
+ },
+ {
+  "message": "a door creaking sound",
+  "expect": "sound_effect"
+ },
+ {
+  "message": "explosion sound effect for my game",
+  "expect": "sound_effect"
+ },
+ {
+  "message": "make the sound of a dog barking",
+  "expect": "sound_effect"
+ },
+ {
+  "message": "озвучь: добро пожаловать",
+  "expect": "speech"
+ },
+ {
+  "message": "озвучь этот текст: сегодня отличный день",
+  "expect": "speech"
+ },
+ {
+  "message": "зачитай вслух: привет всем",
+  "expect": "speech"
+ },
+ {
+  "message": "сгенерируй голос диктора, который говорит: скидки до 50%",
+  "expect": "speech"
+ },
+ {
+  "message": "сделай озвучку для ролика: лучший кофе в городе",
+  "expect": "speech"
+ },
+ {
+  "message": "прочитай вслух: я тебя люблю",
+  "expect": "speech"
+ },
+ {
+  "message": "сделай голосовое поздравление с днём рождения для мамы",
+  "expect": "speech"
+ },
+ {
+  "message": "make a voiceover for my ad: the best pizza in town",
+  "expect": "speech"
+ },
+ {
+  "message": "text to speech: hello world",
+  "expect": "speech"
+ },
+ {
+  "message": "read this aloud: welcome to our channel",
+  "expect": "speech"
+ },
+ {
+  "message": "narrate: once upon a time there was a fox",
+  "expect": "speech"
+ },
+ {
+  "message": "say in a deep voice: you shall not pass",
+  "expect": "speech"
+ },
+ {
+  "message": "хочу сделать видео",
+  "expect": "video"
+ },
+ {
+  "message": "хочу видео с котом на пляже",
+  "expect": "video"
+ },
+ {
+  "message": "сгенерируй видео с котом",
+  "expect": "video"
+ },
+ {
+  "message": "сделай видео с собакой",
+  "expect": "video"
+ },
+ {
+  "message": "можешь сделать ролик про космос?",
+  "expect": "video"
+ },
+ {
+  "message": "мне нужен клип для песни",
+  "expect": "video"
+ },
+ {
+  "message": "сними ролик про осень",
+  "expect": "video"
+ },
+ {
+  "message": "создай анимацию прыгающего мяча",
+  "expect": "video"
+ },
+ {
+  "message": "сделай короткое видео как волны бьются о скалы",
+  "expect": "video"
+ },
+ {
+  "message": "видео, где дракон летит над городом",
+  "expect": "video"
+ },
+ {
+  "message": "хочу мультик про зайца",
+  "expect": "video"
+ },
+ {
+  "message": "сделай рекламный ролик для кофейни",
+  "expect": "video"
+ },
+ {
+  "message": "I want to make a video",
+  "expect": "video"
+ },
+ {
+  "message": "make a video of a dog running",
+  "expect": "video"
+ },
+ {
+  "message": "can you make a video of a cat",
+  "expect": "video"
+ },
+ {
+  "message": "generate a short clip of waves",
+  "expect": "video"
+ },
+ {
+  "message": "animation of a rocket launch",
+  "expect": "video"
+ },
+ {
+  "message": "a cinematic video of a car chase",
+  "expect": "video"
+ },
+ {
+  "message": "make me a 5 second video of fireworks",
+  "expect": "video"
+ },
+ {
+  "message": "хочу видео с котом",
+  "expect": "video",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "сделай видео про космос",
+  "expect": "video",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "a video of a horse running on a beach",
+  "expect": "video",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "оживи это фото",
+  "expect": "animate",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "оживи её",
+  "expect": "animate",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "сделай из этой картинки видео",
+  "expect": "animate",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "animate this picture",
+  "expect": "animate",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "пусть она двигается",
+  "expect": "animate",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "make it move",
+  "expect": "animate",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "сделай так, чтобы волосы развевались на ветру — видео",
+  "expect": "animate",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "оживи фото",
+  "expect": "animate",
+  "attached_images": 1
+ },
+ {
+  "message": "сделай из этого фото видео",
+  "expect": "animate",
+  "attached_images": 1
+ },
+ {
+  "message": "animate this photo",
+  "expect": "animate",
+  "attached_images": 1
+ },
+ {
+  "message": "убери фон",
+  "expect": "remove_background",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "удали фон с фото",
+  "expect": "remove_background",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "сделай без фона",
+  "expect": "remove_background",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "remove the background",
+  "expect": "remove_background",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "вырежи кота с фона",
+  "expect": "remove_background",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "нужен прозрачный фон",
+  "expect": "remove_background",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "cut out the person from the background",
+  "expect": "remove_background",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "убери фон",
+  "expect": "remove_background",
+  "attached_images": 1
+ },
+ {
+  "message": "удали задний фон",
+  "expect": "remove_background",
+  "attached_images": 1
+ },
+ {
+  "message": "remove background please",
+  "expect": "remove_background",
+  "attached_images": 1
+ },
+ {
+  "message": "увеличь качество",
+  "expect": "upscale",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "увеличь разрешение",
+  "expect": "upscale",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "upscale it",
+  "expect": "upscale",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "сделай чётче и в большем разрешении",
+  "expect": "upscale",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "make it higher resolution",
+  "expect": "upscale",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "увеличь это фото в 2 раза",
+  "expect": "upscale",
+  "attached_images": 1
+ },
+ {
+  "message": "upscale this image",
+  "expect": "upscale",
+  "attached_images": 1
+ },
+ {
+  "message": "сделай небо закатным",
+  "expect": "edit",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "замени собаку на кота",
+  "expect": "edit",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "добавь шляпу",
+  "expect": "edit",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "change the sky to night",
+  "expect": "edit",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "а теперь ночью",
+  "expect": "edit",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "сделай в стиле аниме",
+  "expect": "edit",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "перекрась машину в синий",
+  "expect": "edit",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "добавь снег",
+  "expect": "edit",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "убери человека слева",
+  "expect": "edit",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "make it look like a painting",
+  "expect": "edit",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "now make her smile",
+  "expect": "edit",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "put sunglasses on him",
+  "expect": "edit",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "убери людей, оставь девушку в розовом",
+  "expect": "edit",
+  "attached_images": 1
+ },
+ {
+  "message": "Девушку в розовой байке оставь, остальных людей с фото убери",
+  "expect": "edit",
+  "attached_images": 1
+ },
+ {
+  "message": "сделай меня блондинкой",
+  "expect": "edit",
+  "attached_images": 1
+ },
+ {
+  "message": "добавь на фото радугу",
+  "expect": "edit",
+  "attached_images": 1
+ },
+ {
+  "message": "change my shirt to red",
+  "expect": "edit",
+  "attached_images": 1
+ },
+ {
+  "message": "make this photo black and white",
+  "expect": "edit",
+  "attached_images": 1
+ },
+ {
+  "message": "объедини эти фото в одно",
+  "expect": "combine",
+  "attached_images": 2
+ },
+ {
+  "message": "совмести две картинки",
+  "expect": "combine",
+  "attached_images": 2
+ },
+ {
+  "message": "combine these images",
+  "expect": "combine",
+  "attached_images": 2
+ },
+ {
+  "message": "поставь кота с первой картинки на фон со второй",
+  "expect": "combine",
+  "attached_images": 2
+ },
+ {
+  "message": "merge these two photos into one scene",
+  "expect": "combine",
+  "attached_images": 2
+ },
+ {
+  "message": "какой породы эта собака?",
+  "expect": "chat",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "что на этой картинке?",
+  "expect": "chat",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "как убрать фон в фотошопе?",
+  "expect": "chat",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "опиши эту картинку",
+  "expect": "chat",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "красивая получилась, спасибо!",
+  "expect": "chat",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "what is in this picture?",
+  "expect": "chat",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "is this photo real?",
+  "expect": "chat",
+  "previous_reply_was_image": true
+ },
+ {
+  "message": "что это за растение?",
+  "expect": "chat",
+  "attached_images": 1
+ },
+ {
+  "message": "переведи текст на фото",
+  "expect": "chat",
+  "attached_images": 1
+ },
+ {
+  "message": "какого года эта машина?",
+  "expect": "chat",
+  "attached_images": 1
+ },
+ {
+  "message": "what does this sign say?",
+  "expect": "chat",
+  "attached_images": 1
+ },
+ {
+  "message": "сгенерируй пароль",
+  "expect": "chat"
+ },
+ {
+  "message": "сгенерируй надёжный пароль из 16 символов",
+  "expect": "chat"
+ },
+ {
+  "message": "сгенерируй имя для собаки",
+  "expect": "chat"
+ },
+ {
+  "message": "сгенерируй идеи для бизнеса",
+  "expect": "chat"
+ },
+ {
+  "message": "сгенерируй текст поздравления",
+  "expect": "chat"
+ },
+ {
+  "message": "сгенерируй стих про осень",
+  "expect": "chat"
+ },
+ {
+  "message": "сгенерируй код на python",
+  "expect": "chat"
+ },
+ {
+  "message": "сгенерируй список покупок",
+  "expect": "chat"
+ },
+ {
+  "message": "сгенерируй название для кафе",
+  "expect": "chat"
+ },
+ {
+  "message": "сгенерируй слоган для магазина",
+  "expect": "chat"
+ },
+ {
+  "message": "сгенерируй план тренировок",
+  "expect": "chat"
+ },
+ {
+  "message": "сгенерируй рецепт пасты",
+  "expect": "chat"
+ },
+ {
+  "message": "сгенерируй пост для инстаграма",
+  "expect": "chat"
+ },
+ {
+  "message": "сгенерируй sql запрос",
+  "expect": "chat"
+ },
+ {
+  "message": "создай план тренировок",
+  "expect": "chat"
+ },
+ {
+  "message": "сделай список покупок",
+  "expect": "chat"
+ },
+ {
+  "message": "придумай название для кафе",
+  "expect": "chat"
+ },
+ {
+  "message": "сделай презентацию по истории",
+  "expect": "chat"
+ },
+ {
+  "message": "создай сайт для портфолио",
+  "expect": "chat"
+ },
+ {
+  "message": "сделай краткое содержание этой статьи",
+  "expect": "chat"
+ },
+ {
+  "message": "сделай вывод из текста выше",
+  "expect": "chat"
+ },
+ {
+  "message": "сделай короче",
+  "expect": "chat"
+ },
+ {
+  "message": "сделай перевод на английский",
+  "expect": "chat"
+ },
+ {
+  "message": "создай таблицу расходов",
+  "expect": "chat"
+ },
+ {
+  "message": "напиши текст песни про лето",
+  "expect": "chat"
+ },
+ {
+  "message": "напиши сценарий для видео",
+  "expect": "chat"
+ },
+ {
+  "message": "напиши промпт для генерации картинки с котом",
+  "expect": "chat"
+ },
+ {
+  "message": "придумай описание для фото в инстаграм",
+  "expect": "chat"
+ },
+ {
+  "message": "generate a password",
+  "expect": "chat"
+ },
+ {
+  "message": "generate a name for my startup",
+  "expect": "chat"
+ },
+ {
+  "message": "generate python code for sorting",
+  "expect": "chat"
+ },
+ {
+  "message": "generate ideas for a party",
+  "expect": "chat"
+ },
+ {
+  "message": "generate a poem about the sea",
+  "expect": "chat"
+ },
+ {
+  "message": "create a workout plan",
+  "expect": "chat"
+ },
+ {
+  "message": "write lyrics for a pop song",
+  "expect": "chat"
+ },
+ {
+  "message": "write a script for a youtube video",
+  "expect": "chat"
+ },
+ {
+  "message": "make it shorter",
+  "expect": "chat"
+ },
+ {
+  "message": "make a list of books to read",
+  "expect": "chat"
+ },
+ {
+  "message": "create a marketing plan",
+  "expect": "chat"
+ },
+ {
+  "message": "write a prompt for midjourney",
+  "expect": "chat"
+ },
+ {
+  "message": "как сделать видео для тиктока?",
+  "expect": "chat"
+ },
+ {
+  "message": "Как нарисовать собаку карандашом?",
+  "expect": "chat"
+ },
+ {
+  "message": "какая песня была популярной в 1999?",
+  "expect": "chat"
+ },
+ {
+  "message": "посоветуй хорошее видео про космос",
+  "expect": "chat"
+ },
+ {
+  "message": "расскажи про музыку барокко",
+  "expect": "chat"
+ },
+ {
+  "message": "объясни, как работает фотосинтез",
+  "expect": "chat"
+ },
+ {
+  "message": "хочу понять квантовую физику",
+  "expect": "chat"
+ },
+ {
+  "message": "нужно написать письмо начальнику",
+  "expect": "chat"
+ },
+ {
+  "message": "переведи на английский: привет",
+  "expect": "chat"
+ },
+ {
+  "message": "привет, расскажи что ты умеешь",
+  "expect": "chat"
+ },
+ {
+  "message": "что ты умеешь?",
+  "expect": "chat"
+ },
+ {
+  "message": "удали дубликаты из списка: 1, 2, 2, 3",
+  "expect": "chat"
+ },
+ {
+  "message": "убери лишние слова из текста: я очень очень рад",
+  "expect": "chat"
+ },
+ {
+  "message": "Объясни теорию относительности",
+  "expect": "chat"
+ },
+ {
+  "message": "привет",
+  "expect": "chat"
+ },
+ {
+  "message": "как дела?",
+  "expect": "chat"
+ },
+ {
+  "message": "сколько будет 17 * 23?",
+  "expect": "chat"
+ },
+ {
+  "message": "какая столица Австралии?",
+  "expect": "chat"
+ },
+ {
+  "message": "посоветуй фильм на вечер",
+  "expect": "chat"
+ },
+ {
+  "message": "как приготовить борщ?",
+  "expect": "chat"
+ },
+ {
+  "message": "почему небо голубое?",
+  "expect": "chat"
+ },
+ {
+  "message": "что лучше: iPhone или Android?",
+  "expect": "chat"
+ },
+ {
+  "message": "помоги с домашкой по математике",
+  "expect": "chat"
+ },
+ {
+  "message": "какие программы есть для монтажа видео?",
+  "expect": "chat"
+ },
+ {
+  "message": "какой микрофон купить для подкаста?",
+  "expect": "chat"
+ },
+ {
+  "message": "как научиться рисовать?",
+  "expect": "chat"
+ },
+ {
+  "message": "кто написал Войну и мир?",
+  "expect": "chat"
+ },
+ {
+  "message": "что такое нейросеть?",
+  "expect": "chat"
+ },
+ {
+  "message": "ты можешь создавать картинки?",
+  "expect": "chat"
+ },
+ {
+  "message": "а музыку ты умеешь делать?",
+  "expect": "chat"
+ },
+ {
+  "message": "спасибо!",
+  "expect": "chat"
+ },
+ {
+  "message": "ок",
+  "expect": "chat"
+ },
+ {
+  "message": "круто",
+  "expect": "chat"
+ },
+ {
+  "message": "how do I make a video for youtube?",
+  "expect": "chat"
+ },
+ {
+  "message": "what is the best song of 2020?",
+  "expect": "chat"
+ },
+ {
+  "message": "tell me about impressionist painting",
+  "expect": "chat"
+ },
+ {
+  "message": "write an email to my boss",
+  "expect": "chat"
+ },
+ {
+  "message": "hi",
+  "expect": "chat"
+ },
+ {
+  "message": "thanks a lot",
+  "expect": "chat"
+ },
+ {
+  "message": "what can you do?",
+  "expect": "chat"
+ },
+ {
+  "message": "explain recursion like I am five",
+  "expect": "chat"
+ },
+ {
+  "message": "fix this code: print(\"hello\"",
+  "expect": "chat"
+ },
+ {
+  "message": "what camera is best for vlogging?",
+  "expect": "chat"
+ },
+ {
+  "message": "давай поиграем: ты пират, а я юнга",
+  "expect": "chat"
+ },
+ {
+  "message": "представь, что ты мой парень и мы на свидании",
+  "expect": "chat"
+ },
+ {
+  "message": "продолжи историю: рыцарь вошёл в тёмный лес",
+  "expect": "chat"
+ },
+ {
+  "message": "напиши откровенную эротическую сцену",
+  "expect": "chat"
+ },
+ {
+  "message": "расскажи пошлый анекдот",
+  "expect": "chat"
+ },
+ {
+  "message": "roleplay as a vampire lord",
+  "expect": "chat"
+ },
+ {
+  "message": "continue the story where the detective finds the body",
+  "expect": "chat"
+ },
+ {
+  "message": "write a steamy romance scene",
+  "expect": "chat"
+ },
+ {
+  "message": "а теперь сделай короче",
+  "expect": "chat",
+  "recent": [
+   {
+    "role": "user",
+    "text": "напиши поздравление коллеге"
+   },
+   {
+    "role": "assistant",
+    "text": "Дорогой Иван! Поздравляю тебя с днём рождения..."
+   }
+  ]
+ },
+ {
+  "message": "убери последний абзац",
+  "expect": "chat",
+  "recent": [
+   {
+    "role": "user",
+    "text": "напиши поздравление коллеге"
+   },
+   {
+    "role": "assistant",
+    "text": "Дорогой Иван! Поздравляю тебя с днём рождения..."
+   }
+  ]
+ },
+ {
+  "message": "перепиши веселее",
+  "expect": "chat",
+  "recent": [
+   {
+    "role": "user",
+    "text": "напиши поздравление коллеге"
+   },
+   {
+    "role": "assistant",
+    "text": "Дорогой Иван! Поздравляю тебя с днём рождения..."
+   }
+  ]
+ },
+ {
+  "message": "а теперь сделай ярче",
+  "expect": "edit",
+  "previous_reply_was_image": true,
+  "recent": [
+   {
+    "role": "user",
+    "text": "нарисуй кота"
+   },
+   {
+    "role": "assistant",
+    "text": "(sent a picture: кот)"
+   }
+  ]
+ },
+ {
+  "message": "добавь ему крылья",
+  "expect": "edit",
+  "previous_reply_was_image": true,
+  "recent": [
+   {
+    "role": "user",
+    "text": "нарисуй кота"
+   },
+   {
+    "role": "assistant",
+    "text": "(sent a picture: кот)"
+   }
+  ]
+ },
+ {
+  "message": "да, давай, сделай её",
+  "expect": "music",
+  "recent": [
+   {
+    "role": "user",
+    "text": "хочу песню про лето"
+   },
+   {
+    "role": "assistant",
+    "text": "Вот идеи для песни про лето: ..."
+   }
+  ]
+ },
+ {
+  "message": "ок, создай этот трек",
+  "expect": "music",
+  "recent": [
+   {
+    "role": "user",
+    "text": "хочу песню про лето"
+   },
+   {
+    "role": "assistant",
+    "text": "Вот идеи для песни про лето: ..."
+   }
+  ]
+ },
+ {
+  "message": "нарисуй плз котика",
+  "expect": "image"
+ },
+ {
+  "message": "нарисуйй кота на луне",
+  "expect": "image"
+ },
+ {
+  "message": "сделай картинку где я на марсе, космонавт",
+  "expect": "image"
+ },
+ {
+  "message": "мне бы картинку осеннего леса",
+  "expect": "image"
+ },
+ {
+  "message": "визуализируй мою идею: дом на дереве с горкой",
+  "expect": "image"
+ },
+ {
+  "message": "хочу увидеть как выглядел бы Пушкин в 2050 году",
+  "expect": "image"
+ },
+ {
+  "message": "generate pic: neon samurai in rain",
+  "expect": "image"
+ },
+ {
+  "message": "pls draw smth cute",
+  "expect": "image"
+ },
+ {
+  "message": "фотка милой собаки корги",
+  "expect": "image"
+ },
+ {
+  "message": "сделай арт с волком и луной",
+  "expect": "image"
+ },
+ {
+  "message": "сделай песню для моей девушки на годовщину",
+  "expect": "music"
+ },
+ {
+  "message": "нужен трек для тренировки, энергичный",
+  "expect": "music"
+ },
+ {
+  "message": "make me a chill lofi beat",
+  "expect": "music"
+ },
+ {
+  "message": "сгенерируй мелодию на гитаре",
+  "expect": "music"
+ },
+ {
+  "message": "озвучь мне этот текст женским голосом: добрый вечер",
+  "expect": "speech"
+ },
+ {
+  "message": "можешь сказать голосом: я скоро буду",
+  "expect": "speech"
+ },
+ {
+  "message": "звук будильника",
+  "expect": "sound_effect"
+ },
+ {
+  "message": "нужен звук аплодисментов",
+  "expect": "sound_effect"
+ },
+ {
+  "message": "сделай видео как кот танцует",
+  "expect": "video"
+ },
+ {
+  "message": "ролик 10 секунд, закат на море",
+  "expect": "video"
+ },
+ {
+  "message": "gimme a video of a dragon",
+  "expect": "video"
+ },
+ {
+  "message": "напиши стих",
+  "expect": "chat"
+ },
+ {
+  "message": "придумай 10 названий для канала",
+  "expect": "chat"
+ },
+ {
+  "message": "какая нейросеть лучше рисует?",
+  "expect": "chat"
+ },
+ {
+  "message": "сколько стоит подписка?",
+  "expect": "chat"
+ },
+ {
+  "message": "что такое lo-fi музыка?",
+  "expect": "chat"
+ },
+ {
+  "message": "напиши код для телеграм бота",
+  "expect": "chat"
+ },
+ {
+  "message": "составь меню на неделю",
+  "expect": "chat"
+ },
+ {
+  "message": "как сделать фон прозрачным в canva?",
+  "expect": "chat"
+ },
+ {
+  "message": "explain how image generation works",
+  "expect": "chat"
+ },
+ {
+  "message": "какие есть стили рисования?",
+  "expect": "chat"
+ },
+ {
+  "message": "создай аккаунт в инстаграме — как это сделать?",
+  "expect": "chat"
+ }
+]

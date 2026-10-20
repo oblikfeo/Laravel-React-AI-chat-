@@ -5,6 +5,9 @@ namespace App\Providers;
 use App\Services\Ai\SpeechToText;
 use App\Services\Ai\UnavailableSpeechToText;
 use App\Services\Ai\VeniceSpeechToText;
+use App\Services\Chat\Routing\RequestRouter;
+use App\Services\Chat\Routing\UnavailableRouter;
+use App\Services\Chat\Routing\VeniceRequestRouter;
 use App\Services\Studio\AudioStudio;
 use App\Services\Studio\ImageGenerator;
 use App\Services\Studio\UnavailableAudioStudio;
@@ -60,6 +63,21 @@ class StudioServiceProvider extends ServiceProvider
             }
 
             return new VeniceVideoStudio($this->queue($apiKey));
+        });
+
+        $this->app->singleton(RequestRouter::class, function () {
+            $apiKey = config('studio.api_key');
+
+            if (blank($apiKey)) {
+                return new UnavailableRouter;
+            }
+
+            return new VeniceRequestRouter(
+                baseUrl: config('studio.base_url'),
+                apiKey: $apiKey,
+                model: config('ai.router.model'),
+                timeout: config('ai.router.timeout'),
+            );
         });
 
         $this->app->singleton(SpeechToText::class, function () {

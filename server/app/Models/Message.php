@@ -29,12 +29,13 @@ class Message extends Model
         'model',
         'generation_id',
         'intent',
+        'routing',
         'studio_link',
     ];
 
     protected function casts(): array
     {
-        return ['studio_link' => 'array'];
+        return ['studio_link' => 'array', 'routing' => 'array'];
     }
 
     public function chat(): BelongsTo

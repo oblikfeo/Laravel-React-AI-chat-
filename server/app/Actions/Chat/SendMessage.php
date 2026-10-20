@@ -9,7 +9,8 @@ use App\Services\Ai\AiChatProvider;
 use App\Services\Ai\ModelCatalog;
 use App\Services\Characters\CharacterPrompt;
 use App\Services\Chat\ChatImages;
-use App\Services\Chat\StudioIntent;
+use App\Services\Chat\Routing\ChatRouter;
+use App\Services\Chat\Routing\Route;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -27,7 +28,7 @@ class SendMessage
     public function __construct(
         private readonly AiChatProvider $provider,
         private readonly CharacterPrompt $characterPrompt,
-        private readonly StudioIntent $studioIntent,
+        private readonly ChatRouter $router,
     ) {}
 
     /**
@@ -61,15 +62,14 @@ class SendMessage
             app(StoreAttachment::class)->handle($message, $file);
         }
 
-        // Пока ждём ответа, чат показывает анимацию того, что делается.
-        $intent = $this->studioIntent->detect(
-            $content,
-            ChatImages::for($chat, $message->load('attachments'))->count(),
-        );
+        // Что человек хочет, решаем сразу: пока ждём ответа, чат
+        // показывает анимацию того, что делается.
+        $route = $this->router->decide($chat, $message->load('attachments'));
 
-        if ($intent) {
-            $message->forceFill(['intent' => $intent['mode']])->save();
-        }
+        $message->forceFill([
+            'routing' => $route->toArray(),
+            'intent' => $route->toStudio($content)['mode'] ?? null,
+        ])->save();
 
         $chat->forceFill(['last_message_at' => now()])->save();
 
@@ -84,11 +84,40 @@ class SendMessage
      */
     public function reply(Chat $chat): Message
     {
-        $reply = $this->replyWithStudio($chat) ?? $this->askProvider($chat);
+        $question = $this->question($chat);
+        $route = $question ? $this->routeOf($chat, $question) : Route::chat();
+
+        $reply = ($question ? $this->replyWithStudio($chat, $question, $route) : null)
+            ?? $this->askProvider($chat, $this->chatModelFor($chat, $route));
+
+        // Страховка: если модель всё же изобразила картинку текстом,
+        // делаем настоящую.
+        if ($question && $this->pretendsToDraw($reply)) {
+            $reply->delete();
+
+            $reply = $this->replyWithStudio($chat, $question, new Route('image', $question->content, source: 'guard'));
+        }
 
         $chat->forceFill(['last_message_at' => now()])->save();
 
         return $reply;
+    }
+
+    private function question(Chat $chat): ?Message
+    {
+        return $chat->messages()
+            ->with('attachments')
+            ->where('role', Message::ROLE_USER)
+            ->latest('id')
+            ->first();
+    }
+
+    /** Решение по сообщению: принятое при сохранении или новое. */
+    private function routeOf(Chat $chat, Message $question): Route
+    {
+        return $question->routing
+            ? Route::fromArray($question->routing)
+            : $this->router->decide($chat, $question);
     }
 
     /**
@@ -97,34 +126,51 @@ class SendMessage
      * Картинку чат рисует или правит сам, на звук и видео отвечает
      * карточкой со ссылкой в Студию.
      */
-    private function replyWithStudio(Chat $chat): ?Message
+    private function replyWithStudio(Chat $chat, Message $question, Route $route): ?Message
     {
-        $question = $chat->messages()
-            ->with('attachments')
-            ->where('role', Message::ROLE_USER)
-            ->latest('id')
-            ->first();
+        $studio = $route->toStudio($question->content);
 
-        if (! $question) {
+        if (! $studio) {
             return null;
         }
 
         $images = ChatImages::for($chat, $question);
-        $intent = $this->studioIntent->detect($question->content, $images->count());
 
-        return match ($intent['mode'] ?? null) {
-            StudioIntent::IMAGE, StudioIntent::EDIT => app(ReplyWithImage::class)
-                ->handle($chat, $intent, $images->contents()),
-            StudioIntent::AUDIO, StudioIntent::VIDEO => app(ReplyWithStudioLink::class)
-                ->handle($chat, $intent, $images),
-            default => null,
-        };
+        return in_array($studio['mode'], ['image', 'edit'], true)
+            ? app(ReplyWithImage::class)->handle($chat, $studio, $images->contents())
+            : app(ReplyWithStudioLink::class)->handle($chat, $studio, $images);
     }
 
-    private function askProvider(Chat $chat): Message
+    /**
+     * Какую текстовую модель взять.
+     *
+     * Подбираем, только если человек оставил выбор за нами (Auto):
+     * явный выбор модели не трогаем. Гостю и персонажу модель задана.
+     */
+    private function chatModelFor(Chat $chat, Route $route): ?string
+    {
+        $suggested = $route->chatModel;
+
+        if (! $suggested || $suggested === 'auto' || ! ModelCatalog::has($suggested)) {
+            return null;
+        }
+
+        return $chat->model_key === 'auto' && $chat->user_id && ! $chat->character_id
+            ? $suggested
+            : null;
+    }
+
+    /** Ответ, в котором модель изображает картинку словами. */
+    private function pretendsToDraw(Message $reply): bool
+    {
+        return $reply->generation_id === null
+            && preg_match('/^\s*[\[(](image|picture|sent a picture|изображени|картинк)/iu', $reply->content) === 1;
+    }
+
+    private function askProvider(Chat $chat, ?string $model = null): Message
     {
         // В диалоге с персонажем модель задаёт его автор.
-        $key = ModelCatalog::resolve($chat->effectiveModelKey());
+        $key = ModelCatalog::resolve($model ?? $chat->effectiveModelKey());
         $messages = $this->buildContext($chat);
 
         // Картинку понимает не каждая модель: при вложении подставляем
@@ -205,14 +251,29 @@ class SendMessage
             ->limit(config('ai.context_messages'))
             ->get()
             ->reverse()
+            ->values();
+
+        // Ответы картинкой в историю не попадают: увидев образец, модель
+        // начинает «рисовать» текстом. О нарисованном говорим в
+        // системном запросе.
+        $pictures = $history
+            ->filter(fn (Message $message) => $message->generation)
+            ->map(fn (Message $message) => '«'.$message->generation->prompt.'»')
+            ->implode(', ');
+
+        $turns = $this->merged($history
+            ->reject(fn (Message $message) => $message->generation)
             ->map(fn (Message $message) => $this->formatMessage($message))
             ->values()
-            ->all();
+            ->all());
 
-        return array_merge(
-            [['role' => 'system', 'content' => $this->systemPrompt($chat)]],
-            $history,
-        );
+        $system = $this->systemPrompt($chat);
+
+        if ($pictures !== '') {
+            $system .= "\n\nPictures the app has already shown the user in this conversation: {$pictures}.";
+        }
+
+        return array_merge([['role' => 'system', 'content' => $system]], $turns);
     }
 
     /**
@@ -253,15 +314,6 @@ class SendMessage
      */
     private function formatMessage(Message $message): array
     {
-        // Ответ картинкой текста не содержит. Модели говорим словами,
-        // что было нарисовано: иначе она не поймёт, о чём дальше речь.
-        if ($message->generation) {
-            return [
-                'role' => $message->role,
-                'content' => '[Image shown to the user: '.$message->generation->prompt.']',
-            ];
-        }
-
         $attachments = $message->attachments;
 
         if ($attachments->isEmpty()) {
@@ -290,6 +342,37 @@ class SendMessage
         }
 
         return ['role' => $message->role, 'content' => $parts];
+    }
+
+    /**
+     * Соседние реплики одной стороны склеиваются в одну.
+     *
+     * Так бывает, когда ответ картинкой выпал из истории: две реплики
+     * человека подряд некоторые модели не принимают.
+     *
+     * @param  array<int, array<string, mixed>>  $turns
+     * @return array<int, array<string, mixed>>
+     */
+    private function merged(array $turns): array
+    {
+        $result = [];
+
+        foreach ($turns as $turn) {
+            $last = array_key_last($result);
+
+            if ($last !== null
+                && $result[$last]['role'] === $turn['role']
+                && is_string($result[$last]['content'])
+                && is_string($turn['content'])) {
+                $result[$last]['content'] .= "\n\n".$turn['content'];
+
+                continue;
+            }
+
+            $result[] = $turn;
+        }
+
+        return $result;
     }
 
     /**

@@ -173,10 +173,14 @@ class ChatImagesTest extends TestCase
         $chat = $this->say($user, 'Нарисуй собаку');
         $this->say($user, 'Какой породы она получилась?', $chat);
 
-        $history = collect($this->sent)->pluck('content')->implode("\n");
-
-        $this->assertStringContainsString('[Image shown to the user: Нарисуй собаку]', $history);
+        // О нарисованном модель узнаёт из системного запроса, а не из
+        // реплики-образца, которую она могла бы повторить.
+        $this->assertStringContainsString('«Нарисуй собаку»', $this->sent[0]['content']);
         $this->assertStringContainsString('never write that you have created', $this->sent[0]['content']);
+
+        foreach (array_slice($this->sent, 1) as $turn) {
+            $this->assertStringNotContainsString('Image shown', json_encode($turn, JSON_UNESCAPED_UNICODE));
+        }
     }
 
     public function test_daily_limit_is_shared_with_the_studio(): void
