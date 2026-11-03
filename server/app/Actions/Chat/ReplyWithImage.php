@@ -43,7 +43,7 @@ class ReplyWithImage
             return $this->say($chat, 'Image generation is not available right now. Please try again later.');
         }
 
-        if ($denial = $this->gate->studio($user, $guest)) {
+        if ($denial = $this->gate->studio($user, $guest, $intent['operation'])) {
             return $this->say($chat, $denial);
         }
 

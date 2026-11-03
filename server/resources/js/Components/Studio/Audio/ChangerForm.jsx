@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Mic, AudioWaveform, Send, Upload, Square, X } from 'lucide-react';
-import { Panel, NotReady, SubmitBar } from '@/Components/Studio/Controls';
+import { Panel, NotReady, PaidOnly, SubmitBar } from '@/Components/Studio/Controls';
 import Dropdown from '@/Components/Studio/Dropdown';
 import { formatSeconds } from '@/Components/Studio/Audio/duration';
 
@@ -11,6 +11,7 @@ export default function ChangerForm({
     available,
     busy,
     limit,
+    locked = false,
     onSubmit,
 }) {
     const [file, setFile] = useState(null);
@@ -84,7 +85,7 @@ export default function ChangerForm({
     };
 
     const exhausted = Boolean(limit?.exhausted);
-    const canSubmit = Boolean(file) && !busy && available && !exhausted;
+    const canSubmit = Boolean(file) && !busy && available && !exhausted && !locked;
 
     const submit = (event) => {
         event.preventDefault();
@@ -98,6 +99,7 @@ export default function ChangerForm({
     return (
         <Panel onSubmit={submit}>
             {!available && <NotReady />}
+            {available && locked && <PaidOnly>Voice changer is available on paid plans.</PaidOnly>}
 
             <input
                 ref={fileRef}

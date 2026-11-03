@@ -38,11 +38,10 @@ class ChatContext
             ->map(fn (Message $message) => '«'.$message->generation->prompt.'»')
             ->implode(', ');
 
-        $turns = $this->merged($history
+        $turns = $this->merged($this->fitted($history
             ->reject(fn (Message $message) => $message->generation)
-            ->map(fn (Message $message) => $this->formatMessage($message))
             ->values()
-            ->all());
+            ->all()));
 
         $system = $this->systemPrompt($chat);
 
@@ -77,15 +76,60 @@ class ChatContext
     }
 
     /**
+     * Реплики, которые помещаются в предел истории.
+     *
+     * Идём от новых к старым: последняя реплика уходит всегда, старые —
+     * пока хватает места. Картинки тоже только самые свежие; на месте
+     * остальных — пометка, что картинка была.
+     *
+     * @param  array<int, Message>  $messages  от старых к новым
+     * @return array<int, array<string, mixed>>
+     */
+    private function fitted(array $messages): array
+    {
+        $room = (int) config('ai.context_chars');
+        $images = (int) config('ai.context_images');
+        $turns = [];
+
+        foreach (array_reverse($messages) as $message) {
+            $turn = $this->formatMessage($message, $room, $images);
+            $length = mb_strlen($this->textOf($turn));
+
+            if ($turns && $length > $room) {
+                break;
+            }
+
+            $room -= $length;
+            // Первая часть составного сообщения — текст, остальные — картинки.
+            if (is_array($turn['content'])) {
+                $images -= count($turn['content']) - 1;
+            }
+
+            array_unshift($turns, $turn);
+        }
+
+        return $turns;
+    }
+
+    /** @param  array<string, mixed>  $turn */
+    private function textOf(array $turn): string
+    {
+        return is_string($turn['content'])
+            ? $turn['content']
+            : (string) ($turn['content'][0]['text'] ?? '');
+    }
+
+    /**
      * Готовит одно сообщение к отправке.
      *
      * Текст документа вставляется прямо в сообщение: модель не умеет
      * открывать файлы, она работает только с тем, что ей прислали.
-     * Картинки уходят отдельными частями в формате провайдера.
+     * Длинный документ обрезается по оставшемуся месту. Картинки
+     * уходят отдельными частями в формате провайдера.
      *
      * @return array<string, mixed>
      */
-    private function formatMessage(Message $message): array
+    private function formatMessage(Message $message, int $room, int $images): array
     {
         $attachments = $message->attachments;
 
@@ -96,10 +140,27 @@ class ChatContext
         $text = $message->content;
 
         foreach ($attachments->where('extracted_text', '!=', null) as $document) {
-            $text .= "\n\n--- {$document->name} ---\n{$document->extracted_text}";
+            $left = $room - mb_strlen($text) - mb_strlen($document->name) - 10;
+
+            if ($left < 200) {
+                $text .= "\n\n({$document->name} was attached here; it is too long to include again.)";
+
+                continue;
+            }
+
+            $content = mb_strlen($document->extracted_text) > $left
+                ? mb_substr($document->extracted_text, 0, $left).'…'
+                : $document->extracted_text;
+
+            $text .= "\n\n--- {$document->name} ---\n{$content}";
         }
 
-        $images = $attachments->filter(fn (Attachment $a) => $a->isImage());
+        $all = $attachments->filter(fn (Attachment $a) => $a->isImage());
+        $images = $all->take(max(0, $images));
+
+        if ($all->count() > $images->count()) {
+            $text .= "\n\n(".($all->count() - $images->count()).' more image(s) were attached here.)';
+        }
 
         if ($images->isEmpty()) {
             return ['role' => $message->role, 'content' => $text];

@@ -14,6 +14,14 @@
  *                 текущий, 3 — остатки двух прошлых.
  *
  * video — доступно ли видео: ролик дорогой, на бесплатном его нет.
+ *
+ * daily — сколько раз в день можно воспользоваться разделом: chat —
+ *   сообщений, image — картинок, edit — правок, audio — звуков,
+ *   voice — голосовых вводов. Только у бесплатного тарифа: платные
+ *   ограничивает бюджет. Ноль — раздел закрыт.
+ *
+ * caps — что из дорогих настроек недоступно без подписки: длинный
+ *   звук, большое увеличение, несколько вариантов за раз.
  */
 return [
 
@@ -31,12 +39,28 @@ return [
             'price_yearly' => 0,
             'tagline' => 'Explore Uncensia with base models',
             'cta' => 'Current plan',
-            'usage' => ['allowance' => 1.0, 'daily_share' => 0.15, 'rollover' => 1],
+            'usage' => ['allowance' => 0.5, 'daily_share' => null, 'rollover' => 1],
             'video' => false,
+            'daily' => ['chat' => 50, 'image' => 3, 'edit' => 2, 'audio' => 1, 'voice' => 20],
+            'caps' => [
+                // Сколько вариантов картинки за один запуск.
+                'variants' => 1,
+                // Увеличение — только в два раза.
+                'upscale_scales' => [2],
+                // Музыка не длиннее, секунд.
+                'music_seconds' => 30,
+                // Эффекты — только быстрая модель и не длиннее, секунд.
+                'effect_models' => ['quick'],
+                'effect_seconds' => 10,
+                // Озвучка — не длиннее, символов.
+                'speech_characters' => 1000,
+                // Смена голоса — только на платных тарифах.
+                'voice_change' => false,
+            ],
             'features' => [
                 'Base models',
-                'Chat, images and audio every day',
-                'Daily allowance that renews every morning',
+                'Chat, images, edits and audio every day',
+                'Short audio clips',
                 'Private and uncensored',
             ],
         ],
@@ -52,7 +76,8 @@ return [
             'video' => true,
             'features' => [
                 'All Pro models',
-                '6× the monthly allowance of Free',
+                'Use every section as much as you need, within a generous monthly allowance',
+                'Long music, sound effects and voice changer',
                 'Video generation',
                 'Image tools: upscale, remove background, variants',
                 'Custom characters',

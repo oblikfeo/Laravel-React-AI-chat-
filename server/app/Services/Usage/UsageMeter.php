@@ -76,16 +76,22 @@ class UsageMeter
     /**
      * Почему нельзя запустить ещё одну трату, или null — можно.
      *
-     * Последняя трата может немного выйти за бюджет: проверяется
-     * остаток до запуска, а не после.
+     * $cost — цена запроса, если она известна заранее (работа Студии):
+     * запрос дороже остатка не запускается. Цену ответа в чате заранее
+     * не узнать, поэтому он проверяется только по остатку.
      */
-    public function denial(User $user): ?string
+    public function denial(User $user, float $cost = 0.0): ?string
     {
         $usage = $this->snapshot($user);
+        $upgrade = $user->isPromotedPlan() ? ' — or upgrade for more.' : '.';
 
         if ($usage->exhausted()) {
-            return "You've used this month's allowance. It renews on {$usage->periodEnd->format('j M')}"
-                .($user->isPromotedPlan() ? ' — or upgrade for more.' : '.');
+            return "You've used this month's allowance. It renews on {$usage->periodEnd->format('j M')}{$upgrade}";
+        }
+
+        if ($cost > 0 && $usage->spent + $cost > $usage->available()) {
+            return "This needs more than what's left of your allowance ({$usage->toArray()['percentLeft']}% left). "
+                ."Try a shorter or simpler version, or wait until {$usage->periodEnd->format('j M')}{$upgrade}";
         }
 
         if ($usage->dailyExhausted()) {

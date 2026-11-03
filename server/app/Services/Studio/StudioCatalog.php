@@ -190,7 +190,52 @@ class StudioCatalog
      *
      * @return array<int, array<string, mixed>>
      */
-    public static function musicModels(?User $user = null, ?float $share = null): array
+    public static function musicModels(?User $user = null, ?float $share = null, ?array $caps = null): array
+    {
+        return self::capped(self::musicList($user, $share), $caps['music_seconds'] ?? null);
+    }
+
+    /**
+     * Без подписки длинный звук закрыт: длительности обрезаются
+     * потолком, а модель, у которой короче не бывает, — под замком.
+     *
+     * @param  array<int, array<string, mixed>>  $models
+     * @param  array<int, string>|null  $allowed  какие модели открыты; null — все
+     * @return array<int, array<string, mixed>>
+     */
+    private static function capped(array $models, ?int $maxSeconds, ?array $allowed = null): array
+    {
+        if ($maxSeconds === null && $allowed === null) {
+            return $models;
+        }
+
+        return array_map(function (array $model) use ($maxSeconds, $allowed) {
+            if ($allowed !== null && ! in_array($model['key'], $allowed, true)) {
+                return [...$model, 'locked' => true];
+            }
+
+            if ($maxSeconds === null) {
+                return $model;
+            }
+
+            $durations = isset($model['durations'])
+                ? array_values(array_filter($model['durations'], fn (int $seconds) => $seconds <= $maxSeconds))
+                : null;
+            $tooLong = ($durations !== null && $durations === [])
+                || ($model['minDuration'] !== null && $model['minDuration'] > $maxSeconds);
+
+            return [
+                ...$model,
+                'locked' => $model['locked'] || $tooLong,
+                'durations' => $durations ?: $model['durations'] ?? null,
+                'maxDuration' => $model['maxDuration'] !== null ? min($model['maxDuration'], $maxSeconds) : null,
+                'defaultDuration' => $model['defaultDuration'] !== null ? min($model['defaultDuration'], $maxSeconds) : null,
+            ];
+        }, $models);
+    }
+
+    /** @return array<int, array<string, mixed>> */
+    private static function musicList(?User $user, ?float $share): array
     {
         return self::audioGroup('music', $user, $share, fn (array $model) => [
             'lyrics' => (bool) ($model['lyrics'] ?? false),
@@ -203,13 +248,17 @@ class StudioCatalog
     }
 
     /** @return array<int, array<string, mixed>> */
-    public static function effectModels(?User $user = null, ?float $share = null): array
+    public static function effectModels(?User $user = null, ?float $share = null, ?array $caps = null): array
     {
-        return self::audioGroup('effects', $user, $share, fn (array $model) => [
-            'minDuration' => $model['min_duration'] ?? null,
-            'maxDuration' => $model['max_duration'] ?? null,
-            'defaultDuration' => $model['default_duration'] ?? null,
-        ]);
+        return self::capped(
+            self::audioGroup('effects', $user, $share, fn (array $model) => [
+                'minDuration' => $model['min_duration'] ?? null,
+                'maxDuration' => $model['max_duration'] ?? null,
+                'defaultDuration' => $model['default_duration'] ?? null,
+            ]),
+            $caps['effect_seconds'] ?? null,
+            $caps['effect_models'] ?? null,
+        );
     }
 
     /**

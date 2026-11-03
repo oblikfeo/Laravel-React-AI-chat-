@@ -1,4 +1,5 @@
 import { X, Globe, Lock } from 'lucide-react';
+import { usePlans } from '@/Contexts/PlansContext';
 import { formatShare } from '@/Components/Studio/price';
 
 /**
@@ -80,6 +81,27 @@ export function Price({ value }) {
         >
             {text}
         </span>
+    );
+}
+
+/**
+ * Инструмент только для подписчиков: вместо отказа после нажатия
+ * человек сразу видит, что нужно, и может открыть тарифы.
+ */
+export function PaidOnly({ children }) {
+    const { openPlans } = usePlans();
+
+    return (
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-400/20 bg-amber-400/[0.07] px-4 py-2.5 text-[13px] text-amber-100/85">
+            <span>{children}</span>
+            <button
+                type="button"
+                onClick={openPlans}
+                className="rounded-full bg-white px-3.5 py-1 text-[12px] font-semibold text-black transition hover:bg-white/90"
+            >
+                See plans
+            </button>
+        </div>
     );
 }
 

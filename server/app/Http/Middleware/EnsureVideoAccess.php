@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Generation;
 use App\Services\Studio\VideoStudio;
 use App\Services\Usage\UsageGate;
 use Closure;
@@ -12,7 +13,8 @@ use Symfony\Component\HttpFoundation\Response;
  * Пускает к видео только тех, кому оно положено.
  *
  * Условия общие для ролика по описанию и для оживления картинки:
- * раздел подключён, видео есть на тарифе, бюджет не исчерпан.
+ * раздел подключён, видео есть на тарифе, ролик укладывается в
+ * остаток бюджета.
  */
 class EnsureVideoAccess
 {
@@ -27,7 +29,9 @@ class EnsureVideoAccess
             return back()->with('error', 'Studio is not available yet. It is coming soon.');
         }
 
-        if ($denial = $this->gate->video($request->user())) {
+        $operation = $request->routeIs('studio.animate') ? Generation::OP_ANIMATE : Generation::OP_VIDEO;
+
+        if ($denial = $this->gate->video($request->user(), $operation, $request->except(['image']))) {
             return back()->with('error', $denial);
         }
 

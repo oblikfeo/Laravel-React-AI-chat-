@@ -100,7 +100,7 @@ class StudioTest extends TestCase
     {
         Storage::fake('local');
         $this->fakeGenerator();
-        config(['studio.daily_limit_guest' => 1]);
+        config(['guests.daily.image' => 1]);
 
         $payload = ['prompt' => 'One', 'model' => 'fast', 'aspect_ratio' => '1:1'];
 

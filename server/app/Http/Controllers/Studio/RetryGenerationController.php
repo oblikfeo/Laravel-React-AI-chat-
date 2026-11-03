@@ -63,7 +63,7 @@ class RetryGenerationController extends Controller
             return back()->with('error', 'Studio is not available yet. It is coming soon.');
         }
 
-        if ($denial = $this->gate->studio($user, $guest)) {
+        if ($denial = $this->gate->studio($user, $guest, $generation->operation, self::inputOf($generation))) {
             return back()->with('error', $denial);
         }
 
@@ -119,7 +119,7 @@ class RetryGenerationController extends Controller
             return back()->with('error', 'Studio is not available yet. It is coming soon.');
         }
 
-        if ($denial = $this->gate->video($user)) {
+        if ($denial = $this->gate->video($user, $generation->operation, self::inputOf($generation))) {
             return back()->with('error', $denial);
         }
 
@@ -129,5 +129,21 @@ class RetryGenerationController extends Controller
         }
 
         return back();
+    }
+
+    /**
+     * Настройки работы в том виде, в каком их присылает форма: по ним
+     * проверяются пределы и цена повтора.
+     *
+     * @return array<string, mixed>
+     */
+    private static function inputOf(Generation $generation): array
+    {
+        return array_filter([
+            'model' => $generation->model_key,
+            'duration' => $generation->duration,
+            'resolution' => $generation->resolution,
+            'text' => $generation->operation === Generation::OP_SPEECH ? $generation->prompt : null,
+        ], fn ($value) => $value !== null);
     }
 }

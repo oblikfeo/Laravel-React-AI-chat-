@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Chat;
 
+use Illuminate\Http\UploadedFile;
+
 /**
  * Правила для приложенных файлов.
  *
@@ -15,7 +17,21 @@ trait ValidatesAttachments
     protected function attachmentRules(): array
     {
         return [
-            'files' => ['nullable', 'array', 'max:5'],
+            'files' => [
+                'nullable',
+                'array',
+                'max:5',
+                // Общий размер: больше сервер не примет вовсе, и человек
+                // увидел бы голую страницу ошибки вместо подсказки.
+                function (string $attribute, mixed $files, \Closure $fail) {
+                    $total = collect(is_array($files) ? $files : [])
+                        ->sum(fn ($file) => $file instanceof UploadedFile ? $file->getSize() : 0);
+
+                    if ($total > 25 * 1024 * 1024) {
+                        $fail('Files together must be under 25 MB.');
+                    }
+                },
+            ],
             'files.*' => [
                 'file',
                 'max:10240',

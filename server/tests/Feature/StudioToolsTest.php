@@ -141,7 +141,7 @@ class StudioToolsTest extends TestCase
 
     public function test_image_is_upscaled(): void
     {
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->create(['plan' => 'pro']))
             ->post('/studio/edit', [
                 'operation' => 'upscale',
                 'images' => [$this->upload()],
@@ -232,7 +232,7 @@ class StudioToolsTest extends TestCase
     /** Несколько вариантов одной идеи становятся отдельными работами. */
     public function test_variants_create_separate_works(): void
     {
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->create(['plan' => 'pro']))
             ->post('/studio', [
                 'prompt' => 'Four cats',
                 'model' => 'fast',

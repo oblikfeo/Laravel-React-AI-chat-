@@ -468,7 +468,8 @@ class StudioVideoTest extends TestCase
                 ->where('videoModels.0.prices.text.480p.5', fn ($value) => abs($value - 0.12 * $share) < 1e-9)
                 ->where('editPrices.edit', fn ($value) => abs($value - 0.04 * $share) < 1e-9)
                 ->has('musicModels.0.price.perSecond')
-                ->where('limit.percentLeft', 100));
+                ->where('limits.image.percentLeft', 100)
+                ->where('limits.video.percentLeft', 100));
     }
 
     /** Гостю цены не показываются: у него проба, а не бюджет. */

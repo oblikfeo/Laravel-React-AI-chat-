@@ -88,7 +88,9 @@ export default function StudioIndex({
     upscaleScales,
     maxCombine,
     studioReady,
-    limit,
+    limits = {},
+    maxSpeech,
+    voiceChange,
     compose,
 }) {
     const [view, setView] = useState(() =>
@@ -271,7 +273,9 @@ export default function StudioIndex({
             .map((item) => ({ section: sectionOf(item) })),
     ];
 
-    const shared = { available: studioReady, busy, limit };
+    // У каждого раздела свой остаток: без подписки у них разные
+    // дневные пределы.
+    const shared = { available: studioReady, busy, limit: limits[tab] ?? null };
     const freshHere = unseenIn(tab).length;
 
     return (
@@ -367,6 +371,8 @@ export default function StudioIndex({
                                     defaultEffectModel={defaultEffectModel}
                                     defaultVoice={defaultVoice}
                                     maxLyrics={maxLyrics}
+                                    maxCharacters={maxSpeech}
+                                    voiceChange={voiceChange}
                                     mode={audioMode}
                                     onModeChange={setAudioMode}
                                     incoming={incoming}

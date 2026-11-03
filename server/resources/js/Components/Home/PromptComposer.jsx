@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { usePage } from '@inertiajs/react';
 import { Plus, Mic, ArrowUp, Square, Loader2, X } from 'lucide-react';
 import ModelPicker from '@/Components/Home/ModelPicker';
 import AttachedFiles from '@/Components/Home/AttachedFiles';
@@ -8,7 +9,14 @@ import useVoiceInput from '@/Components/Home/useVoiceInput';
 const ACCEPT = 'image/jpeg,image/png,image/webp,image/gif,application/pdf,'
     + 'text/plain,text/markdown,text/csv,application/json,application/xml';
 
+/** Пределы — те же, что проверяет сервер, см. ValidatesAttachments. */
 const MAX_FILES = 5;
+const MAX_FILE_MB = 10;
+const MAX_TOTAL_MB = 25;
+const MAX_CHARS = 8000;
+
+const MB = 1024 * 1024;
+const EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'pdf', 'txt', 'md', 'csv', 'json', 'xml'];
 
 /**
  * Поле ввода промпта — центральный элемент главной.
@@ -30,6 +38,19 @@ export default function PromptComposer({
 }) {
     const textareaRef = useRef(null);
     const fileRef = useRef(null);
+    const { errors = {} } = usePage().props;
+
+    // Что не так с вводом: слишком длинный текст или неподходящий
+    // файл. Ловим до отправки — иначе запрос уйдёт и вернётся отказом.
+    const [problem, setProblem] = useState(null);
+
+    // Отказ сервера по полям формы: без него сообщение просто не
+    // уходило бы, и человек не понимал бы почему.
+    const serverError = errors.message
+        ?? errors.files
+        ?? Object.entries(errors).find(([key]) => key.startsWith('files.'))?.[1]
+        ?? null;
+    const shownProblem = problem ?? serverError;
 
     // Распознанная речь дописывается к уже набранному тексту.
     const voice = useVoiceInput((text) => {
@@ -50,14 +71,44 @@ export default function PromptComposer({
 
     // Отправлять можно и без текста, если приложен файл: «посмотри
     // этот документ» без слов — обычный сценарий.
-    const canSubmit = (value.trim().length > 0 || files.length > 0) && !busy;
+    const canSubmit = (value.trim().length > 0 || files.length > 0)
+        && value.length <= MAX_CHARS
+        && !busy;
 
     const addFiles = (incoming) => {
         if (!onFilesChange) {
             return;
         }
 
-        onFilesChange([...files, ...Array.from(incoming)].slice(0, MAX_FILES));
+        const types = ACCEPT.split(',');
+        // Тип файла браузер знает не всегда (у .md он бывает пустым),
+        // поэтому подходит и расширение. Окончательно проверит сервер.
+        const accepted = (file) =>
+            types.includes(file.type) || EXTENSIONS.includes(file.name.split('.').pop()?.toLowerCase());
+        const picked = [];
+        let total = files.reduce((sum, file) => sum + file.size, 0);
+        let rejected = null;
+
+        for (const file of Array.from(incoming)) {
+            if (!accepted(file)) {
+                rejected = `${file.name}: this file type is not supported.`;
+            } else if (file.size > MAX_FILE_MB * MB) {
+                rejected = `${file.name} is larger than ${MAX_FILE_MB} MB.`;
+            } else if (total + file.size > MAX_TOTAL_MB * MB) {
+                rejected = `Files together must be under ${MAX_TOTAL_MB} MB.`;
+            } else if (files.length + picked.length >= MAX_FILES) {
+                rejected = `You can attach up to ${MAX_FILES} files.`;
+            } else {
+                picked.push(file);
+                total += file.size;
+            }
+        }
+
+        setProblem(rejected);
+
+        if (picked.length) {
+            onFilesChange([...files, ...picked]);
+        }
     };
 
     const handleSubmit = (event) => {
@@ -107,7 +158,13 @@ export default function PromptComposer({
             <textarea
                 ref={textareaRef}
                 value={value}
-                onChange={(event) => onChange(event.target.value)}
+                onChange={(event) => {
+                    onChange(event.target.value);
+
+                    if (problem && event.target.value.length <= MAX_CHARS) {
+                        setProblem(null);
+                    }
+                }}
                 onKeyDown={handleKeyDown}
                 // Картинку можно вставить из буфера обмена.
                 onPaste={(event) => {
@@ -116,13 +173,49 @@ export default function PromptComposer({
                     if (pasted.length) {
                         event.preventDefault();
                         addFiles(pasted);
+
+                        return;
+                    }
+
+                    // Огромный текст браузер молча обрезал бы по пределу:
+                    // говорим, как передать его целиком.
+                    const text = event.clipboardData.getData('text');
+
+                    if (value.length + text.length > MAX_CHARS) {
+                        setProblem(
+                            `Messages are limited to ${MAX_CHARS.toLocaleString('en-US')} characters. `
+                                + 'Save a longer text as a .txt file and attach it.',
+                        );
                     }
                 }}
+                maxLength={MAX_CHARS}
                 placeholder={placeholder}
                 rows={minRows}
                 autoFocus={autoFocus}
                 className="w-full resize-none border-0 bg-transparent p-0 text-[17px] leading-relaxed text-white placeholder:text-white/45 focus:outline-none focus:ring-0"
             />
+
+            {value.length > MAX_CHARS * 0.9 && (
+                <p className="mt-2 text-right text-[12px] tabular-nums text-white/45">
+                    {value.length.toLocaleString('en-US')} / {MAX_CHARS.toLocaleString('en-US')}
+                </p>
+            )}
+
+            {shownProblem && (
+                <p className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-rose-400/25 bg-rose-950/50 px-3 py-2 text-[13px] text-rose-100">
+                    {shownProblem}
+                    {problem && (
+                        <button
+                            type="button"
+                            onClick={() => setProblem(null)}
+                            aria-label="Dismiss"
+                            className="shrink-0 rounded-md p-0.5 text-rose-200/70 transition hover:text-white"
+                        >
+                            <X className="h-3.5 w-3.5" strokeWidth={2} />
+                        </button>
+                    )}
+                </p>
+            )}
 
             {voice.error && (
                 <p className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-rose-400/25 bg-rose-950/50 px-3 py-2 text-[13px] text-rose-100">

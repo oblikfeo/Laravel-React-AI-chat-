@@ -28,7 +28,7 @@ class ShowStudioController extends Controller
         $user = $request->user();
         $guest = CurrentGuest::get($request);
 
-        ['share' => $share, 'limit' => $limit] = $usage->for($user, $guest);
+        ['share' => $share, 'limits' => $limits, 'caps' => $caps] = $usage->for($user, $guest);
 
         return Inertia::render('Studio/Index', [
             // С чем открыть Студию, если пришли из чата или ленты.
@@ -46,8 +46,8 @@ class ShowStudioController extends Controller
             'aspectRatios' => StudioCatalog::aspectRatios(),
             'styles' => StudioCatalog::styles(),
             'speechModels' => StudioCatalog::speechModels($user, $share),
-            'musicModels' => StudioCatalog::musicModels($user, $share),
-            'effectModels' => StudioCatalog::effectModels($user, $share),
+            'musicModels' => StudioCatalog::musicModels($user, $share, $caps),
+            'effectModels' => StudioCatalog::effectModels($user, $share, $caps),
             'videoModels' => StudioCatalog::videoModels($share),
             'defaultVideoModel' => config('studio.video.default_model'),
             'editPrices' => StudioCatalog::editPrices($share),
@@ -61,7 +61,7 @@ class ShowStudioController extends Controller
                     ! $user->hasVideo() => 'upgrade',
                     default => 'open',
                 },
-                'limit' => $limit,
+                'limit' => $limits['video'],
             ],
             'voices' => StudioCatalog::voices(),
             'defaultVoice' => config('studio.default_voice'),
@@ -70,17 +70,21 @@ class ShowStudioController extends Controller
             'maxLyrics' => (int) config('studio.music.max_lyrics'),
             'defaultModel' => config('studio.default_model'),
             'defaultSpeechModel' => config('studio.speech.default_model'),
-            'maxVariants' => (int) config('studio.max_variants'),
+            // Без подписки дорогие настройки закрыты, см. caps в
+            // config/plans.php: формы показывают их под замком.
+            'maxVariants' => (int) ($caps['variants'] ?? config('studio.max_variants')),
+            'maxSpeech' => (int) ($caps['speech_characters'] ?? config('studio.speech.max_characters')),
+            'voiceChange' => $caps['voice_change'] ?? true,
             'maxSeed' => (int) config('studio.max_seed'),
-            'upscaleScales' => config('studio.edit.scales'),
+            'upscaleScales' => $caps['upscale_scales'] ?? config('studio.edit.scales'),
             'maxCombine' => (int) config('studio.edit.max_combine'),
 
             // Пока провайдер не открыл доступ, интерфейс говорит, что
             // Студия скоро заработает, вместо ошибки на весь экран.
             'studioReady' => $generator->isAvailable(),
 
-            // Остаток бюджета в процентах и когда он обновится.
-            'limit' => $limit,
+            // Остаток каждого раздела в процентах и когда он обновится.
+            'limits' => $limits,
         ]);
     }
 }

@@ -15,6 +15,37 @@ use App\Models\Generation;
 class GenerationCost
 {
     /**
+     * Цена запроса до запуска — по тем же настройкам, что придут в
+     * форме. Чего человек не задал, берётся по умолчанию модели.
+     *
+     * @param  array<string, mixed>  $input
+     */
+    public static function estimate(string $operation, array $input): float
+    {
+        [$kind, $group] = match ($operation) {
+            Generation::OP_VIDEO, Generation::OP_ANIMATE => [Generation::KIND_VIDEO, 'video'],
+            Generation::OP_SPEECH => [Generation::KIND_AUDIO, 'speech'],
+            Generation::OP_MUSIC => [Generation::KIND_AUDIO, 'music'],
+            Generation::OP_EFFECT => [Generation::KIND_AUDIO, 'effects'],
+            Generation::OP_VOICE_CHANGE => [Generation::KIND_AUDIO, null],
+            default => [Generation::KIND_IMAGE, null],
+        };
+
+        $model = $input['model'] ?? ($group ? config("studio.{$group}.default_model") : config('studio.default_model'));
+        $defaults = $group ? config("studio.{$group}.models.{$model}", []) : [];
+
+        return self::of(new Generation([
+            'kind' => $kind,
+            'operation' => $operation,
+            'model_key' => $operation === Generation::OP_VOICE_CHANGE ? 'voice_changer' : $model,
+            'variants' => max(1, (int) ($input['variants'] ?? 1)),
+            'duration' => $input['duration'] ?? ($defaults['default_duration'] ?? null),
+            'resolution' => $input['resolution'] ?? ($defaults['default_resolution'] ?? null),
+            'prompt' => (string) ($input['text'] ?? $input['prompt'] ?? ''),
+        ]), ['scale' => (int) ($input['scale'] ?? 2)]);
+    }
+
+    /**
      * @param  array{scale?: int}  $options  то, чего нет в записи работы
      */
     public static function of(Generation $generation, array $options = []): float

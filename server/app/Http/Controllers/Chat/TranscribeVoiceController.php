@@ -7,6 +7,7 @@ use App\Http\Requests\Chat\TranscribeVoiceRequest;
 use App\Services\Ai\SpeechToText;
 use App\Services\Guests\CurrentGuest;
 use App\Services\Studio\GenerationFailed;
+use App\Services\Usage\UsageGate;
 use App\Services\Usage\UsageLedger;
 use Illuminate\Http\JsonResponse;
 
@@ -18,10 +19,14 @@ class TranscribeVoiceController extends Controller
      * Текст возвращается в поле ввода, а не отправляется сразу: человек
      * видит, что распознано, и может поправить перед отправкой.
      */
-    public function __invoke(TranscribeVoiceRequest $request, SpeechToText $speech, UsageLedger $ledger): JsonResponse
+    public function __invoke(TranscribeVoiceRequest $request, SpeechToText $speech, UsageLedger $ledger, UsageGate $gate): JsonResponse
     {
         if (! $speech->isAvailable()) {
             return response()->json(['message' => 'Voice input is not available right now.'], 503);
+        }
+
+        if ($denial = $gate->voice($request->user(), CurrentGuest::get($request))) {
+            return response()->json(['message' => $denial], 429);
         }
 
         $file = $request->file('audio');

@@ -155,13 +155,15 @@ class UsageMeterTest extends TestCase
         $this->assertStringContainsString('3 Dec', $this->meter->denial($user));
     }
 
-    /** Бесплатный тариф не выбирает месячный бюджет за один день. */
-    public function test_free_plan_has_a_daily_share(): void
+    /** Дневная доля: тариф не выбирает месячный бюджет за один день. */
+    public function test_daily_share_limits_one_day(): void
     {
-        $user = User::factory()->create();
+        config(['plans.list.pro.usage.daily_share' => 0.2]);
+
+        $user = $this->subscriber('pro', '2026-11-01 00:00');
         $plan = $user->planUsage();
 
-        $this->spend($user, $plan['allowance'] * $plan['daily_share']);
+        $this->spend($user, $plan['allowance'] * 0.2);
 
         $this->assertStringContainsString('today', $this->meter->denial($user));
 
@@ -170,10 +172,20 @@ class UsageMeterTest extends TestCase
         $this->assertTrue($this->meter->allows($user));
     }
 
+    /** Запрос дороже остатка не запускается, даже если остаток есть. */
+    public function test_request_bigger_than_what_is_left_is_refused(): void
+    {
+        $user = User::factory()->create();
+        $this->spend($user, $user->planUsage()['allowance'] - 0.01);
+
+        $this->assertNull($this->meter->denial($user, 0.005));
+        $this->assertStringContainsString("what's left", $this->meter->denial($user, 0.04));
+    }
+
     public function test_interface_gets_percentages_not_dollars(): void
     {
         $user = User::factory()->create();
-        $this->spend($user, 0.05, category: UsageRecord::CATEGORY_CHAT);
+        $this->spend($user, $user->planUsage()['allowance'] * 0.05, category: UsageRecord::CATEGORY_CHAT);
 
         $this->actingAs($user)
             ->get('/')
@@ -212,7 +224,7 @@ class UsageMeterTest extends TestCase
         $this->actingAs($user)
             ->get('/studio')
             ->assertInertia(fn ($page) => $page
-                ->where('limit.percentLeft', 0)
-                ->where('limit.exhausted', true));
+                ->where('limits.image.percentLeft', 0)
+                ->where('limits.image.exhausted', true));
     }
 }

@@ -32,14 +32,20 @@ final class UsageSnapshot
         return $this->base + $this->carried;
     }
 
+    /**
+     * Суммы — дроби: 6 × 0.2 в PHP не ровно 1.2, а в базе лежит ровно.
+     * Без допуска потраченный до цента бюджет считался бы неполным.
+     */
+    private const EPSILON = 0.000001;
+
     public function exhausted(): bool
     {
-        return $this->spent >= $this->available();
+        return $this->spent >= $this->available() - self::EPSILON;
     }
 
     public function dailyExhausted(): bool
     {
-        return $this->dailyLimit !== null && $this->spentToday >= $this->dailyLimit;
+        return $this->dailyLimit !== null && $this->spentToday >= $this->dailyLimit - self::EPSILON;
     }
 
     /** Доля бюджета, израсходованная в периоде, 0–100. */

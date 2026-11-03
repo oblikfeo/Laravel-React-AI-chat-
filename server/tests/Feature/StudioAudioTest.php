@@ -36,7 +36,7 @@ class StudioAudioTest extends TestCase
 
     public function test_music_goes_into_the_queue(): void
     {
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->create(['plan' => 'pro']))
             ->post('/studio/music', [
                 'prompt' => 'Calm piano for a rainy evening',
                 'model' => 'instrumental',
@@ -55,7 +55,7 @@ class StudioAudioTest extends TestCase
     /** Короткое описание модель не примет. */
     public function test_music_needs_a_real_description(): void
     {
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->create(['plan' => 'pro']))
             ->post('/studio/music', ['prompt' => 'jazz'])
             ->assertSessionHasErrors('prompt');
     }
@@ -63,7 +63,7 @@ class StudioAudioTest extends TestCase
     /** Модель, которая поёт, без слов работать не станет. */
     public function test_singing_model_requires_lyrics(): void
     {
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->create(['plan' => 'pro']))
             ->post('/studio/music', [
                 'prompt' => 'A cheerful song about the sea',
                 'model' => 'vocal',
@@ -73,7 +73,7 @@ class StudioAudioTest extends TestCase
 
     public function test_effect_goes_into_the_queue(): void
     {
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->create(['plan' => 'pro']))
             ->post('/studio/effect', [
                 'prompt' => 'Thunder rolling in the distance',
                 'model' => 'quick',
@@ -90,7 +90,7 @@ class StudioAudioTest extends TestCase
 
     public function test_voice_change_takes_a_recording(): void
     {
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->create(['plan' => 'pro']))
             ->post('/studio/voice-change', [
                 'recording' => UploadedFile::fake()->createWithContent(
                     'speech.mp3',
@@ -110,7 +110,7 @@ class StudioAudioTest extends TestCase
 
     public function test_voice_change_without_a_recording_is_refused(): void
     {
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->create(['plan' => 'pro']))
             ->post('/studio/voice-change', ['voice' => 'warm'])
             ->assertSessionHasErrors('recording');
     }
@@ -118,7 +118,7 @@ class StudioAudioTest extends TestCase
     /** Пока провайдер считает, работа остаётся в ожидании. */
     public function test_unfinished_work_stays_queued(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['plan' => 'pro']);
 
         $this->actingAs($user)->post('/studio/music', [
             'prompt' => 'Slow ambient drone for deep focus',
@@ -134,7 +134,7 @@ class StudioAudioTest extends TestCase
 
     public function test_finished_work_is_saved(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['plan' => 'pro']);
 
         $this->actingAs($user)->post('/studio/music', [
             'prompt' => 'Slow ambient drone for deep focus',
@@ -157,7 +157,7 @@ class StudioAudioTest extends TestCase
      */
     public function test_voice_change_is_collected_from_its_own_endpoint(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['plan' => 'pro']);
 
         $this->actingAs($user)->post('/studio/voice-change', [
             'recording' => UploadedFile::fake()->createWithContent('a.mp3', 'x'),
@@ -171,7 +171,7 @@ class StudioAudioTest extends TestCase
     /** Задача, о которой провайдер забыл, не должна висеть вечно. */
     public function test_a_forgotten_job_gives_up(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['plan' => 'pro']);
 
         $this->actingAs($user)->post('/studio/music', [
             'prompt' => 'Slow ambient drone for deep focus',
@@ -194,7 +194,7 @@ class StudioAudioTest extends TestCase
     /** Чужие работы при проверке готовности не трогаем. */
     public function test_another_users_work_is_not_collected(): void
     {
-        $owner = User::factory()->create();
+        $owner = User::factory()->create(['plan' => 'pro']);
 
         $this->actingAs($owner)->post('/studio/music', [
             'prompt' => 'Slow ambient drone for deep focus',
@@ -202,7 +202,7 @@ class StudioAudioTest extends TestCase
 
         $this->studio->ready = true;
 
-        $this->actingAs(User::factory()->create())->post('/studio/collect');
+        $this->actingAs(User::factory()->create(['plan' => 'pro']))->post('/studio/collect');
 
         $this->assertSame(
             Generation::STATUS_QUEUED,
@@ -213,7 +213,7 @@ class StudioAudioTest extends TestCase
     /** Имя модели у провайдера наружу не отдаётся. */
     public function test_provider_names_are_not_exposed(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['plan' => 'pro']);
 
         $this->actingAs($user)->post('/studio/music', [
             'prompt' => 'Calm piano for a rainy evening',
@@ -233,7 +233,7 @@ class StudioAudioTest extends TestCase
      */
     public function test_model_is_sent_when_collecting(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['plan' => 'pro']);
 
         $this->actingAs($user)->post('/studio/effect', [
             'prompt' => 'Thunder rolling in the distance',
@@ -254,7 +254,7 @@ class StudioAudioTest extends TestCase
      */
     public function test_audio_can_be_repeated(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['plan' => 'pro']);
 
         $this->actingAs($user)->post('/studio/effect', [
             'prompt' => 'Thunder rolling in the distance',
@@ -276,7 +276,7 @@ class StudioAudioTest extends TestCase
      */
     public function test_voice_change_cannot_be_repeated(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['plan' => 'pro']);
 
         $this->actingAs($user)->post('/studio/voice-change', [
             'recording' => UploadedFile::fake()->createWithContent('a.mp3', 'x'),
