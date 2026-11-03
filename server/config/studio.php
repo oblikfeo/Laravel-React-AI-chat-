@@ -214,6 +214,8 @@ return [
                 'label' => 'Premium',
                 'description' => 'Most lifelike',
                 'provider_model' => 'tts-elevenlabs-turbo-v2-5',
+                // Голоса ElevenLabs: имена свои, см. elevenlabs в voices.
+                'voice_set' => 'elevenlabs',
                 'voice' => 'Aria',
                 'paid' => true,
                 'cost_per_million' => 62.5,
@@ -232,16 +234,20 @@ return [
     | означает язык, вторая — пол. Показываем понятные имена и берём
     | разные по звучанию, а не весь список из полусотни.
     |
+    | provider — голос обычной озвучки (Kokoro), elevenlabs — того же
+    | характера у ElevenLabs: на нём работают Premium-озвучка и смена
+    | голоса, а имена голосов там свои. Список — GET /models?type=tts.
+    |
     */
 
     'voices' => [
-        'warm' => ['label' => 'Warm', 'description' => 'Female, soft', 'provider' => 'af_heart'],
-        'clear' => ['label' => 'Clear', 'description' => 'Female, neutral', 'provider' => 'af_nova'],
-        'bright' => ['label' => 'Bright', 'description' => 'Female, lively', 'provider' => 'af_bella'],
-        'calm' => ['label' => 'Calm', 'description' => 'Male, steady', 'provider' => 'am_adam'],
-        'deep' => ['label' => 'Deep', 'description' => 'Male, low', 'provider' => 'am_onyx'],
-        'british_f' => ['label' => 'British', 'description' => 'Female, UK accent', 'provider' => 'bf_emma'],
-        'british_m' => ['label' => 'British male', 'description' => 'Male, UK accent', 'provider' => 'bm_george'],
+        'warm' => ['label' => 'Warm', 'description' => 'Female, soft', 'provider' => 'af_heart', 'elevenlabs' => 'Sarah'],
+        'clear' => ['label' => 'Clear', 'description' => 'Female, neutral', 'provider' => 'af_nova', 'elevenlabs' => 'Aria'],
+        'bright' => ['label' => 'Bright', 'description' => 'Female, lively', 'provider' => 'af_bella', 'elevenlabs' => 'Jessica'],
+        'calm' => ['label' => 'Calm', 'description' => 'Male, steady', 'provider' => 'am_adam', 'elevenlabs' => 'Chris'],
+        'deep' => ['label' => 'Deep', 'description' => 'Male, low', 'provider' => 'am_onyx', 'elevenlabs' => 'Bill'],
+        'british_f' => ['label' => 'British', 'description' => 'Female, UK accent', 'provider' => 'bf_emma', 'elevenlabs' => 'Alice'],
+        'british_m' => ['label' => 'British male', 'description' => 'Male, UK accent', 'provider' => 'bm_george', 'elevenlabs' => 'George'],
     ],
 
     'default_voice' => env('STUDIO_VOICE', 'warm'),

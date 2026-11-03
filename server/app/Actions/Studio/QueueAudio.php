@@ -10,6 +10,7 @@ use App\Services\Studio\EffectRequest;
 use App\Services\Studio\GenerationFailed;
 use App\Services\Studio\MusicRequest;
 use App\Services\Studio\PromptTranslator;
+use App\Services\Studio\StudioCatalog;
 use App\Services\Usage\UsageLedger;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -99,7 +100,8 @@ class QueueAudio
         return $this->start($generation, fn () => $this->studio->queueVoiceChange(
             recording: $recording,
             filename: $filename,
-            voice: config('studio.voices.'.($input['voice'] ?? config('studio.default_voice')).'.provider'),
+            // Смена голоса — движок ElevenLabs, голоса у него свои.
+            voice: StudioCatalog::voiceFor($input['voice'] ?? null, 'elevenlabs'),
             removeNoise: (bool) ($input['remove_noise'] ?? false),
         ));
     }

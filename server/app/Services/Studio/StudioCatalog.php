@@ -303,6 +303,20 @@ class StudioCatalog
             ->all();
     }
 
+    /**
+     * Название голоса у провайдера для нашего ключа.
+     *
+     * $set — у какого движка: kokoro (обычная озвучка) или elevenlabs
+     * (Premium и смена голоса). Имена голосов у них разные.
+     */
+    public static function voiceFor(?string $key, string $set = 'kokoro'): ?string
+    {
+        $voice = config('studio.voices.'.($key ?? config('studio.default_voice')))
+            ?? config('studio.voices.'.config('studio.default_voice'));
+
+        return $set === 'elevenlabs' ? ($voice['elevenlabs'] ?? null) : ($voice['provider'] ?? null);
+    }
+
     public static function has(string $key): bool
     {
         return (bool) config("studio.models.{$key}");

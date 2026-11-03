@@ -5,10 +5,12 @@ namespace Tests\Feature;
 use App\Models\Generation;
 use App\Models\User;
 use App\Services\Studio\AudioStudio;
+use App\Services\Studio\ImageGenerator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Tests\Support\FakeAudioStudio;
+use Tests\Support\FakeImageGenerator;
 use Tests\TestCase;
 
 /**
@@ -105,7 +107,29 @@ class StudioAudioTest extends TestCase
         $this->assertSame(Generation::OP_VOICE_CHANGE, $generation->operation);
         $this->assertSame('fake-recording', $this->studio->lastRecording);
         // Наружу уходит название голоса у провайдера, а не наш ключ.
-        $this->assertSame('am_onyx', $this->studio->lastVoice);
+        // Смена голоса — движок ElevenLabs, голос берётся оттуда.
+        $this->assertSame('Bill', $this->studio->lastVoice);
+    }
+
+    /**
+     * Premium-озвучка — тоже ElevenLabs: голос Kokoro (af_heart) она
+     * не знает, и провайдер отказал бы.
+     */
+    public function test_premium_speech_gets_an_elevenlabs_voice(): void
+    {
+        $images = new FakeImageGenerator;
+        $this->app->instance(ImageGenerator::class, $images);
+
+        $this->actingAs(User::factory()->create(['plan' => 'pro']))
+            ->post('/studio/speech', ['text' => 'Hello there', 'model' => 'premium', 'voice' => 'deep'])
+            ->assertSessionMissing('error');
+
+        $this->assertSame('Bill', $images->lastSpeech->voice);
+
+        $this->actingAs(User::factory()->create(['plan' => 'pro']))
+            ->post('/studio/speech', ['text' => 'Hello there', 'model' => 'standard', 'voice' => 'deep']);
+
+        $this->assertSame('am_onyx', $images->lastSpeech->voice);
     }
 
     public function test_voice_change_without_a_recording_is_refused(): void

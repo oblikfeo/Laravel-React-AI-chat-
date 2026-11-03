@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Services\Studio\GenerationFailed;
 use App\Services\Studio\ImageGenerator;
 use App\Services\Studio\SpeechRequest;
+use App\Services\Studio\StudioCatalog;
 use App\Services\Usage\UsageLedger;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -56,7 +57,7 @@ class CreateSpeech
             $audio = $this->generator->speech(new SpeechRequest(
                 text: $input['text'],
                 providerModel: config("studio.speech.models.{$modelKey}.provider_model"),
-                voice: config('studio.voices.'.($input['voice'] ?? config('studio.default_voice')).'.provider')
+                voice: StudioCatalog::voiceFor($input['voice'] ?? null, config("studio.speech.models.{$modelKey}.voice_set", 'kokoro'))
                     ?? config("studio.speech.models.{$modelKey}.voice"),
                 speed: (float) ($input['speed'] ?? 1.0),
             ));
