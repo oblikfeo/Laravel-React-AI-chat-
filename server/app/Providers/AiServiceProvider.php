@@ -37,6 +37,7 @@ class AiServiceProvider extends ServiceProvider
                 model: $settings['model'],
                 timeout: config('ai.timeout'),
                 maxTokens: config('ai.max_tokens'),
+                extra: $settings['extra'] ?? [],
             );
         });
     }

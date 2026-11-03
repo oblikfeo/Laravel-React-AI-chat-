@@ -459,7 +459,7 @@ return [
 
     'translate_model' => env(
         'STUDIO_TRANSLATE_MODEL',
-        'cognitivecomputations/dolphin-mistral-24b-venice-edition',
+        'gemma-4-uncensored',
     ),
 
     // Ниже этого остатка на счёте провайдера пишем предупреждение в лог.

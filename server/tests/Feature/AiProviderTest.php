@@ -36,6 +36,38 @@ class AiProviderTest extends TestCase
         );
     }
 
+    /**
+     * Venice получает свои параметры и не получает чужих: без
+     * include_venice_system_prompt он подмешал бы свой системный
+     * запрос к нашему.
+     */
+    public function test_venice_gets_its_own_parameters(): void
+    {
+        config([
+            'ai.provider' => 'venice',
+            'ai.providers.venice.api_key' => 'test-key',
+        ]);
+
+        Http::fake(['*/chat/completions' => Http::response([
+            'model' => 'google-gemma-3-27b-it',
+            'choices' => [['message' => ['content' => 'Hi']]],
+            'usage' => ['prompt_tokens' => 10, 'completion_tokens' => 5],
+        ])]);
+
+        $this->app->forgetInstance(AiChatProvider::class);
+
+        $response = $this->app->make(AiChatProvider::class)
+            ->complete([['role' => 'user', 'content' => 'Hi']], 'google-gemma-3-27b-it');
+
+        Http::assertSent(fn ($request) => str_starts_with($request->url(), 'https://api.venice.ai/')
+            && $request['venice_parameters']['include_venice_system_prompt'] === false
+            && ! isset($request['reasoning'])
+            && ! isset($request['usage']));
+
+        $this->assertSame(10, $response->inputTokens);
+        $this->assertNull($response->cost);
+    }
+
     public function test_provider_sends_history_and_stores_reply(): void
     {
         Http::fake([

@@ -16,9 +16,24 @@ return [
     |
     */
 
-    'provider' => env('AI_PROVIDER', 'openrouter'),
+    'provider' => env('AI_PROVIDER', 'venice'),
 
+    /*
+     * extra — что добавить в каждый запрос: у провайдеров свои
+     * параметры сверх общего формата.
+     */
     'providers' => [
+
+        // Тот же провайдер, что у Студии: один ключ и один счёт.
+        // Свой системный запрос Venice выключен — у нас свой.
+        'venice' => [
+            'base_url' => env('VENICE_BASE_URL', 'https://api.venice.ai/api/v1'),
+            'api_key' => env('VENICE_API_KEY'),
+            'model' => env('VENICE_TEXT_MODEL', 'google-gemma-3-27b-it'),
+            'extra' => [
+                'venice_parameters' => ['include_venice_system_prompt' => false],
+            ],
+        ],
 
         // Бесплатные модели, ключ выдаётся без привязки карты.
         // https://openrouter.ai/keys
@@ -26,6 +41,12 @@ return [
             'base_url' => env('OPENROUTER_BASE_URL', 'https://openrouter.ai/api/v1'),
             'api_key' => env('OPENROUTER_API_KEY'),
             'model' => env('OPENROUTER_MODEL', 'liquid/lfm-2.5-2.6b:free'),
+            'extra' => [
+                // Размышления рассуждающих моделей в чате только мешают.
+                'reasoning' => ['exclude' => true],
+                // Цена каждого ответа приходит вместе с ним.
+                'usage' => ['include' => true],
+            ],
         ],
 
         // Локальный запуск моделей без интернета и ключей.

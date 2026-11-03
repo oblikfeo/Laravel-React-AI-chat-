@@ -73,8 +73,7 @@ export default function Models({ month, sections }) {
 
             <p className="mt-4 text-[12px] leading-relaxed text-white/40">
                 Prices are what the provider charges us. Chat replies are
-                billed at the price the provider reports for each answer;
-                the per-token prices here are used only when it does not.
+                billed by the tokens each answer used at these prices.
                 Prices are set in config/models.php and config/studio.php.
             </p>
         </AdminLayout>

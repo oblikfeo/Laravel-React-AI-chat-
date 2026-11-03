@@ -16,9 +16,9 @@
  * сообщение об ошибке вместо ответа.
  *
  * price — цена у провайдера в долларах за миллион токенов: input —
- * то, что модель читает, output — то, что пишет. Провайдер сам
- * сообщает цену каждого ответа; эти значения нужны, только если он
- * её не прислал, и для справки в админке.
+ * то, что модель читает, output — то, что пишет. По ней и расходу
+ * токенов считается цена каждого ответа: Venice свою цену в ответе
+ * не присылает. Взята из списка моделей Venice (GET /models).
  */
 return [
 
@@ -32,8 +32,8 @@ return [
             // Версия на 12 млрд отвечала односложно и уходила в
             // английский на русских вопросах. Эта крупнее, держит
             // язык собеседника и не засыпает между запросами.
-            'provider_model' => 'google/gemma-3-27b-it',
-            'price' => ['input' => 0.09, 'output' => 0.17],
+            'provider_model' => 'google-gemma-3-27b-it',
+            'price' => ['input' => 0.12, 'output' => 0.2],
             'vision' => true,
             'free' => false,
             'fallback' => 'fast',
@@ -44,8 +44,8 @@ return [
             'description' => 'Quick replies, long context',
             // Рассуждающие модели здесь не годятся: они тратят весь
             // лимит на размышления и отвечают через десятки секунд.
-            'provider_model' => 'amazon/nova-lite-v1',
-            'price' => ['input' => 0.06, 'output' => 0.24],
+            'provider_model' => 'mistral-small-3-2-24b-instruct',
+            'price' => ['input' => 0.09375, 'output' => 0.25],
             'vision' => true,
             'free' => false,
         ],
@@ -53,8 +53,8 @@ return [
         'smart' => [
             'label' => 'Smart',
             'description' => 'Deeper reasoning for hard questions',
-            'provider_model' => 'nousresearch/hermes-4-405b',
-            'price' => ['input' => 1.0, 'output' => 3.0],
+            'provider_model' => 'qwen3-235b-a22b-instruct-2507',
+            'price' => ['input' => 0.15, 'output' => 0.75],
             'vision' => false,
             'free' => false,
         ],
@@ -64,18 +64,18 @@ return [
             'description' => 'Fewer refusals, direct answers',
             // Ради этой модели к нам и приходят: выделяем её в списке.
             'signature' => true,
-            'provider_model' => 'cognitivecomputations/dolphin-mistral-24b-venice-edition',
-            'price' => ['input' => 0.1, 'output' => 0.3],
-            'vision' => false,
+            'provider_model' => 'venice-uncensored-1-2',
+            'price' => ['input' => 0.2, 'output' => 0.9],
+            'vision' => true,
             'free' => false,
         ],
 
         'roleplay' => [
             'label' => 'Roleplay',
             'description' => 'Characters, stories, long dialogue',
-            'provider_model' => 'sao10k/l3.3-euryale-70b',
-            'price' => ['input' => 0.65, 'output' => 0.75],
-            'vision' => false,
+            'provider_model' => 'venice-uncensored-role-play',
+            'price' => ['input' => 0.5, 'output' => 2.0],
+            'vision' => true,
             'free' => false,
         ],
     ],

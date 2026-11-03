@@ -19,6 +19,8 @@ class OpenAiCompatibleProvider implements AiChatProvider
         private readonly string $model,
         private readonly int $timeout,
         private readonly int $maxTokens = 1024,
+        /** Параметры провайдера сверх общего формата, см. extra в config/ai.php. */
+        private readonly array $extra = [],
     ) {}
 
     public function isConfigured(): bool
@@ -46,13 +48,7 @@ class OpenAiCompatibleProvider implements AiChatProvider
                 ...(isset($options['temperature'])
                     ? ['temperature' => (float) $options['temperature']]
                     : []),
-                // Рассуждающие модели тратят весь лимит на размышления
-                // и отвечают через десятки секунд пустотой. В чате важна
-                // скорость, поэтому размышления отключаем.
-                'reasoning' => ['exclude' => true],
-                // Провайдер присылает цену ответа: по ней считается,
-                // сколько бюджета тарифа ушло.
-                'usage' => ['include' => true],
+                ...$this->extra,
             ]);
 
         if ($response->failed()) {
