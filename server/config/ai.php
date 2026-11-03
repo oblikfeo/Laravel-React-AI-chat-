@@ -129,7 +129,7 @@ return [
         'model' => env('AI_ROUTER_MODEL', 'gemma-4-uncensored'),
         'timeout' => (int) env('AI_ROUTER_TIMEOUT', 6),
         'min_confidence' => (float) env('AI_ROUTER_MIN_CONFIDENCE', 0.55),
-        'price' => ['input' => 0.15, 'output' => 0.6],
+        'price' => ['input' => 0.1625, 'output' => 0.5],
     ],
 
     /*

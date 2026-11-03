@@ -134,7 +134,7 @@ class ModelDirectory
                 key: 'translator',
                 label: 'Prompt translator',
                 providerModel: config('studio.translate_model'),
-                price: 'as the chat model',
+                price: sprintf('$%s in · $%s out / 1M tokens', self::number(config('studio.translate_price.input')), self::number(config('studio.translate_price.output'))),
                 usedIn: 'Translates Studio prompts to English',
                 match: ['category' => UsageRecord::CATEGORY_SERVICE, 'provider_model' => config('studio.translate_model')],
             ),

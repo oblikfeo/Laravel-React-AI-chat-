@@ -88,14 +88,18 @@ class UsageLedger
      * Служебное обращение к текстовой модели: перевод описания,
      * текст персонажа. Без владельца — расход сервиса.
      */
-    public function service(AiResponse $response, string $model, ?User $user = null): void
+    /**
+     * @param  array{input: float, output: float}|null  $price  цена модели не из
+     *                                                          списка чата
+     */
+    public function service(AiResponse $response, string $model, ?User $user = null, ?array $price = null): void
     {
         $this->write([
             'user_id' => $user?->id,
             'category' => UsageRecord::CATEGORY_SERVICE,
             'model_key' => ModelCatalog::has($model) ? $model : null,
             'provider_model' => $response->model ?? $model,
-            'cost' => self::textCost($response, ModelCatalog::price($model)),
+            'cost' => self::textCost($response, $price ?? ModelCatalog::price($model)),
             'meta' => self::tokens($response),
         ]);
     }

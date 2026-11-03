@@ -55,7 +55,7 @@ class PromptTranslator
                     ['role' => 'user', 'content' => $prompt],
                 ], config('studio.translate_model'));
 
-                $this->ledger->service($answer, config('studio.translate_model'));
+                $this->ledger->service($answer, config('studio.translate_model'), price: config('studio.translate_price'));
 
                 $translated = trim($answer->content);
             } catch (Throwable $exception) {
