@@ -83,7 +83,7 @@ export default function ChangerForm({
         setRecording(false);
     };
 
-    const exhausted = limit?.remaining === 0;
+    const exhausted = Boolean(limit?.exhausted);
     const canSubmit = Boolean(file) && !busy && available && !exhausted;
 
     const submit = (event) => {

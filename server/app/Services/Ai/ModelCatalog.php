@@ -27,6 +27,20 @@ class ModelCatalog
         return config("models.list.{$key}.provider_model");
     }
 
+    /**
+     * Цена модели за миллион токенов: по нашему ключу или по названию
+     * у провайдера — переводчик описаний зовёт модель по нему.
+     *
+     * @return array{input: float, output: float}|null
+     */
+    public static function price(string $keyOrProviderModel): ?array
+    {
+        $model = config("models.list.{$keyOrProviderModel}")
+            ?? collect(config('models.list'))->firstWhere('provider_model', $keyOrProviderModel);
+
+        return $model['price'] ?? null;
+    }
+
     /** Название модели для интерфейса. */
     public static function labelOf(string $key): string
     {

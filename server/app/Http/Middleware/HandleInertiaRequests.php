@@ -9,6 +9,7 @@ use App\Services\Auth\GoogleAuth;
 use App\Services\Billing\PaymentGateway;
 use App\Services\Guests\CurrentGuest;
 use App\Services\Guests\GuestLimiter;
+use App\Services\Usage\UsageMeter;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -52,6 +53,9 @@ class HandleInertiaRequests extends Middleware
                     // кто уже платит, и тем, кто на бесплатном.
                     'canUpgrade' => $request->user()->isPromotedPlan(),
                     'subscription' => $this->subscriptionOf($request->user()),
+                    // Сколько бюджета тарифа ушло — в процентах.
+                    'usage' => app(UsageMeter::class)->snapshot($request->user())->toArray(),
+                    'isAdmin' => $request->user()->isAdmin(),
                 ] : null,
             ],
 
@@ -127,9 +131,11 @@ class HandleInertiaRequests extends Middleware
             return null;
         }
 
+        $remaining = app(GuestLimiter::class)->remaining($guest);
+
         return [
-            'remaining' => app(GuestLimiter::class)->remaining($guest),
-            'limit' => config('guests.daily_messages'),
+            'remaining' => $remaining,
+            'percentLeft' => (int) floor($remaining / max(1, (int) config('guests.daily_messages')) * 100),
             // Какая модель ему доступна: остальные интерфейс покажет
             // под замком, чтобы было видно, что даёт регистрация.
             'model' => config('guests.model'),

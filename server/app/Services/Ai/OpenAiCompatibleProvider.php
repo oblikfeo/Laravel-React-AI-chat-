@@ -50,6 +50,9 @@ class OpenAiCompatibleProvider implements AiChatProvider
                 // и отвечают через десятки секунд пустотой. В чате важна
                 // скорость, поэтому размышления отключаем.
                 'reasoning' => ['exclude' => true],
+                // Провайдер присылает цену ответа: по ней считается,
+                // сколько бюджета тарифа ушло.
+                'usage' => ['include' => true],
             ]);
 
         if ($response->failed()) {
@@ -68,14 +71,18 @@ class OpenAiCompatibleProvider implements AiChatProvider
         // Если модель всё же ответила одними размышлениями, показывать
         // их нельзя: это внутренняя кухня, а не ответ. Лучше отдать
         // ошибку и уйти на запасную модель.
-
         if ($content === '') {
             throw new RuntimeException('Провайдер вернул пустой ответ.');
         }
 
+        $cost = $response->json('usage.cost');
+
         return new AiResponse(
             content: $content,
             model: $response->json('model') ?? $model ?? $this->model,
+            inputTokens: (int) $response->json('usage.prompt_tokens', 0),
+            outputTokens: (int) $response->json('usage.completion_tokens', 0),
+            cost: is_numeric($cost) ? (float) $cost : null,
         );
     }
 }

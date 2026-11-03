@@ -2,8 +2,8 @@
 
 namespace App\Http\Middleware;
 
-use App\Services\Studio\VideoLimiter;
 use App\Services\Studio\VideoStudio;
+use App\Services\Usage\UsageGate;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -12,29 +12,23 @@ use Symfony\Component\HttpFoundation\Response;
  * Пускает к видео только тех, кому оно положено.
  *
  * Условия общие для ролика по описанию и для оживления картинки:
- * раздел подключён, тариф платный, дневной лимит не исчерпан.
+ * раздел подключён, видео есть на тарифе, бюджет не исчерпан.
  */
 class EnsureVideoAccess
 {
     public function __construct(
         private readonly VideoStudio $studio,
-        private readonly VideoLimiter $limiter,
+        private readonly UsageGate $gate,
     ) {}
 
     public function handle(Request $request, Closure $next): Response
     {
-        $user = $request->user();
-
         if (! $this->studio->isAvailable()) {
             return back()->with('error', 'Studio is not available yet. It is coming soon.');
         }
 
-        if (! $this->limiter->hasAccess($user)) {
-            return back()->with('error', 'Video is available on paid plans.');
-        }
-
-        if (! $this->limiter->allows($user)) {
-            return back()->with('error', "You have reached today's video limit. It resets tomorrow.");
+        if ($denial = $this->gate->video($request->user())) {
+            return back()->with('error', $denial);
         }
 
         return $next($request);

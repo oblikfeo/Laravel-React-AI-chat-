@@ -10,6 +10,7 @@ use App\Services\Chat\ChatContext;
 use App\Services\Chat\ChatImages;
 use App\Services\Chat\Routing\ChatRouter;
 use App\Services\Chat\Routing\Route;
+use App\Services\Usage\UsageLedger;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -28,6 +29,7 @@ class SendMessage
         private readonly AiChatProvider $provider,
         private readonly ChatContext $context,
         private readonly ChatRouter $router,
+        private readonly UsageLedger $ledger = new UsageLedger,
     ) {}
 
     /**
@@ -69,6 +71,8 @@ class SendMessage
             'routing' => $route->toArray(),
             'intent' => $route->toStudio($content)['mode'] ?? null,
         ])->save();
+
+        $this->ledger->routing($chat, $message, $route->cost, config('ai.router.model'));
 
         $chat->forceFill(['last_message_at' => now()])->save();
 
@@ -220,11 +224,15 @@ class SendMessage
             $this->optionsFor($chat),
         );
 
-        return $chat->messages()->create([
+        $reply = $chat->messages()->create([
             'role' => Message::ROLE_ASSISTANT,
             'content' => $response->content,
             'model' => $response->model,
         ]);
+
+        $this->ledger->chat($chat, $reply, $key, $response);
+
+        return $reply;
     }
 
     /**

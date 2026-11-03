@@ -10,6 +10,7 @@ use App\Services\Studio\EffectRequest;
 use App\Services\Studio\GenerationFailed;
 use App\Services\Studio\MusicRequest;
 use App\Services\Studio\PromptTranslator;
+use App\Services\Usage\UsageLedger;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -25,6 +26,7 @@ class QueueAudio
     public function __construct(
         private readonly AudioStudio $studio,
         private readonly PromptTranslator $translator,
+        private readonly UsageLedger $ledger,
     ) {}
 
     /**
@@ -109,7 +111,7 @@ class QueueAudio
      */
     private function record(?User $user, ?Guest $guest, array $attributes): Generation
     {
-        return Generation::create([
+        $generation = Generation::create([
             'user_id' => $user?->id,
             'guest_id' => $user ? null : $guest?->id,
             'kind' => Generation::KIND_AUDIO,
@@ -118,6 +120,10 @@ class QueueAudio
             'is_public' => false,
             ...$attributes,
         ]);
+
+        $this->ledger->generation($generation);
+
+        return $generation;
     }
 
     /**

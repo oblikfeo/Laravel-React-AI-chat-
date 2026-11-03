@@ -9,8 +9,7 @@ use App\Services\Guests\CurrentGuest;
 use App\Services\Studio\ImageGenerator;
 use App\Services\Studio\StudioCatalog;
 use App\Services\Studio\StudioCompose;
-use App\Services\Studio\StudioLimiter;
-use App\Services\Studio\VideoLimiter;
+use App\Services\Usage\StudioUsage;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -22,15 +21,14 @@ class ShowStudioController extends Controller
      */
     public function __invoke(
         Request $request,
-        StudioLimiter $limiter,
-        VideoLimiter $videoLimiter,
+        StudioUsage $usage,
         ImageGenerator $generator,
         StudioCompose $compose,
     ): Response {
         $user = $request->user();
         $guest = CurrentGuest::get($request);
 
-        $remaining = $limiter->remaining($user, $guest);
+        ['share' => $share, 'limit' => $limit] = $usage->for($user, $guest);
 
         return Inertia::render('Studio/Index', [
             // С чем открыть Студию, если пришли из чата или ленты.
@@ -44,29 +42,26 @@ class ShowStudioController extends Controller
                     ->get()
             ),
 
-            'models' => StudioCatalog::models($user),
+            'models' => StudioCatalog::models($user, $share),
             'aspectRatios' => StudioCatalog::aspectRatios(),
             'styles' => StudioCatalog::styles(),
-            'speechModels' => StudioCatalog::speechModels($user),
-            'musicModels' => StudioCatalog::musicModels($user),
-            'effectModels' => StudioCatalog::effectModels($user),
-            'videoModels' => StudioCatalog::videoModels(),
+            'speechModels' => StudioCatalog::speechModels($user, $share),
+            'musicModels' => StudioCatalog::musicModels($user, $share),
+            'effectModels' => StudioCatalog::effectModels($user, $share),
+            'videoModels' => StudioCatalog::videoModels($share),
             'defaultVideoModel' => config('studio.video.default_model'),
-            'editPrices' => StudioCatalog::editPrices(),
+            'editPrices' => StudioCatalog::editPrices($share),
 
-            // Видео — только на платном тарифе и со своим лимитом.
-            // Гостю и бесплатному тарифу показываем, что оно есть и
-            // как его получить, а не прячем вкладку.
+            // Видео — только на платных тарифах. Гостю и бесплатному
+            // тарифу показываем, что оно есть и как его получить, а не
+            // прячем вкладку. Бюджет у видео общий со всей Студией.
             'video' => [
                 'access' => match (true) {
                     $user === null => 'guest',
-                    ! $videoLimiter->hasAccess($user) => 'upgrade',
+                    ! $user->hasVideo() => 'upgrade',
                     default => 'open',
                 },
-                'limit' => [
-                    'remaining' => $videoLimiter->remaining($user),
-                    'total' => $videoLimiter->limitFor($user),
-                ],
+                'limit' => $limit,
             ],
             'voices' => StudioCatalog::voices(),
             'defaultVoice' => config('studio.default_voice'),
@@ -84,12 +79,8 @@ class ShowStudioController extends Controller
             // Студия скоро заработает, вместо ошибки на весь экран.
             'studioReady' => $generator->isAvailable(),
 
-            'limit' => [
-                'remaining' => $remaining === PHP_INT_MAX ? null : $remaining,
-                'total' => $limiter->limitFor($user) === PHP_INT_MAX
-                    ? null
-                    : $limiter->limitFor($user),
-            ],
+            // Остаток бюджета в процентах и когда он обновится.
+            'limit' => $limit,
         ]);
     }
 }

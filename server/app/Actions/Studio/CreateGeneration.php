@@ -9,6 +9,7 @@ use App\Services\Studio\GenerationFailed;
 use App\Services\Studio\GenerationRequest;
 use App\Services\Studio\ImageGenerator;
 use App\Services\Studio\PromptTranslator;
+use App\Services\Usage\UsageLedger;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -25,6 +26,7 @@ class CreateGeneration
         private readonly ImageGenerator $generator,
         private readonly StoreGenerationFile $files,
         private readonly PromptTranslator $translator,
+        private readonly UsageLedger $ledger,
     ) {}
 
     /**
@@ -57,6 +59,8 @@ class CreateGeneration
             'seed' => $input['seed'] ?? random_int(1, config('studio.max_seed')),
             'variants' => $variants,
         ]);
+
+        $this->ledger->generation($generation);
 
         return $this->run($generation);
     }

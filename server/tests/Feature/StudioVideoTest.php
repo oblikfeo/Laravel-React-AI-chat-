@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Generation;
+use App\Models\UsageRecord;
 use App\Models\User;
 use App\Services\Studio\AudioStudio;
 use App\Services\Studio\GenerationFailed;
@@ -120,53 +121,53 @@ class StudioVideoTest extends TestCase
         $this->assertSame(0, $this->studio->queued);
     }
 
-    public function test_daily_limit_stops_video(): void
+    /** Бюджет тарифа исчерпан — ролик не запускается. */
+    public function test_spent_allowance_stops_video(): void
     {
         $user = $this->paid();
-        $limit = config('studio.video.daily_limits.pro');
 
-        for ($i = 0; $i < $limit; $i++) {
-            $this->actingAs($user)->post('/studio/video', ['prompt' => 'A fox in snow']);
-        }
+        UsageRecord::create([
+            'user_id' => $user->id,
+            'category' => UsageRecord::CATEGORY_VIDEO,
+            'cost' => $user->planUsage()['allowance'],
+        ]);
 
         $this->actingAs($user)
             ->post('/studio/video', ['prompt' => 'One more fox'])
             ->assertSessionHas('error');
 
-        $this->assertSame($limit, $this->studio->queued);
+        $this->assertSame(0, $this->studio->queued);
     }
 
-    /** Несостоявшийся ролик попытку не сжигает. */
-    public function test_failed_video_does_not_count_against_the_limit(): void
+    /** Несостоявшийся ролик бюджет не тратит. */
+    public function test_failed_video_is_not_charged(): void
     {
-        $failing = new FakeVideoStudio(fails: true);
-        $this->app->instance(VideoStudio::class, $failing);
+        $this->app->instance(VideoStudio::class, new FakeVideoStudio(fails: true));
 
         $user = $this->paid();
-        $limit = config('studio.video.daily_limits.pro');
 
-        for ($i = 0; $i < $limit + 2; $i++) {
-            $this->actingAs($user)->post('/studio/video', ['prompt' => 'A fox in snow']);
-        }
+        $this->actingAs($user)->post('/studio/video', ['prompt' => 'A fox in snow']);
 
-        $this->assertSame($limit + 2, Generation::where('status', Generation::STATUS_FAILED)->count());
-
-        $this->app->instance(VideoStudio::class, $this->studio);
-
-        $this->actingAs($user)
-            ->post('/studio/video', ['prompt' => 'A fox in snow'])
-            ->assertSessionMissing('error');
-
-        $this->assertSame(1, $this->studio->queued);
+        $this->assertSame(Generation::STATUS_FAILED, Generation::first()->status);
+        $this->assertSame(0, UsageRecord::count());
     }
 
-    public function test_higher_plan_gets_more_videos(): void
+    /** Ролик списывает свою цену из бюджета сразу при запуске. */
+    public function test_video_is_charged_when_queued(): void
     {
-        $this->actingAs($this->paid('max'))
-            ->get('/studio')
-            ->assertInertia(fn ($page) => $page
-                ->where('video.access', 'open')
-                ->where('video.limit.total', config('studio.video.daily_limits.max')));
+        $user = $this->paid();
+
+        $this->actingAs($user)->post('/studio/video', [
+            'prompt' => 'A fox in snow',
+            'duration' => 5,
+            'resolution' => '480p',
+        ]);
+
+        $record = UsageRecord::first();
+
+        $this->assertSame(UsageRecord::CATEGORY_VIDEO, $record->category);
+        $this->assertEqualsWithDelta(0.12, $record->cost, 0.0001);
+        $this->assertSame($user->id, $record->user_id);
     }
 
     public function test_studio_tells_a_free_user_to_upgrade(): void
@@ -452,14 +453,30 @@ class StudioVideoTest extends TestCase
             ->assertSessionHasErrors('duration');
     }
 
-    public function test_studio_shows_what_each_tool_costs(): void
+    /**
+     * Цены уходят в интерфейс долями бюджета, а не долларами: у Pro
+     * бюджет $6, значит картинка за $0.01 — это 1/6 процента.
+     */
+    public function test_studio_shows_what_each_tool_costs_as_a_share(): void
     {
+        $share = 100 / config('plans.list.pro.usage.allowance');
+
         $this->actingAs($this->paid())
             ->get('/studio')
             ->assertInertia(fn ($page) => $page
-                ->where('models.0.price.flat', 0.01)
-                ->where('videoModels.0.prices.text.480p.5', 0.12)
-                ->where('editPrices.edit', 0.04)
-                ->has('musicModels.0.price.perSecond'));
+                ->where('models.0.price.flat', fn ($value) => abs($value - 0.01 * $share) < 1e-9)
+                ->where('videoModels.0.prices.text.480p.5', fn ($value) => abs($value - 0.12 * $share) < 1e-9)
+                ->where('editPrices.edit', fn ($value) => abs($value - 0.04 * $share) < 1e-9)
+                ->has('musicModels.0.price.perSecond')
+                ->where('limit.percentLeft', 100));
+    }
+
+    /** Гостю цены не показываются: у него проба, а не бюджет. */
+    public function test_guest_sees_no_prices(): void
+    {
+        $this->get('/studio')
+            ->assertInertia(fn ($page) => $page
+                ->where('models.0.price', null)
+                ->where('editPrices', []));
     }
 }

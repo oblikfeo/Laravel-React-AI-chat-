@@ -104,7 +104,7 @@ export default function EditForm({
     ];
 
     const enough = picked.length >= current.minimum;
-    const exhausted = limit?.remaining === 0;
+    const exhausted = Boolean(limit?.exhausted);
     const canSubmit =
         enough &&
         (!current.needsPrompt || prompt.trim().length > 0) &&

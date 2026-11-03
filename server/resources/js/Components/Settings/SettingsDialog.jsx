@@ -14,7 +14,7 @@ import BillingSection from '@/Components/Settings/BillingSection';
 const sections = [
     { key: 'profile', label: 'Profile', icon: User, Component: ProfileSection },
     { key: 'password', label: 'Password', icon: Lock, Component: PasswordSection },
-    { key: 'billing', label: 'Subscription', icon: CreditCard, Component: BillingSection },
+    { key: 'billing', label: 'Plan & usage', icon: CreditCard, Component: BillingSection },
 ];
 
 export default function SettingsDialog({ open, onClose }) {

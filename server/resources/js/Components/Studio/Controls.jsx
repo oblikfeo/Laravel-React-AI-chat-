@@ -1,5 +1,5 @@
 import { X, Globe, Lock } from 'lucide-react';
-import { formatPrice } from '@/Components/Studio/price';
+import { formatShare } from '@/Components/Studio/price';
 
 /**
  * Панель формы.
@@ -61,13 +61,13 @@ export function Visibility({ value, onChange }) {
 }
 
 /**
- * Сколько стоит работа.
+ * Сколько стоит работа: какую долю бюджета тарифа она займёт.
  *
  * Стоит рядом с кнопкой запуска: человек видит цену до того, как
- * нажмёт. Пока это себестоимость у провайдера, без наших кредитов.
+ * нажмёт.
  */
 export function Price({ value }) {
-    const text = formatPrice(value);
+    const text = formatShare(value);
 
     if (!text) {
         return null;
@@ -75,7 +75,7 @@ export function Price({ value }) {
 
     return (
         <span
-            title="Cost of this request"
+            title="Share of your plan's allowance this will use"
             className="text-[13px] tabular-nums text-white/40"
         >
             {text}
@@ -83,15 +83,20 @@ export function Price({ value }) {
     );
 }
 
-/** Остаток дневного лимита. */
+/** Остаток бюджета в процентах и когда он обновится. */
 export function Remaining({ limit }) {
-    if (limit?.remaining === null || limit?.remaining === undefined) {
+    if (limit?.percentLeft == null) {
         return null;
     }
 
     return (
-        <span className="text-[13px] text-white/40">
-            {limit.remaining} of {limit.total} left today
+        <span
+            title={`Renews ${limit.renewsAt === 'tomorrow' ? 'tomorrow' : `on ${limit.renewsAt}`}`}
+            className={`text-[13px] tabular-nums ${
+                limit.exhausted ? 'text-rose-300/80' : 'text-white/40'
+            }`}
+        >
+            {limit.percentLeft}% left
         </span>
     );
 }

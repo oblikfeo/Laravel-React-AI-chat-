@@ -62,7 +62,7 @@ export default function GenerationForm({
         textareaRef.current?.focus();
     }, [preset, defaultModel]);
 
-    const exhausted = limit?.remaining === 0;
+    const exhausted = Boolean(limit?.exhausted);
     const canSubmit = prompt.trim().length > 0 && !busy && available && !exhausted;
 
     const submit = (event) => {

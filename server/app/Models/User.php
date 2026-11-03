@@ -15,11 +15,6 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    /**
      * Тариф по умолчанию задан и в базе, и здесь: иначе у только что
      * созданной модели поле остаётся пустым до перечитывания из базы.
      */
@@ -27,6 +22,11 @@ class User extends Authenticatable
         'plan' => 'free',
     ];
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
     protected $fillable = [
         'name',
         'email',
@@ -56,6 +56,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_admin' => 'boolean',
         ];
     }
 
@@ -80,6 +81,16 @@ class User extends Authenticatable
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class)->latest('id');
+    }
+
+    public function usageRecords(): HasMany
+    {
+        return $this->hasMany(UsageRecord::class);
+    }
+
+    public function isAdmin(): bool
+    {
+        return (bool) $this->is_admin;
     }
 
     /**
@@ -112,5 +123,28 @@ class User extends Authenticatable
     public function planName(): string
     {
         return config("plans.list.{$this->plan}.name", 'Free');
+    }
+
+    /**
+     * Сколько покрывает тариф, см. usage в config/plans.php.
+     *
+     * @return array{allowance: float, daily_share: float|null, rollover: int}
+     */
+    public function planUsage(): array
+    {
+        $usage = config("plans.list.{$this->plan}.usage")
+            ?? config('plans.list.'.config('plans.default').'.usage');
+
+        return [
+            'allowance' => (float) $usage['allowance'],
+            'daily_share' => isset($usage['daily_share']) ? (float) $usage['daily_share'] : null,
+            'rollover' => max(1, (int) ($usage['rollover'] ?? 1)),
+        ];
+    }
+
+    /** Есть ли на тарифе видео. */
+    public function hasVideo(): bool
+    {
+        return (bool) config("plans.list.{$this->plan}.video", false);
     }
 }

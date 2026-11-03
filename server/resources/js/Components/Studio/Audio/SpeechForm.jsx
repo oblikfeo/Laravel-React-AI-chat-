@@ -40,7 +40,7 @@ export default function SpeechForm({
     const [voice, setVoice] = useState(defaultVoice);
     const [speed, setSpeed] = useState('1');
 
-    const exhausted = limit?.remaining === 0;
+    const exhausted = Boolean(limit?.exhausted);
     const canSubmit =
         text.trim().length > 0 &&
         text.length <= maxCharacters &&

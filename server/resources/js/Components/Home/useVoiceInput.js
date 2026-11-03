@@ -40,12 +40,14 @@ export default function useVoiceInput(onText) {
         Boolean(navigator.mediaDevices?.getUserMedia) &&
         typeof window.MediaRecorder !== 'undefined';
 
-    const transcribe = async (blob) => {
+    const transcribe = async (blob, length) => {
         setState('transcribing');
 
         const form = new FormData();
         const extension = blob.type.includes('mp4') ? 'm4a' : blob.type.includes('ogg') ? 'ogg' : 'webm';
         form.append('audio', blob, `voice.${extension}`);
+        // Распознавание оплачивается посекундно.
+        form.append('seconds', String(length));
 
         try {
             const { data } = await window.axios.post('/voice/transcribe', form);
@@ -86,6 +88,8 @@ export default function useVoiceInput(onText) {
                 }
             };
 
+            const startedAt = Date.now();
+
             recorder.onstop = () => {
                 stream.getTracks().forEach((track) => track.stop());
 
@@ -94,7 +98,7 @@ export default function useVoiceInput(onText) {
                 });
 
                 if (blob.size) {
-                    transcribe(blob);
+                    transcribe(blob, Math.max(1, Math.round((Date.now() - startedAt) / 1000)));
                 } else {
                     setState('idle');
                 }

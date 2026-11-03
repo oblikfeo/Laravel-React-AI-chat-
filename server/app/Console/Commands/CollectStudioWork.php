@@ -36,13 +36,17 @@ class CollectStudioWork extends Command
 
         // Работа, которая так и не дошла до провайдера (запрос
         // оборвался на полпути), иначе крутилась бы в интерфейсе вечно.
+        // По одной, а не одним запросом: так срабатывает возврат
+        // стоимости в бюджет, см. Generation::booted().
         $abandoned = Generation::query()
             ->where('status', Generation::STATUS_PENDING)
             ->where('created_at', '<', now()->subMinutes(15))
-            ->update([
+            ->get()
+            ->each(fn (Generation $generation) => $generation->forceFill([
                 'status' => Generation::STATUS_FAILED,
                 'failure_reason' => 'Работа не была завершена.',
-            ]);
+            ])->save())
+            ->count();
 
         $this->info("В работе: {$waiting->count()}, готово: {$finished}, брошено: {$abandoned}");
 

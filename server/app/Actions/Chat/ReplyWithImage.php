@@ -9,7 +9,7 @@ use App\Models\Generation;
 use App\Models\Message;
 use App\Services\Chat\StudioIntent;
 use App\Services\Studio\ImageGenerator;
-use App\Services\Studio\StudioLimiter;
+use App\Services\Usage\UsageGate;
 
 /**
  * Отвечает в чате картинкой.
@@ -26,7 +26,7 @@ class ReplyWithImage
     public function __construct(
         private readonly CreateGeneration $create,
         private readonly EditImage $edit,
-        private readonly StudioLimiter $limiter,
+        private readonly UsageGate $gate,
         private readonly ImageGenerator $generator,
     ) {}
 
@@ -43,10 +43,8 @@ class ReplyWithImage
             return $this->say($chat, 'Image generation is not available right now. Please try again later.');
         }
 
-        if (! $this->limiter->allows($user, $guest)) {
-            return $this->say($chat, $user
-                ? "You've reached today's image limit. It resets tomorrow."
-                : "You've reached today's free image limit. Sign up to create more.");
+        if ($denial = $this->gate->studio($user, $guest)) {
+            return $this->say($chat, $denial);
         }
 
         $described = in_array($intent['operation'], [Generation::OP_EDIT, Generation::OP_COMBINE], true);

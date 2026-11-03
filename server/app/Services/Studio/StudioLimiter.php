@@ -4,50 +4,35 @@ namespace App\Services\Studio;
 
 use App\Models\Generation;
 use App\Models\Guest;
-use App\Models\User;
 
 /**
- * Сколько работ в день можно создать.
+ * Сколько работ в день может создать гость.
  *
- * Генерация изображений дороже текста, поэтому лимит отдельный и
- * заметно строже: у гостя несколько штук, у бесплатного тарифа —
- * полтора десятка.
+ * Пользователей ограничивает бюджет тарифа, см. UsageMeter. Гость —
+ * это проба до регистрации: ему несколько работ в день.
  */
 class StudioLimiter
 {
-    public function limitFor(?User $user): int
+    public function limit(): int
     {
-        if (! $user) {
-            return config('studio.daily_limit_guest');
-        }
-
-        // Платные тарифы ограничиваются кредитами, а не счётчиком.
-        return $user->isPromotedPlan()
-            ? config('studio.daily_limit_free')
-            : PHP_INT_MAX;
+        return (int) config('studio.daily_limit_guest');
     }
 
-    public function usedToday(?User $user, ?Guest $guest): int
+    public function usedToday(Guest $guest): int
     {
         return Generation::query()
-            ->ownedBy($user, $guest)
+            ->where('guest_id', $guest->id)
             ->whereDate('created_at', today())
             ->count();
     }
 
-    public function remaining(?User $user, ?Guest $guest): int
+    public function remaining(Guest $guest): int
     {
-        $limit = $this->limitFor($user);
-
-        if ($limit === PHP_INT_MAX) {
-            return PHP_INT_MAX;
-        }
-
-        return max(0, $limit - $this->usedToday($user, $guest));
+        return max(0, $this->limit() - $this->usedToday($guest));
     }
 
-    public function allows(?User $user, ?Guest $guest): bool
+    public function allows(Guest $guest): bool
     {
-        return $this->remaining($user, $guest) > 0;
+        return $this->remaining($guest) > 0;
     }
 }

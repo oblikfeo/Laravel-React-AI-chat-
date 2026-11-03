@@ -106,7 +106,23 @@ TEXT;
             return null;
         }
 
-        return $this->parse((string) $response->json('choices.0.message.content'));
+        return $this->parse(
+            (string) $response->json('choices.0.message.content'),
+            $this->costOf($response->json('usage') ?? []),
+        );
+    }
+
+    /**
+     * Цена вызова по расходу токенов, см. ai.router.price.
+     *
+     * @param  array<string, mixed>  $usage
+     */
+    private function costOf(array $usage): float
+    {
+        $price = config('ai.router.price', ['input' => 0, 'output' => 0]);
+
+        return ((int) ($usage['prompt_tokens'] ?? 0) * $price['input']
+            + (int) ($usage['completion_tokens'] ?? 0) * $price['output']) / 1_000_000;
     }
 
     /** @return array<string, mixed> */
@@ -136,7 +152,7 @@ TEXT;
         ];
     }
 
-    private function parse(string $content): ?Route
+    private function parse(string $content, float $cost = 0.0): ?Route
     {
         // Некоторые модели оборачивают JSON в разметку кода.
         $json = trim(preg_replace('/^```(?:json)?|```$/m', '', trim($content)));
@@ -155,6 +171,7 @@ TEXT;
             prompt: trim((string) ($data['prompt'] ?? '')),
             confidence: max(0.0, min(1.0, (float) ($data['confidence'] ?? 0))),
             chatModel: in_array($data['chat_model'] ?? null, Route::CHAT_MODELS, true) ? $data['chat_model'] : null,
+            cost: $cost,
         );
     }
 }

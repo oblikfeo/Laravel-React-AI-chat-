@@ -14,6 +14,11 @@
  * fallback — чем заменить, если модель не ответила. У бесплатных
  * моделей строгий лимит частоты: без подмены человек получил бы
  * сообщение об ошибке вместо ответа.
+ *
+ * price — цена у провайдера в долларах за миллион токенов: input —
+ * то, что модель читает, output — то, что пишет. Провайдер сам
+ * сообщает цену каждого ответа; эти значения нужны, только если он
+ * её не прислал, и для справки в админке.
  */
 return [
 
@@ -28,6 +33,7 @@ return [
             // английский на русских вопросах. Эта крупнее, держит
             // язык собеседника и не засыпает между запросами.
             'provider_model' => 'google/gemma-3-27b-it',
+            'price' => ['input' => 0.09, 'output' => 0.17],
             'vision' => true,
             'free' => false,
             'fallback' => 'fast',
@@ -39,6 +45,7 @@ return [
             // Рассуждающие модели здесь не годятся: они тратят весь
             // лимит на размышления и отвечают через десятки секунд.
             'provider_model' => 'amazon/nova-lite-v1',
+            'price' => ['input' => 0.06, 'output' => 0.24],
             'vision' => true,
             'free' => false,
         ],
@@ -47,6 +54,7 @@ return [
             'label' => 'Smart',
             'description' => 'Deeper reasoning for hard questions',
             'provider_model' => 'nousresearch/hermes-4-405b',
+            'price' => ['input' => 1.0, 'output' => 3.0],
             'vision' => false,
             'free' => false,
         ],
@@ -57,6 +65,7 @@ return [
             // Ради этой модели к нам и приходят: выделяем её в списке.
             'signature' => true,
             'provider_model' => 'cognitivecomputations/dolphin-mistral-24b-venice-edition',
+            'price' => ['input' => 0.1, 'output' => 0.3],
             'vision' => false,
             'free' => false,
         ],
@@ -65,6 +74,7 @@ return [
             'label' => 'Roleplay',
             'description' => 'Characters, stories, long dialogue',
             'provider_model' => 'sao10k/l3.3-euryale-70b',
+            'price' => ['input' => 0.65, 'output' => 0.75],
             'vision' => false,
             'free' => false,
         ],

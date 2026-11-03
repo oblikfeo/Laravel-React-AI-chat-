@@ -18,6 +18,8 @@ class TranscribeVoiceRequest extends FormRequest
                 'max:'.config('ai.transcription.max_kb'),
                 'mimetypes:audio/webm,video/webm,audio/ogg,audio/mp4,video/mp4,audio/mpeg,audio/wav,audio/x-wav,audio/aac,audio/x-m4a',
             ],
+            // Длина записи в секундах: по ней считается цена.
+            'seconds' => ['nullable', 'integer', 'min:1', 'max:'.config('ai.transcription.max_seconds')],
         ];
     }
 

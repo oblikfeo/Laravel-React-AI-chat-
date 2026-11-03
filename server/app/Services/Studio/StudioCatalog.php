@@ -9,11 +9,15 @@ use App\Models\User;
  *
  * Названия моделей у провайдера сюда не попадают: пользователь видит
  * только наши ярлыки.
+ *
+ * Цены уходят не в долларах, а в процентах бюджета тарифа: $share —
+ * сколько процентов стоит доллар для этого человека, см. UsageSnapshot.
+ * Без него (гость) цены не показываются.
  */
 class StudioCatalog
 {
     /** @return array<int, array<string, mixed>> */
-    public static function models(?User $user = null): array
+    public static function models(?User $user = null, ?float $share = null): array
     {
         return collect(config('studio.models'))
             ->map(fn (array $model, string $key) => [
@@ -27,14 +31,15 @@ class StudioCatalog
                 // скрывать их бессмысленно — человек должен понимать,
                 // что получит.
                 'locked' => ($model['paid'] ?? false) && ! self::isPaid($user),
-                'price' => self::price($model),
+                'price' => self::price($model, $share),
             ])
             ->values()
             ->all();
     }
 
     /**
-     * Цена модели в том виде, в каком её берёт провайдер.
+     * Цена модели в том виде, в каком её берёт провайдер, но в
+     * процентах бюджета.
      *
      * Интерфейс сам считает итог: он зависит от длины и количества,
      * которые человек меняет на лету.
@@ -42,13 +47,17 @@ class StudioCatalog
      * @param  array<string, mixed>  $model
      * @return array<string, mixed>|null
      */
-    public static function price(array $model): ?array
+    public static function price(array $model, ?float $share): ?array
     {
+        if ($share === null) {
+            return null;
+        }
+
         return match (true) {
-            isset($model['cost']) => ['flat' => $model['cost']],
-            isset($model['cost_per_second']) => ['perSecond' => $model['cost_per_second']],
-            isset($model['cost_per_million']) => ['perMillion' => $model['cost_per_million']],
-            isset($model['costs']) => ['table' => $model['costs']],
+            isset($model['cost']) => ['flat' => self::scaled($model['cost'], $share)],
+            isset($model['cost_per_second']) => ['perSecond' => self::scaled($model['cost_per_second'], $share)],
+            isset($model['cost_per_million']) => ['perMillion' => self::scaled($model['cost_per_million'], $share)],
+            isset($model['costs']) => ['table' => self::scaled($model['costs'], $share)],
             default => null,
         };
     }
@@ -58,9 +67,17 @@ class StudioCatalog
      *
      * @return array<string, mixed>
      */
-    public static function editPrices(): array
+    public static function editPrices(?float $share = null): array
     {
-        return config('studio.edit.costs', []);
+        return $share === null ? [] : self::scaled(config('studio.edit.costs', []), $share);
+    }
+
+    /** Доллары в проценты бюджета — и в таблицах цен тоже. */
+    private static function scaled(mixed $value, float $share): mixed
+    {
+        return is_array($value)
+            ? array_map(fn ($item) => self::scaled($item, $share), $value)
+            : (float) $value * $share;
     }
 
     /**
@@ -68,7 +85,7 @@ class StudioCatalog
      *
      * @return array<int, array<string, mixed>>
      */
-    public static function videoModels(): array
+    public static function videoModels(?float $share = null): array
     {
         return collect(config('studio.video.models'))
             ->map(fn (array $model, string $key) => [
@@ -82,7 +99,7 @@ class StudioCatalog
                 'aspectRatios' => $model['aspect_ratios'],
                 'defaultAspectRatio' => $model['default_aspect_ratio'],
                 // Режим → разрешение → секунды → цена.
-                'prices' => $model['costs'],
+                'prices' => $share === null ? null : self::scaled($model['costs'], $share),
             ])
             ->values()
             ->all();
@@ -143,7 +160,7 @@ class StudioCatalog
     }
 
     /** @return array<int, array<string, mixed>> */
-    public static function speechModels(?User $user = null): array
+    public static function speechModels(?User $user = null, ?float $share = null): array
     {
         return collect(config('studio.speech.models'))
             ->map(fn (array $model, string $key) => [
@@ -153,7 +170,7 @@ class StudioCatalog
                 'paid' => (bool) ($model['paid'] ?? false),
                 'badge' => ($model['paid'] ?? false) ? 'Pro' : null,
                 'locked' => ($model['paid'] ?? false) && ! self::isPaid($user),
-                'price' => self::price($model),
+                'price' => self::price($model, $share),
             ])
             ->values()
             ->all();
@@ -173,9 +190,9 @@ class StudioCatalog
      *
      * @return array<int, array<string, mixed>>
      */
-    public static function musicModels(?User $user = null): array
+    public static function musicModels(?User $user = null, ?float $share = null): array
     {
-        return self::audioGroup('music', $user, fn (array $model) => [
+        return self::audioGroup('music', $user, $share, fn (array $model) => [
             'lyrics' => (bool) ($model['lyrics'] ?? false),
             'lyricsRequired' => (bool) ($model['lyrics_required'] ?? false),
             'durations' => $model['durations'] ?? null,
@@ -186,9 +203,9 @@ class StudioCatalog
     }
 
     /** @return array<int, array<string, mixed>> */
-    public static function effectModels(?User $user = null): array
+    public static function effectModels(?User $user = null, ?float $share = null): array
     {
-        return self::audioGroup('effects', $user, fn (array $model) => [
+        return self::audioGroup('effects', $user, $share, fn (array $model) => [
             'minDuration' => $model['min_duration'] ?? null,
             'maxDuration' => $model['max_duration'] ?? null,
             'defaultDuration' => $model['default_duration'] ?? null,
@@ -200,7 +217,7 @@ class StudioCatalog
      *
      * @return array<int, array<string, mixed>>
      */
-    private static function audioGroup(string $group, ?User $user, callable $extra): array
+    private static function audioGroup(string $group, ?User $user, ?float $share, callable $extra): array
     {
         return collect(config("studio.{$group}.models"))
             ->map(fn (array $model, string $key) => [
@@ -210,7 +227,7 @@ class StudioCatalog
                 'paid' => (bool) ($model['paid'] ?? false),
                 'badge' => ($model['paid'] ?? false) ? 'Pro' : null,
                 'locked' => ($model['paid'] ?? false) && ! self::isPaid($user),
-                'price' => self::price($model),
+                'price' => self::price($model, $share),
                 ...$extra($model),
             ])
             ->values()

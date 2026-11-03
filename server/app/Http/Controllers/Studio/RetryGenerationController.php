@@ -14,9 +14,8 @@ use App\Services\Guests\CurrentGuest;
 use App\Services\Guests\GenerationOwnership;
 use App\Services\Studio\AudioStudio;
 use App\Services\Studio\ImageGenerator;
-use App\Services\Studio\StudioLimiter;
-use App\Services\Studio\VideoLimiter;
 use App\Services\Studio\VideoStudio;
+use App\Services\Usage\UsageGate;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -28,8 +27,7 @@ class RetryGenerationController extends Controller
         private readonly CreateSpeech $speech,
         private readonly QueueAudio $audio,
         private readonly QueueVideo $video,
-        private readonly StudioLimiter $limiter,
-        private readonly VideoLimiter $videoLimiter,
+        private readonly UsageGate $gate,
         private readonly ImageGenerator $generator,
         private readonly AudioStudio $audioStudio,
         private readonly VideoStudio $videoStudio,
@@ -41,8 +39,8 @@ class RetryGenerationController extends Controller
      * Зерно меняется намеренно — человек просит другой вариант, а не
      * ту же самую картинку.
      *
-     * Повторять можно и звук, и видео: у них свои модели, своя
-     * очередь и свой лимит, поэтому вид работы разбирается отдельно.
+     * Повторять можно и звук, и видео: у них свои модели и своя
+     * очередь, поэтому вид работы разбирается отдельно.
      */
     public function __invoke(Request $request, Generation $generation): RedirectResponse
     {
@@ -65,8 +63,8 @@ class RetryGenerationController extends Controller
             return back()->with('error', 'Studio is not available yet. It is coming soon.');
         }
 
-        if (! $this->limiter->allows($user, $guest)) {
-            return back()->with('error', "You have reached today's limit.");
+        if ($denial = $this->gate->studio($user, $guest)) {
+            return back()->with('error', $denial);
         }
 
         // Смену голоса повторить нельзя: исходной записи у нас уже
@@ -121,12 +119,8 @@ class RetryGenerationController extends Controller
             return back()->with('error', 'Studio is not available yet. It is coming soon.');
         }
 
-        if (! $this->videoLimiter->hasAccess($user)) {
-            return back()->with('error', 'Video is available on paid plans.');
-        }
-
-        if (! $this->videoLimiter->allows($user)) {
-            return back()->with('error', "You have reached today's video limit. It resets tomorrow.");
+        if ($denial = $this->gate->video($user)) {
+            return back()->with('error', $denial);
         }
 
         // Картинки, которую оживляли, могло не остаться.

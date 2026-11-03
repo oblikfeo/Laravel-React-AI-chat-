@@ -40,6 +40,8 @@ final class Route
         public readonly ?string $chatModel = null,
         /** router — решила модель-диспетчер, rules — запасное правило. */
         public readonly string $source = 'router',
+        /** Сколько стоил вызов диспетчера, в долларах. */
+        public readonly float $cost = 0.0,
     ) {}
 
     public static function chat(?string $chatModel = null, string $source = 'router'): self
@@ -76,6 +78,7 @@ final class Route
             confidence: (float) ($data['confidence'] ?? 1.0),
             chatModel: $data['chat_model'] ?? null,
             source: (string) ($data['source'] ?? 'router'),
+            cost: (float) ($data['cost'] ?? 0.0),
         );
     }
 
@@ -88,6 +91,7 @@ final class Route
             'confidence' => $this->confidence,
             'chat_model' => $this->chatModel,
             'source' => $this->source,
+            'cost' => $this->cost,
         ];
     }
 

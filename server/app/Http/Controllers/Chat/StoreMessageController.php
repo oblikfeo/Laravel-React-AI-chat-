@@ -8,7 +8,7 @@ use App\Http\Requests\Chat\StoreMessageRequest;
 use App\Models\Chat;
 use App\Services\Guests\ChatOwnership;
 use App\Services\Guests\CurrentGuest;
-use App\Services\Guests\GuestLimiter;
+use App\Services\Usage\UsageGate;
 use Illuminate\Http\RedirectResponse;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
@@ -24,7 +24,7 @@ class StoreMessageController extends Controller
         StoreMessageRequest $request,
         Chat $chat,
         SendMessage $sendMessage,
-        GuestLimiter $limiter,
+        UsageGate $gate,
     ): RedirectResponse {
         if (! ChatOwnership::owns($request, $chat)) {
             throw new AccessDeniedHttpException;
@@ -32,8 +32,8 @@ class StoreMessageController extends Controller
 
         $guest = CurrentGuest::get($request);
 
-        if ($guest && ! $request->user() && ! $limiter->allows($guest)) {
-            return back()->with('error', 'You have reached today\'s free limit. Sign up to keep going.');
+        if ($denial = $gate->chat($request->user(), $guest)) {
+            return back()->with('error', $denial);
         }
 
         $sendMessage->store(

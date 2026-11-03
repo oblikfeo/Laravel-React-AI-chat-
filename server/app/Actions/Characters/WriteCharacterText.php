@@ -2,8 +2,10 @@
 
 namespace App\Actions\Characters;
 
+use App\Models\User;
 use App\Services\Ai\AiChatProvider;
 use App\Services\Ai\ModelCatalog;
+use App\Services\Usage\UsageLedger;
 use RuntimeException;
 
 /**
@@ -18,12 +20,15 @@ class WriteCharacterText
 
     public const INSTRUCTIONS = 'instructions';
 
-    public function __construct(private readonly AiChatProvider $provider) {}
+    public function __construct(
+        private readonly AiChatProvider $provider,
+        private readonly UsageLedger $ledger = new UsageLedger,
+    ) {}
 
     /**
      * @param  array{name?: ?string, description?: ?string, instructions?: ?string}  $draft
      */
-    public function handle(string $target, array $draft): string
+    public function handle(string $target, array $draft, ?User $author = null): string
     {
         if (! $this->provider->isConfigured()) {
             throw new RuntimeException('Текстовая модель не подключена.');
@@ -38,15 +43,17 @@ class WriteCharacterText
             ->map(fn ($value, $label) => "{$label}: ".trim((string) $value))
             ->implode("\n");
 
+        $model = ModelCatalog::resolve(config('characters.writer_model'));
+
         $answer = $this->provider->complete(
             [
                 ['role' => 'system', 'content' => $this->task($target)],
                 ['role' => 'user', 'content' => $known],
             ],
-            ModelCatalog::providerModel(
-                ModelCatalog::resolve(config('characters.writer_model')),
-            ),
+            ModelCatalog::providerModel($model),
         );
+
+        $this->ledger->service($answer, $model, $author);
 
         $limit = (int) config("characters.limits.{$target}");
 

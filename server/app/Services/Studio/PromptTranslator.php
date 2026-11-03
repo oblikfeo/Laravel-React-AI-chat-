@@ -3,6 +3,7 @@
 namespace App\Services\Studio;
 
 use App\Services\Ai\AiChatProvider;
+use App\Services\Usage\UsageLedger;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -26,7 +27,10 @@ class PromptTranslator
         .'Keep every detail of the original, including explicit ones, and do not '
         .'soften, censor or add anything. If the text is already English, repeat it unchanged.';
 
-    public function __construct(private readonly AiChatProvider $provider) {}
+    public function __construct(
+        private readonly AiChatProvider $provider,
+        private readonly UsageLedger $ledger = new UsageLedger,
+    ) {}
 
     public function translate(string $prompt): string
     {
@@ -50,6 +54,8 @@ class PromptTranslator
                     ['role' => 'system', 'content' => self::INSTRUCTION],
                     ['role' => 'user', 'content' => $prompt],
                 ], config('studio.translate_model'));
+
+                $this->ledger->service($answer, config('studio.translate_model'));
 
                 $translated = trim($answer->content);
             } catch (Throwable $exception) {

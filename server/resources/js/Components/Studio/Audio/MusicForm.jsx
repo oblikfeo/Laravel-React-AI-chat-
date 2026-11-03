@@ -47,7 +47,7 @@ export default function MusicForm({
         duration ?? String(current?.defaultDuration ?? durationOptions[0]?.key ?? 60);
 
     const lyricsNeeded = current?.lyricsRequired;
-    const exhausted = limit?.remaining === 0;
+    const exhausted = Boolean(limit?.exhausted);
     const canSubmit =
         prompt.trim().length >= 10 &&
         (!lyricsNeeded || lyrics.trim().length > 0) &&

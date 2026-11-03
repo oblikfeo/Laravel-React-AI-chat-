@@ -9,6 +9,7 @@ use App\Services\Studio\PromptTranslator;
 use App\Services\Studio\Thumbnailer;
 use App\Services\Studio\VideoRequest;
 use App\Services\Studio\VideoStudio;
+use App\Services\Usage\UsageLedger;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -27,6 +28,7 @@ class QueueVideo
         private readonly VideoStudio $studio,
         private readonly PromptTranslator $translator,
         private readonly Thumbnailer $thumbnailer,
+        private readonly UsageLedger $ledger,
     ) {}
 
     /**
@@ -154,7 +156,7 @@ class QueueVideo
      */
     private function record(User $user, array $model, array $attributes, array $input): Generation
     {
-        return Generation::create([
+        $generation = Generation::create([
             'user_id' => $user->id,
             'kind' => Generation::KIND_VIDEO,
             'status' => Generation::STATUS_PENDING,
@@ -172,6 +174,10 @@ class QueueVideo
             ),
             ...$attributes,
         ]);
+
+        $this->ledger->generation($generation);
+
+        return $generation;
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\Usage\UsageLedger;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -177,6 +178,21 @@ class Generation extends Model
             str_contains($reason, 'Слишком много запросов') => 'The service is busy right now. Try again in a minute.',
             default => 'Could not create this one. Try again.',
         };
+    }
+
+    /**
+     * Работа не получилась — её стоимость возвращается в бюджет.
+     *
+     * Здесь, а не в каждом месте, где работа помечается неудачной:
+     * таких мест много, и забытое в одном списало бы деньги зря.
+     */
+    protected static function booted(): void
+    {
+        static::updated(function (Generation $generation) {
+            if ($generation->wasChanged('status') && $generation->status === self::STATUS_FAILED) {
+                app(UsageLedger::class)->refund($generation);
+            }
+        });
     }
 
     public function isQueued(): bool

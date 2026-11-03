@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Chat;
 use App\Models\Generation;
 use App\Models\Message;
+use App\Models\UsageRecord;
 use App\Models\User;
 use App\Services\Ai\AiChatProvider;
 use App\Services\Ai\AiResponse;
@@ -183,20 +184,21 @@ class ChatImagesTest extends TestCase
         }
     }
 
-    public function test_daily_limit_is_shared_with_the_studio(): void
+    /** Бюджет у чата и Студии общий: потраченное в Студии видно в чате. */
+    public function test_allowance_is_shared_with_the_studio(): void
     {
         $user = User::factory()->create();
+        $chat = $this->say($user, 'Привет');
 
-        for ($i = 0; $i < config('studio.daily_limit_free'); $i++) {
-            $this->actingAs($user)->post('/studio', ['prompt' => 'Tree', 'model' => 'fast', 'aspect_ratio' => '1:1']);
-        }
+        UsageRecord::create([
+            'user_id' => $user->id,
+            'category' => UsageRecord::CATEGORY_IMAGE,
+            'cost' => $user->planUsage()['allowance'],
+        ]);
 
-        $chat = $this->say($user, 'Нарисуй собаку');
-
-        $reply = $this->lastReply($chat);
-
-        $this->assertNull($reply->generation_id);
-        $this->assertStringContainsString('limit', $reply->content);
+        $this->actingAs($user)
+            ->post("/chats/{$chat->id}/messages", ['message' => 'Нарисуй собаку'])
+            ->assertSessionHas('error', fn ($message) => str_contains($message, 'allowance'));
     }
 
     public function test_failed_picture_is_explained(): void

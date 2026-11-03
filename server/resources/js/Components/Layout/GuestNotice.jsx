@@ -13,8 +13,7 @@ export default function GuestNotice() {
         return null;
     }
 
-    const { remaining, limit } = guest;
-    const exhausted = remaining <= 0;
+    const exhausted = guest.remaining <= 0;
 
     return (
         <div
@@ -26,7 +25,7 @@ export default function GuestNotice() {
         >
             {exhausted ? (
                 <>
-                    <span>You have used today&apos;s free messages.</span>
+                    <span>You have used today&apos;s free trial.</span>
                     <Link
                         href="/auth?mode=register"
                         className="font-semibold text-white underline underline-offset-2"
@@ -36,9 +35,7 @@ export default function GuestNotice() {
                 </>
             ) : (
                 <>
-                    <span>
-                        {remaining} of {limit} free messages left today.
-                    </span>
+                    <span>{guest.percentLeft}% of today&apos;s free trial left.</span>
                     <Link
                         href="/auth?mode=register"
                         className="font-medium text-white/80 underline underline-offset-2 hover:text-white"

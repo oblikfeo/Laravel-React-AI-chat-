@@ -10,6 +10,7 @@ use App\Services\Studio\GeneratedImage;
 use App\Services\Studio\GenerationFailed;
 use App\Services\Studio\ImageGenerator;
 use App\Services\Studio\PromptTranslator;
+use App\Services\Usage\UsageLedger;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -26,6 +27,7 @@ class EditImage
         private readonly ImageGenerator $generator,
         private readonly StoreGenerationFile $files,
         private readonly PromptTranslator $translator,
+        private readonly UsageLedger $ledger,
     ) {}
 
     /**
@@ -48,6 +50,8 @@ class EditImage
             'prompt' => $input['prompt'] ?? $this->titleFor($operation),
             'aspect_ratio' => $input['aspect_ratio'] ?? '1:1',
         ]);
+
+        $this->ledger->generation($generation, ['scale' => (int) ($input['scale'] ?? 2)]);
 
         try {
             $image = $this->apply($operation, $sources, $input);

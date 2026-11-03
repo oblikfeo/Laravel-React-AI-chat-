@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Services\Studio\GenerationFailed;
 use App\Services\Studio\ImageGenerator;
 use App\Services\Studio\SpeechRequest;
+use App\Services\Usage\UsageLedger;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -22,6 +23,7 @@ class CreateSpeech
     public function __construct(
         private readonly ImageGenerator $generator,
         private readonly StoreGenerationFile $files,
+        private readonly UsageLedger $ledger,
     ) {}
 
     /**
@@ -47,6 +49,8 @@ class CreateSpeech
             'is_public' => false,
             'prompt' => $input['text'],
         ]);
+
+        $this->ledger->generation($generation);
 
         try {
             $audio = $this->generator->speech(new SpeechRequest(

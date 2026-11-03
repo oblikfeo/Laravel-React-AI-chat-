@@ -108,7 +108,7 @@ export default function VideoStudio({
         ] ?? null;
 
     const open = access === 'open';
-    const exhausted = open && limit?.remaining === 0;
+    const exhausted = open && Boolean(limit?.exhausted);
 
     const canSubmit =
         open &&

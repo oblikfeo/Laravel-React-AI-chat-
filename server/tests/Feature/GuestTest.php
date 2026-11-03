@@ -190,7 +190,7 @@ class GuestTest extends TestCase
         config(['guests.daily_messages' => 5]);
 
         $this->get('/')->assertInertia(fn ($page) => $page
-            ->where('guest.limit', 5)
+            ->where('guest.percentLeft', 100)
             ->where('guest.remaining', 5)
         );
     }

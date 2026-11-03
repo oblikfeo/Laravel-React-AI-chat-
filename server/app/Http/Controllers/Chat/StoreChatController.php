@@ -7,7 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Chat\StoreChatRequest;
 use App\Models\Chat;
 use App\Services\Guests\CurrentGuest;
-use App\Services\Guests\GuestLimiter;
+use App\Services\Usage\UsageGate;
 use Illuminate\Http\RedirectResponse;
 
 class StoreChatController extends Controller
@@ -21,14 +21,14 @@ class StoreChatController extends Controller
     public function __invoke(
         StoreChatRequest $request,
         SendMessage $sendMessage,
-        GuestLimiter $limiter,
+        UsageGate $gate,
     ): RedirectResponse {
         $message = $request->string('message')->toString();
         $files = $request->file('files', []);
         $guest = CurrentGuest::get($request);
 
-        if ($guest && ! $limiter->allows($guest)) {
-            return back()->with('error', 'You have reached today\'s free limit. Sign up to keep going.');
+        if ($denial = $gate->chat($request->user(), $guest)) {
+            return back()->with('error', $denial);
         }
 
         $chat = Chat::create([

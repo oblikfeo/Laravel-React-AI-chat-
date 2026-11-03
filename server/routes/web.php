@@ -1,5 +1,11 @@
 <?php
 
+use App\Http\Controllers\Admin\IndexPaymentsController;
+use App\Http\Controllers\Admin\IndexSubscriptionsController;
+use App\Http\Controllers\Admin\IndexUsersController;
+use App\Http\Controllers\Admin\ShowModelsController;
+use App\Http\Controllers\Admin\ShowOverviewController;
+use App\Http\Controllers\Admin\ShowUserController;
 use App\Http\Controllers\Billing\HandleWebhookController;
 use App\Http\Controllers\Billing\ReturnController;
 use App\Http\Controllers\Billing\StoreSubscriptionController;
@@ -38,6 +44,7 @@ use App\Http\Controllers\Studio\StoreMusicController;
 use App\Http\Controllers\Studio\StoreSpeechController;
 use App\Http\Controllers\Studio\StoreVideoController;
 use App\Http\Controllers\Studio\StoreVoiceChangeController;
+use App\Http\Middleware\EnsureAdmin;
 use App\Http\Middleware\EnsureStudioAccess;
 use App\Http\Middleware\EnsureVideoAccess;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
@@ -156,6 +163,16 @@ Route::middleware('auth')->group(function () {
         ->name('billing.subscribe');
     Route::get('billing/return', ReturnController::class)
         ->name('billing.return');
+
+    // Админка: только для администраторов, остальным — 404.
+    Route::prefix('admin')->name('admin.')->middleware(EnsureAdmin::class)->group(function () {
+        Route::get('/', ShowOverviewController::class)->name('overview');
+        Route::get('models', ShowModelsController::class)->name('models');
+        Route::get('subscriptions', IndexSubscriptionsController::class)->name('subscriptions');
+        Route::get('payments', IndexPaymentsController::class)->name('payments');
+        Route::get('users', IndexUsersController::class)->name('users');
+        Route::get('users/{user}', ShowUserController::class)->whereNumber('user')->name('users.show');
+    });
 });
 
 // Уведомление платёжной системы приходит без сессии и без ключа

@@ -1,9 +1,10 @@
 import { useEffect, useRef } from 'react';
-import { router } from '@inertiajs/react';
-import { Sparkles, LogOut, Moon, Sun, Settings } from 'lucide-react';
+import { Link, router } from '@inertiajs/react';
+import { Sparkles, LogOut, Moon, Sun, Settings, ShieldCheck } from 'lucide-react';
 import { useTheme } from '@/Contexts/ThemeContext';
 import { usePlans } from '@/Contexts/PlansContext';
 import { useSettings } from '@/Contexts/SettingsContext';
+import UsageBar from '@/Components/Billing/UsageBar';
 
 /**
  * Меню по клику на карточку пользователя.
@@ -61,6 +62,10 @@ export default function UserMenu({ user, collapsed, onClose }) {
                 <span className="chip-outline mt-2 inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-medium">
                     {user.plan} plan
                 </span>
+
+                <div className="mt-3">
+                    <UsageBar usage={user.usage} compact />
+                </div>
             </div>
 
             <div className="pt-1.5">
@@ -91,6 +96,13 @@ export default function UserMenu({ user, collapsed, onClose }) {
                     <Settings className="h-4 w-4" strokeWidth={1.75} />
                     Settings
                 </button>
+
+                {user.isAdmin && (
+                    <Link href="/admin" role="menuitem" onClick={onClose} className={item}>
+                        <ShieldCheck className="h-4 w-4" strokeWidth={1.75} />
+                        Admin
+                    </Link>
+                )}
 
                 <button
                     type="button"
