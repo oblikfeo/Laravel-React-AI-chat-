@@ -13,7 +13,7 @@ class StoreMusicController extends Controller
     /**
      * Ставит музыку в работу.
      *
-     * Доступность Студии и дневной лимит проверяет EnsureStudioAccess.
+     * Доступность Студии, пределы и бюджет проверяет EnsureStudioAccess.
      */
     public function __invoke(StoreMusicRequest $request, QueueAudio $action): RedirectResponse
     {

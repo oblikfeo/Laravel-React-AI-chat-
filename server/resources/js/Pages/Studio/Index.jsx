@@ -91,6 +91,7 @@ export default function StudioIndex({
     limits = {},
     maxSpeech,
     voiceChange,
+    voiceChangePrice,
     compose,
 }) {
     const [view, setView] = useState(() =>
@@ -373,6 +374,7 @@ export default function StudioIndex({
                                     maxLyrics={maxLyrics}
                                     maxCharacters={maxSpeech}
                                     voiceChange={voiceChange}
+                                    voiceChangePrice={voiceChangePrice}
                                     mode={audioMode}
                                     onModeChange={setAudioMode}
                                     incoming={incoming}

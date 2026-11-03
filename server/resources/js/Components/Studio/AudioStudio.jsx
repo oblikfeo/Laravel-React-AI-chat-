@@ -56,6 +56,7 @@ export default function AudioStudio({
     maxCharacters = 4000,
     maxLyrics = 3000,
     voiceChange = true,
+    voiceChangePrice = null,
     available,
     busy,
     limit,
@@ -104,6 +105,7 @@ export default function AudioStudio({
                     busy={busy}
                     limit={limit}
                     locked={!voiceChange}
+                    price={voiceChangePrice}
                     onSubmit={(values) => onSubmit('voice-change', values)}
                 />
             )}

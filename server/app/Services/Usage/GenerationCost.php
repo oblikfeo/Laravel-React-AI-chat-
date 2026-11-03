@@ -39,7 +39,7 @@ class GenerationCost
             'operation' => $operation,
             'model_key' => $operation === Generation::OP_VOICE_CHANGE ? 'voice_changer' : $model,
             'variants' => max(1, (int) ($input['variants'] ?? 1)),
-            'duration' => $input['duration'] ?? ($defaults['default_duration'] ?? null),
+            'duration' => $input['duration'] ?? $input['seconds'] ?? ($defaults['default_duration'] ?? null),
             'resolution' => $input['resolution'] ?? ($defaults['default_resolution'] ?? null),
             'prompt' => (string) ($input['text'] ?? $input['prompt'] ?? ''),
         ]), ['scale' => (int) ($input['scale'] ?? 2)]);
@@ -122,8 +122,28 @@ class GenerationCost
             isset($model['cost']) => $model['cost'] * $count,
             isset($model['cost_per_second']) => $model['cost_per_second'] * $seconds,
             isset($model['cost_per_million']) => $model['cost_per_million'] * $characters / 1_000_000,
-            isset($model['costs']) => $model['costs'][$seconds] ?? null,
+            isset($model['costs']) => self::bracket($model['costs'], $seconds),
             default => null,
         };
+    }
+
+    /**
+     * Цена по таблице длительностей: строка таблицы — «до стольких
+     * секунд». 75 секунд в таблице 60/90/120 стоят как 90 — так
+     * считает провайдер.
+     *
+     * @param  array<int, float>  $table
+     */
+    private static function bracket(array $table, int $seconds): ?float
+    {
+        ksort($table);
+
+        foreach ($table as $limit => $cost) {
+            if ($seconds <= $limit) {
+                return $cost;
+            }
+        }
+
+        return null;
     }
 }

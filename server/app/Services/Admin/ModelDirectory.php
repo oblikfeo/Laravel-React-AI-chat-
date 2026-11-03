@@ -71,7 +71,6 @@ class ModelDirectory
                         price: self::priceText(config('studio.voice_changer')),
                         usedIn: 'Studio → Audio → Voice changer',
                         match: ['category' => UsageRecord::CATEGORY_AUDIO, 'model_key' => 'voice_changer'],
-                        estimate: true,
                     ),
                 ],
             ],
@@ -187,7 +186,6 @@ class ModelDirectory
                 price: '$'.self::number($costs['background_remove']).' / image',
                 usedIn: 'Studio → Edit → Remove background',
                 match: ['category' => UsageRecord::CATEGORY_EDIT, 'provider_model' => 'background-remove'],
-                estimate: true,
             ),
         ];
     }

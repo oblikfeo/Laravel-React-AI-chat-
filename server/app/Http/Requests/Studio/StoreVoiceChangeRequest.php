@@ -20,6 +20,8 @@ class StoreVoiceChangeRequest extends FormRequest
             ],
             'voice' => ['nullable', Rule::in(array_keys(config('studio.voices')))],
             'remove_noise' => ['nullable', 'boolean'],
+            // Длина записи, её меряет браузер: по ней считается цена.
+            'seconds' => ['nullable', 'integer', 'min:1', 'max:'.config('studio.voice_changer.max_seconds')],
         ];
     }
 

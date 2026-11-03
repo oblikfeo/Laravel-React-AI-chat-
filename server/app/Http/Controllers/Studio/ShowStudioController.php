@@ -75,6 +75,7 @@ class ShowStudioController extends Controller
             'maxVariants' => (int) ($caps['variants'] ?? config('studio.max_variants')),
             'maxSpeech' => (int) ($caps['speech_characters'] ?? config('studio.speech.max_characters')),
             'voiceChange' => $caps['voice_change'] ?? true,
+            'voiceChangePrice' => StudioCatalog::price(config('studio.voice_changer'), $share),
             'maxSeed' => (int) config('studio.max_seed'),
             'upscaleScales' => $caps['upscale_scales'] ?? config('studio.edit.scales'),
             'maxCombine' => (int) config('studio.edit.max_combine'),

@@ -3,6 +3,29 @@ import { Mic, AudioWaveform, Send, Upload, Square, X } from 'lucide-react';
 import { Panel, NotReady, PaidOnly, SubmitBar } from '@/Components/Studio/Controls';
 import Dropdown from '@/Components/Studio/Dropdown';
 import { formatSeconds } from '@/Components/Studio/Audio/duration';
+import { priceOf } from '@/Components/Studio/price';
+
+/**
+ * Длина загруженной записи. Браузер знает её по заголовку файла;
+ * не смог — ноль, тогда длину оценит сервер.
+ */
+function measure(file) {
+    return new Promise((resolve) => {
+        const audio = new Audio();
+        const url = URL.createObjectURL(file);
+
+        audio.preload = 'metadata';
+        audio.onloadedmetadata = () => {
+            URL.revokeObjectURL(url);
+            resolve(Number.isFinite(audio.duration) ? Math.ceil(audio.duration) : 0);
+        };
+        audio.onerror = () => {
+            URL.revokeObjectURL(url);
+            resolve(0);
+        };
+        audio.src = url;
+    });
+}
 
 /** Смена голоса в записи. */
 export default function ChangerForm({
@@ -12,9 +35,12 @@ export default function ChangerForm({
     busy,
     limit,
     locked = false,
+    price = null,
     onSubmit,
 }) {
     const [file, setFile] = useState(null);
+    // Длина записи в секундах: по ней провайдер считает цену.
+    const [length, setLength] = useState(0);
     const [voice, setVoice] = useState(defaultVoice);
     const [recording, setRecording] = useState(false);
     const [seconds, setSeconds] = useState(0);
@@ -50,10 +76,16 @@ export default function ChangerForm({
                 }
             };
 
+            // Длину наговорённого считаем по часам: у записи из браузера
+            // заголовок часто без длительности.
+            const startedAt = Date.now();
+
             recorder.onstop = () => {
                 const blob = new Blob(chunksRef.current, {
                     type: recorder.mimeType || 'audio/webm',
                 });
+
+                setLength(Math.max(1, Math.round((Date.now() - startedAt) / 1000)));
 
                 setFile(
                     new File([blob], 'recording.webm', { type: blob.type }),
@@ -91,7 +123,7 @@ export default function ChangerForm({
         event.preventDefault();
 
         if (canSubmit) {
-            onSubmit({ recording: file, voice });
+            onSubmit({ recording: file, voice, ...(length ? { seconds: length } : {}) });
             setFile(null);
         }
     };
@@ -107,8 +139,15 @@ export default function ChangerForm({
                 accept="audio/*"
                 className="hidden"
                 onChange={(event) => {
-                    setFile(event.target.files[0] ?? null);
+                    const picked = event.target.files[0] ?? null;
+
+                    setFile(picked);
+                    setLength(0);
                     event.target.value = '';
+
+                    if (picked) {
+                        measure(picked).then(setLength);
+                    }
                 }}
             />
 
@@ -186,7 +225,13 @@ export default function ChangerForm({
                     icon={Mic}
                 />
 
-                <SubmitBar icon={Send} busy={busy} canSubmit={canSubmit} limit={limit} />
+                <SubmitBar
+                    icon={Send}
+                    busy={busy}
+                    canSubmit={canSubmit}
+                    limit={limit}
+                    price={file ? priceOf(price, { seconds: length || 1 }) : null}
+                />
             </div>
         </Panel>
     );

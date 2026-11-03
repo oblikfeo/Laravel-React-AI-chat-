@@ -13,7 +13,7 @@ class StoreSpeechController extends Controller
     /**
      * Озвучивает текст.
      *
-     * Доступность Студии и дневной лимит проверяет EnsureStudioAccess.
+     * Доступность Студии, пределы и бюджет проверяет EnsureStudioAccess.
      */
     public function __invoke(StoreSpeechRequest $request, CreateSpeech $action): RedirectResponse
     {

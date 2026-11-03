@@ -98,7 +98,7 @@ Route::group([], function () {
         ->name('characters.chat');
 
     // Студия открыта и гостю: попробовать до регистрации, с малым
-    // дневным лимитом, см. config/studio.php.
+    // дневным лимитом, см. config/guests.php.
     Route::get('studio', ShowStudioController::class)->name('studio');
     Route::middleware(EnsureStudioAccess::class.':image')->group(function () {
         Route::post('studio', StoreGenerationController::class)
@@ -130,7 +130,7 @@ Route::group([], function () {
 
 Route::middleware('auth')->group(function () {
     // Видео — только вошедшим на платном тарифе и в пределах
-    // дневного лимита: ролик стоит на порядок дороже картинки.
+    // бюджета тарифа: ролик стоит на порядок дороже картинки.
     Route::middleware(EnsureVideoAccess::class)->group(function () {
         Route::post('studio/video', StoreVideoController::class)
             ->name('studio.video');

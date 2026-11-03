@@ -13,7 +13,7 @@ class StoreVoiceChangeController extends Controller
     /**
      * Ставит в работу смену голоса в записи.
      *
-     * Доступность Студии и дневной лимит проверяет EnsureStudioAccess.
+     * Доступность Студии, пределы и бюджет проверяет EnsureStudioAccess.
      */
     public function __invoke(StoreVoiceChangeRequest $request, QueueAudio $action): RedirectResponse
     {

@@ -13,7 +13,7 @@ class StoreGenerationController extends Controller
     /**
      * Создаёт изображение по описанию.
      *
-     * Доступность Студии и дневной лимит проверяет EnsureStudioAccess.
+     * Доступность Студии, пределы и бюджет проверяет EnsureStudioAccess.
      */
     public function __invoke(StoreGenerationRequest $request, CreateGeneration $action): RedirectResponse
     {

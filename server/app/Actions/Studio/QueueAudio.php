@@ -92,6 +92,7 @@ class QueueAudio
         $generation = $this->record($user, $guest, [
             'operation' => Generation::OP_VOICE_CHANGE,
             'model_key' => 'voice_changer',
+            'duration' => self::lengthOf($recording, $input),
             // В галерее подписью служит выбранный голос.
             'prompt' => config('studio.voices.'.($input['voice'] ?? config('studio.default_voice')).'.label')
                 ?? 'Voice change',
@@ -104,6 +105,23 @@ class QueueAudio
             voice: StudioCatalog::voiceFor($input['voice'] ?? null, 'elevenlabs'),
             removeNoise: (bool) ($input['remove_noise'] ?? false),
         ));
+    }
+
+    /**
+     * Длина записи в секундах — по ней провайдер берёт деньги.
+     *
+     * Длину меряет браузер. На случай, если её не прислали или
+     * занизили, берём не меньше оценки по размеру файла: даже очень
+     * плотный звук (320 кбит/с) — это 40 КБ на секунду.
+     *
+     * @param  array<string, mixed>  $input
+     */
+    private static function lengthOf(string $recording, array $input): int
+    {
+        $byClient = (int) ($input['seconds'] ?? 0);
+        $bySize = (int) ceil(strlen($recording) / 40_000);
+
+        return (int) min(max($byClient, $bySize, 1), config('studio.voice_changer.max_seconds'));
     }
 
     /**

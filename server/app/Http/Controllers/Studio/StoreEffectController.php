@@ -13,7 +13,7 @@ class StoreEffectController extends Controller
     /**
      * Ставит звуковой эффект в работу.
      *
-     * Доступность Студии и дневной лимит проверяет EnsureStudioAccess.
+     * Доступность Студии, пределы и бюджет проверяет EnsureStudioAccess.
      */
     public function __invoke(StoreEffectRequest $request, QueueAudio $action): RedirectResponse
     {

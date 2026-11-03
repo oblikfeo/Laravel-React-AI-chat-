@@ -14,11 +14,13 @@ use App\Services\Ai\SpeechToText;
 use App\Services\Chat\Routing\RequestRouter;
 use App\Services\Chat\Routing\Route;
 use App\Services\Chat\Routing\RoutingInput;
+use App\Services\Studio\AudioStudio;
 use App\Services\Studio\ImageGenerator;
 use App\Services\Usage\UsageLedger;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Tests\Support\FakeAudioStudio;
 use Tests\Support\FakeImageGenerator;
 use Tests\TestCase;
 
@@ -228,5 +230,43 @@ class UsageRecordingTest extends TestCase
 
         $this->assertSame(UsageRecord::CATEGORY_VOICE, $record->category);
         $this->assertEqualsWithDelta(12 * config('ai.transcription.cost_per_second'), $record->cost, 1e-9);
+    }
+
+    /**
+     * Смена голоса — по таблице провайдера: до минуты $0.35, до двух
+     * $0.69. Длину присылает браузер, но не меньше оценки по размеру.
+     */
+    public function test_voice_change_is_billed_by_recording_length(): void
+    {
+        $this->app->instance(AudioStudio::class, new FakeAudioStudio);
+        $user = User::factory()->create(['plan' => 'pro']);
+
+        $this->actingAs($user)->post('/studio/voice-change', [
+            'recording' => UploadedFile::fake()->createWithContent('a.mp3', str_repeat('x', 1000)),
+            'seconds' => 75,
+        ])->assertSessionHasNoErrors();
+
+        $this->assertEqualsWithDelta(0.69, UsageRecord::first()->cost, 1e-9);
+
+        // Прислали 1 секунду, а файл на три минуты по размеру.
+        $this->actingAs($user)->post('/studio/voice-change', [
+            'recording' => UploadedFile::fake()->createWithContent('b.mp3', str_repeat('x', 170 * 40_000)),
+            'seconds' => 1,
+        ]);
+
+        $this->assertEqualsWithDelta(1.04, UsageRecord::latest('id')->first()->cost, 1e-9);
+    }
+
+    public function test_background_removal_costs_what_the_provider_charges(): void
+    {
+        $user = User::factory()->create(['plan' => 'pro']);
+        $photo = UploadedFile::fake()->createWithContent('a.png', base64_decode(FakeImageGenerator::PIXEL));
+
+        $this->actingAs($user)->post('/studio/edit', [
+            'operation' => Generation::OP_BACKGROUND,
+            'images' => [$photo],
+        ]);
+
+        $this->assertEqualsWithDelta(0.03, UsageRecord::first()->cost, 1e-9);
     }
 }

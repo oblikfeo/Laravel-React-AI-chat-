@@ -24,8 +24,14 @@ export function priceOf(price, { seconds = 0, count = 1, characters = 0 } = {}) 
         return (price.perMillion * characters) / 1_000_000;
     }
 
+    // Строка таблицы — «до стольких секунд»: 75 секунд стоят как 90.
     if (price.table) {
-        return price.table[seconds] ?? null;
+        const limit = Object.keys(price.table)
+            .map(Number)
+            .sort((a, b) => a - b)
+            .find((key) => seconds <= key);
+
+        return limit === undefined ? null : price.table[limit];
     }
 
     return null;
